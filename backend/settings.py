@@ -38,16 +38,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",  # Required by allauth
 
     # Local apps
     "backend.users.apps.UsersConfig",
     "rest_framework",
     "rest_framework.authtoken",
-    "dj_rest_auth",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
     "corsheaders",
     "backend.operations.apps.OperationsConfig",
 ]
@@ -61,7 +56,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -141,24 +135,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # https://docs.djangoproject.com/en/5.2/topics/auth/customizing/#substituting-a-custom-user-model
 AUTH_USER_MODEL = "users.User"
 
-# Django Allauth Configuration
-# https://django-allauth.readthedocs.io/en/latest/configuration.html
-SITE_ID = 1
-ACCOUNT_AUTHENTICATION_METHOD = "email"  # Keep for dj-rest-auth compatibility
-ACCOUNT_EMAIL_REQUIRED = True            # Keep for dj-rest-auth compatibility
-ACCOUNT_USERNAME_REQUIRED = False        # Keep for dj-rest-auth compatibility
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None # Keep for dj-rest-auth compatibility
-# For development, 'optional' is easier to work with.
-# Change to 'mandatory' before deploying to production.
-ACCOUNT_EMAIL_VERIFICATION = "optional"
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/?verification=1"
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/?verification=1"
-
 # Django REST Framework Configuration
 # https://www.django-rest-framework.org/api-guide/settings/
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ],
@@ -171,8 +152,26 @@ REST_FRAMEWORK = {
 # https://github.com/adamchainz/django-cors-headers
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:9000",  # Default Quasar dev server port
+    "http://localhost:9001",  # Alternative Quasar dev server port
     "http://localhost:8080",
     "http://127.0.0.1:9000",
+    "http://127.0.0.1:9001",
+]
+
+# Allow credentials (cookies, authorization headers)
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow all headers
+CORS_ALLOW_ALL_HEADERS = True
+
+# Allow all methods
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
 ]
 
 SIMPLE_JWT = {

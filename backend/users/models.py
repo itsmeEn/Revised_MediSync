@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 
 from .managers import CustomUserManager
 
@@ -17,9 +18,15 @@ class User(AbstractUser):
         NURSE = "nurse", "Nurse"
         DOCTOR = "doctor", "Doctor"
         PATIENT = "patient", "Patient"
-
+        
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    verification_document = models.FileField(
+        upload_to='verification_documents/',
+        blank=True,
+        null=True,
+        help_text="Upload a PDF, JPG, or PNG file for identity verification"
+    )
     # AbstractUser has a 'username' field. We set it to None to indicate
-    # we are not using it, in favor of 'email'.
     username = None
     email = models.EmailField("email address", unique=True)
 
@@ -44,6 +51,17 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        import re
+        
+        # Password validation for alphanumeric combination with at least 8 characters
+        if self.password and len(self.password) < 8:
+            raise ValidationError("Password must be at least 8 characters long.")
+        
+        if self.password and not re.match(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$', self.password):
+            raise ValidationError("Password must contain at least one letter and one number.")
 
 
 class GeneralDoctorProfile(models.Model):
@@ -78,14 +96,14 @@ class NurseProfile(models.Model):
         return f"Nurse {self.user.full_name}"
     
     #patient profile
-class PatientProfile(models.Model):
+class PatientProfile(models.Model): #can be the content of medical history
     """Profile model for users with the 'patient' role."""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="patient_profile")
     
 
     # Note: Name, Age, and Gender are sourced from the related User model.
     # Age can be calculated from user.date_of_birth.
-
+    #this is for patient demographics for predictive analytics
     class BloodType(models.TextChoices):
         A_POSITIVE = "A+", "A+"
         A_NEGATIVE = "A-", "A-"
