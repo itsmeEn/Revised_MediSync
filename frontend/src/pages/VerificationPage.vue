@@ -1,104 +1,84 @@
 <template>
-  <q-page class="verification-page">
+  <div class="verification-page">
     <div class="verification-container">
-      <q-card class="verification-card">
-        <q-card-section class="text-center">
-          <h4 class="text-h4 q-mb-md">Account Verification</h4>
-          <p class="text-subtitle1 q-mb-lg">Please upload a document to verify your identity</p>
-        </q-card-section>
+      <div class="verification-card">
+        <div class="text-center">
+          <h4>Account Verification</h4>
+          <p>Please upload a document to verify your identity</p>
+        </div>
 
-        <q-card-section>
-          <div class="upload-section q-mb-lg">
-            <q-file
-              v-model="verificationDocument"
-              label="Upload Verification Document"
+        <div class="upload-section">
+          <div class="form-group">
+            <label for="verification-document">Upload Verification Document</label>
+            <input
+              id="verification-document"
+              type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              outlined
-              dense
-              class="q-mb-md"
-              :rules="[val => !!val || 'Please upload a verification document']"
-            >
-              <template v-slot:prepend>
-                <q-icon name="upload_file" />
-              </template>
-              <template v-slot:hint>
-                Accepted formats: PDF, JPG, PNG (Max 5MB)
-              </template>
-            </q-file>
-
-            <div v-if="verificationDocument" class="uploaded-file q-mb-md">
-              <q-chip
-                :label="verificationDocument.name"
-                color="primary"
-                icon="description"
-                removable
-                @remove="verificationDocument = null"
-              />
-            </div>
+              @change="handleFileChange"
+              class="file-input"
+            />
+            <small>Accepted formats: PDF, JPG, PNG (Max 5MB)</small>
           </div>
 
+          <div v-if="verificationDocument" class="uploaded-file">
+            <div class="file-chip">
+              <span>{{ verificationDocument.name }}</span>
+              <button @click="verificationDocument = null" class="remove-btn">×</button>
+            </div>
+          </div>
+        </div>
+
           <div class="verification-options">
-            <p class="text-body2 q-mb-md">
+            <p>
               Choose how you'd like to proceed with verification:
             </p>
             
-            <div class="row q-gutter-md">
-              <div class="col-12 col-md-6">
-                <q-btn
-                  color="primary"
-                  label="Verify Now"
-                  icon="check_circle"
-                  class="full-width"
-                  size="lg"
-                  :loading="verifying"
-                  :disable="!verificationDocument"
+            <div class="button-row">
+              <div class="button-group">
+                <button
+                  class="btn btn-primary"
+                  :disabled="!verificationDocument || verifying"
                   @click="verifyNow"
-                />
-                <p class="text-caption q-mt-sm text-center">
+                >
+                  {{ verifying ? 'Verifying...' : 'Verify Now' }}
+                </button>
+                <p class="button-caption">
                   Upload document and verify immediately
                 </p>
               </div>
               
-              <div class="col-12 col-md-6">
-                <q-btn
-                  color="secondary"
-                  label="Verify Later"
-                  icon="schedule"
-                  class="full-width"
-                  size="lg"
-                  :loading="verifying"
+              <div class="button-group">
+                <button
+                  class="btn btn-secondary"
+                  :disabled="verifying"
                   @click="verifyLater"
-                />
-                <p class="text-caption q-mt-sm text-center">
+                >
+                  {{ verifying ? 'Processing...' : 'Verify Later' }}
+                </button>
+                <p class="button-caption">
                   Skip verification for now
                 </p>
               </div>
             </div>
           </div>
-        </q-card-section>
 
-        <q-card-section class="text-center">
-          <q-btn
-            flat
-            color="grey"
-            label="Back to Registration"
+        <div class="text-center">
+          <button
+            class="btn btn-link"
             @click="$router.push('/role-selection')"
-            no-caps
-          />
-        </q-card-section>
-      </q-card>
+          >Back to Registration</button>
+        </div>
+      </div>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
 
 const router = useRouter()
-const $q = useQuasar()
 
 interface User {
   id: number
@@ -110,6 +90,13 @@ interface User {
 
 const verificationDocument = ref<File | null>(null)
 const verifying = ref(false)
+
+const handleFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    verificationDocument.value = target.files[0]
+  }
+}
 
 onMounted(() => {
   // Check if user is logged in
@@ -142,10 +129,7 @@ const redirectToDashboard = (role: string) => {
 
 const verifyNow = async () => {
   if (!verificationDocument.value) {
-    $q.notify({
-      type: 'negative',
-      message: 'Please upload a verification document first'
-    })
+    alert('Please upload a verification document first')
     return
   }
 
@@ -170,10 +154,7 @@ const verifyNow = async () => {
       }
     })
 
-    $q.notify({
-      type: 'positive',
-      message: 'Account verified successfully!'
-    })
+    alert('Account verified successfully!')
 
     const user = getCurrentUser()
     if (user) {
@@ -183,10 +164,7 @@ const verifyNow = async () => {
   } catch (error: unknown) {
     console.error('Verification error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Verification failed. Please try again.'
-    $q.notify({
-      type: 'negative',
-      message: errorMessage
-    })
+    alert(`Error: ${errorMessage}`)
   } finally {
     verifying.value = false
   }
@@ -208,10 +186,7 @@ const verifyLater = async () => {
       })
     }
 
-    $q.notify({
-      type: 'info',
-      message: 'You can verify your account later from your dashboard.'
-    })
+    alert('You can verify your account later from your dashboard.')
 
     const user = getCurrentUser()
     if (user) {
@@ -221,10 +196,7 @@ const verifyLater = async () => {
   } catch (error: unknown) {
     console.error('Verification error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Failed to save document. Please try again.'
-    $q.notify({
-      type: 'negative',
-      message: errorMessage
-    })
+    alert(`Error: ${errorMessage}`)
   } finally {
     verifying.value = false
   }
@@ -234,7 +206,7 @@ const verifyLater = async () => {
 <style scoped>
 .verification-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #286660;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,17 +219,175 @@ const verifyLater = async () => {
 }
 
 .verification-card {
+  background: white;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-center h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.text-center p {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.upload-section {
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.file-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.form-group small {
+  color: #666;
+  font-size: 14px;
 }
 
 .uploaded-file {
   display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.file-chip {
+  background: #1e7668;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
 .verification-options {
   border-top: 1px solid #e0e0e0;
   padding-top: 20px;
+  margin-bottom: 20px;
+}
+
+.verification-options p {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.button-group {
+  text-align: center;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 8px;
+}
+
+.btn-primary {
+  background: #1e7668;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #6ca299;
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.btn-secondary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-link {
+  background: none;
+  color: #1e7668;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.btn-link:hover {
+  color: #6ca299;
+}
+
+.button-caption {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .verification-card {
+    padding: 20px;
+  }
+  
+  .button-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

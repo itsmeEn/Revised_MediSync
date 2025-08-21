@@ -42,26 +42,32 @@ def register(request):
     This single endpoint handles all user roles (doctor, nurse, patient).
     The serializer handles all validation logic.
     """
+    print("Received data:", request.data)  # Add debug logging
     serializer = UserRegistrationSerializer(data=request.data)
+    print("Serializer is valid:", serializer.is_valid())  # Add debug logging
     if serializer.is_valid():
         try:
             with transaction.atomic():
+                print("Creating user...")  # Add debug logging
                 # Create the user from validated data
                 user = serializer.save()
+                print("User created successfully:", user.email)  # Add debug logging
                 
                 # Create the appropriate profile based on the user's role
-                if user.role == User.Role.DOCTOR:
+                if user.role == 'doctor':
+                    print("Creating doctor profile...")  # Add debug logging
                     GeneralDoctorProfile.objects.create(
                         user=user,
                         license_number=request.data.get('license_number'),
                         specialization=request.data.get('specialization')
                     )
-                elif user.role == User.Role.NURSE:
+                    print("Doctor profile created successfully")  # Add debug logging
+                elif user.role == 'nurse':
                     NurseProfile.objects.create(
                         user=user,
                         license_number=request.data.get('license_number')
                     )
-                elif user.role == User.Role.PATIENT:
+                elif user.role == 'patient':
                     PatientProfile.objects.create(
                         user=user,
                         blood_type=request.data.get('blood_type', PatientProfile.BloodType.UNKNOWN),
@@ -81,12 +87,16 @@ def register(request):
                 }, status=status.HTTP_201_CREATED)
                 
         except Exception as e:
+            print("Exception occurred:", str(e))  # Add debug logging
+            print("Exception type:", type(e))  # Add debug logging
             return Response({
                 'error': 'Registration failed',
                 'details': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
     
     # Return validation errors if data is invalid
+    print("Validation errors:", serializer.errors)  # Add debug logging
+    print("Error details:", dict(serializer.errors))  # Add more detailed logging
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -96,6 +106,7 @@ def login(request):
     """
     Logs in a user with email and password and returns JWT tokens.
     """
+    print("Login attempt - Email:", request.data.get('email'))  # Add debug logging
     email = request.data.get('email')
     password = request.data.get('password')
     
@@ -105,23 +116,35 @@ def login(request):
         }, status=status.HTTP_400_BAD_REQUEST)
         
     user = authenticate(request, email=email, password=password)
+    print("Authentication result - User:", user)  # Add debug logging
     
     if user is not None:
         if not user.is_active:
             return Response({'error': 'User is not active.'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Generate JWT tokens
+        # Generate JWT tokens without embedding user data
         refresh = RefreshToken.for_user(user)
-        refresh['user'] = UserSerializer(user).data
 
-        return Response({
+        # Create user data structure
+        user_data = {
+            'id': user.id,
+            'email': user.email,
+            'full_name': user.full_name,
+            'role': user.role,
+            'is_verified': user.is_verified
+        }
+        print("User data from serializer:", user_data)  # Add debug logging
+        
+        response_data = {
             'message': 'Login successful',
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-        }, status=status.HTTP_200_OK)
+            'user': user_data,
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+        print("Login response data:", response_data)  # Add debug logging
+        return Response(response_data, status=status.HTTP_200_OK)
     else:
+        print("Authentication failed - Invalid credentials")  # Add debug logging
         return Response({
             'error': 'Invalid credentials.',
             'message': 'Email or password is incorrect. Please try again.'
@@ -146,14 +169,39 @@ def upload_verification_document(request):
 @permission_classes([IsAuthenticated])
 def verify_now(request):
     """
-    Mark user as verified immediately (for admin use or immediate verification)
+    Submit verification request for admin review
     """
     user = request.user
-    user.is_verified = True
-    user.save()
+    
+    # Check if user already has a verification document
+    if not user.verification_document:
+        return Response({
+            'error': 'Please upload a verification document first.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if verification request already exists
+    from admin_site.models import VerificationRequest
+    existing_request = VerificationRequest.objects.filter(
+        user_email=user.email,
+        status__in=['pending', 'approved']
+    ).first()
+    
+    if existing_request:
+        return Response({
+            'error': 'Verification request already exists and is being processed.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Create verification request
+    verification_request = VerificationRequest.objects.create(
+        user_email=user.email,
+        user_full_name=user.full_name,
+        user_role=user.role,
+        verification_document=user.verification_document,
+        status='pending'
+    )
     
     return Response({
-        'message': 'User verified successfully',
+        'message': 'Verification request submitted successfully. Please wait for admin approval.',
         'user': UserSerializer(user).data
     }, status=status.HTTP_200_OK)
 
@@ -207,16 +255,44 @@ def forgot_password(request):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         
         # Create reset URL (for now, we'll use a simple approach)
-        reset_url = f"http://localhost:9001/reset-password/{uid}/{token}"
+        reset_url = f"http://localhost:9000/#/reset-password/{uid}/{token}"
         
-        # Send email (for development, we'll just print the URL)
-        # In production, you would use send_mail
-        print(f"Password reset URL: {reset_url}")
+        # Send password reset email
+        subject = 'Password Reset Request - MediSync'
+        message = f"""
+        Hello {user.full_name},
         
-        return Response({
-            'message': 'Password reset link has been sent to your email.',
-            'reset_url': reset_url  # Remove this in production
-        }, status=status.HTTP_200_OK)
+        You have requested to reset your password for your MediSync account.
+        
+        Please click the following link to reset your password:
+        {reset_url}
+        
+        If you did not request this password reset, please ignore this email.
+        
+        This link will expire in 24 hours.
+        
+        Best regards,
+        MediSync Team
+        """
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,  # From email
+                [user.email],  # To email
+                fail_silently=False,
+            )
+            
+            return Response({
+                'message': 'Password reset link has been sent to your email.'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"Email sending failed: {e}")
+            return Response({
+                'error': 'Failed to send password reset email. Please try again.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     except User.DoesNotExist:
         # Don't reveal if email exists or not for security

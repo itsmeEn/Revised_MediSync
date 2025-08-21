@@ -99,9 +99,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         # ⚠️ Enforce role-based field requirements
         role = attrs.get('role')
-        if role == User.Role.DOCTOR and not (attrs.get('license_number') and attrs.get('specialization')):
+        if role == 'doctor' and not (attrs.get('license_number') and attrs.get('specialization')):
             raise serializers.ValidationError({"role_fields": "License number and specialization are required for doctors."})
-        if role == User.Role.NURSE and not attrs.get('license_number'):
+        if role == 'nurse' and not attrs.get('license_number'):
             raise serializers.ValidationError({"role_fields": "License number is required for nurses."})
 
         return attrs

@@ -1,238 +1,224 @@
 <template>
-  <q-page class="doctor-dashboard">
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div class="user-info">
-          <q-avatar size="60px" color="primary" text-color="white">
-            {{ userInitials }}
+  <q-layout view="hHh Lpr fFf">
+
+    <q-header reveal elevated class="text-white" height-hint="98">
+      <q-toolbar>
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+        
+        <q-toolbar-title>
+          <q-avatar>
+            <img src="../assets/logo.png" alt="MediSync Logo" />
           </q-avatar>
-          <div class="user-details">
-            <h5 class="text-h5 q-mb-xs">Dr. {{ user?.full_name }}</h5>
-            <p class="text-subtitle2 q-mb-none">{{ user?.doctor_profile?.specialization }}</p>
-            <q-chip
-              :color="user?.is_verified ? 'positive' : 'warning'"
-              text-color="white"
-              :label="user?.is_verified ? 'Verified' : 'Pending Verification'"
+          MediSync
+        </q-toolbar-title>
+      </q-toolbar>
+
+      <q-toolbar class="text-white">
+        <div class="search-container">
+          <q-input 
+            dark 
+            dense 
+            standout 
+            v-model="text" 
+            placeholder="Search patients, symptoms, appointments..."
+            class="search-input"
+          >
+            <template v-slot:append>
+              <q-icon v-if="text === 'Patient Name, Sickness, Appointment'" name="search" />
+              <q-icon v-else name="clear" class="cursor-pointer" @click="text = ''" />
+            </template>
+          </q-input>
+        </div>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered>
+      <div class="drawer-content">
+        <!-- User Profile Section -->
+        <div class="user-profile-section">
+          <div class="profile-picture-container">
+            <q-avatar size="100px" class="profile-avatar">
+              <img v-if="userProfile.profile_picture" :src="userProfile.profile_picture" alt="Profile Picture" />
+              <div v-else class="profile-placeholder">
+                {{ userInitials }}
+              </div>
+            </q-avatar>
+            <q-btn
+              round
+              color="primary"
+              icon="camera_alt"
               size="sm"
+              class="upload-btn"
+              @click="triggerFileUpload"
+            />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleProfilePictureUpload"
             />
           </div>
-        </div>
-        <q-btn
-          color="negative"
-          label="Logout"
-          icon="logout"
-          @click="logout"
-          flat
-        />
-      </div>
-    </div>
-
-    <div class="dashboard-content">
-      <!-- Stats Cards -->
-      <div class="row q-gutter-md q-mb-lg">
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ stats.patients }}</div>
-                  <div class="text-subtitle2">Total Patients</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="people" size="2rem" color="primary" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ stats.appointments }}</div>
-                  <div class="text-subtitle2">Today's Appointments</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="event" size="2rem" color="secondary" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ stats.consultations }}</div>
-                  <div class="text-subtitle2">Consultations</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="medical_services" size="2rem" color="accent" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ stats.revenue }}</div>
-                  <div class="text-subtitle2">Monthly Revenue</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="attach_money" size="2rem" color="positive" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
-
-      <!-- Main Content -->
-      <div class="row q-gutter-lg">
-        <!-- Patient List -->
-        <div class="col-12 col-md-8">
-          <q-card>
-            <q-card-section>
-              <div class="row items-center q-mb-md">
-                <h6 class="text-h6 q-mb-none">Recent Patients</h6>
-                <q-space />
-                <q-btn
-                  color="primary"
-                  label="Add Patient"
-                  icon="add"
-                  size="sm"
-                />
-              </div>
-              
-              <q-list>
-                <q-item v-for="patient in patients" :key="patient.id" class="q-mb-sm">
-                  <q-item-section avatar>
-                    <q-avatar color="primary" text-color="white">
-                      {{ patient.name.charAt(0) }}
-                    </q-avatar>
-                  </q-item-section>
-                  
-                  <q-item-section>
-                    <q-item-label>{{ patient.name }}</q-item-label>
-                    <q-item-label caption>{{ patient.condition }}</q-item-label>
-                  </q-item-section>
-                  
-                  <q-item-section side>
-                    <q-btn
-                      color="primary"
-                      label="View"
-                      size="sm"
-                      flat
-                    />
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card-section>
-          </q-card>
+          
+          <div class="user-info">
+            <h6 class="user-name">{{ userProfile.full_name }}</h6>
+            <p class="user-specialization">{{ userProfile.specialization }}</p>
+            <q-chip color="primary" text-color="white" size="sm">
+              {{ userProfile.role }}
+            </q-chip>
+          </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="col-12 col-md-4">
-          <q-card>
-            <q-card-section>
-              <h6 class="text-h6 q-mb-md">Quick Actions</h6>
-              
-              <div class="q-gutter-md">
-                <q-btn
-                  color="primary"
-                  label="Schedule Appointment"
-                  icon="event"
-                  class="full-width"
-                  size="lg"
-                />
-                
-                <q-btn
-                  color="secondary"
-                  label="Patient Records"
-                  icon="folder"
-                  class="full-width"
-                  size="lg"
-                />
-                
-                <q-btn
-                  color="accent"
-                  label="Medical Reports"
-                  icon="description"
-                  class="full-width"
-                  size="lg"
-                />
-                
-                <q-btn
-                  color="positive"
-                  label="Consultations"
-                  icon="video_call"
-                  class="full-width"
-                  size="lg"
-                />
-              </div>
-            </q-card-section>
-          </q-card>
+        <!-- Navigation Menu -->
+        <q-list class="navigation-menu">
+          <q-item clickable v-ripple @click="navigateTo('doctor-dashboard')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="dashboard" />
+            </q-item-section>
+            <q-item-section>Dashboard</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('appointments')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="event" />
+            </q-item-section>
+            <q-item-section>Appointments</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('messaging')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="message" />
+            </q-item-section>
+            <q-item-section>Messaging</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('patients')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="people" />
+            </q-item-section>
+            <q-item-section>Patient Management</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="analytics" />
+            </q-item-section>
+            <q-item-section>Analytics</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('settings')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="settings" />
+            </q-item-section>
+            <q-item-section>Settings</q-item-section>
+          </q-item>
+        </q-list>
+
+        <!-- Logout Section -->
+        <div class="logout-section">
+          <q-btn
+            color="negative"
+            icon="logout"
+            label="Logout"
+            class="logout-btn"
+            @click="logout"
+          />
         </div>
       </div>
-    </div>
-  </q-page>
+    </q-drawer>
+
+    <q-page-container>
+      <router-view />
+    </q-page-container>
+
+  </q-layout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { api } from '../boot/axios'
 
 const router = useRouter()
+const rightDrawerOpen = ref(false)
+const text = ref('Patient Name, Sickness, Appointment')
+const fileInput = ref<HTMLInputElement>()
 
-interface User {
-  id: number
-  email: string
-  full_name: string
-  role: string
-  is_verified: boolean
-  doctor_profile?: {
-    specialization: string
+// Mock user profile data - replace with actual API call
+const userProfile = ref({
+  full_name: 'Dr. John Doe',
+  specialization: 'Cardiology',
+  role: 'Doctor',
+  profile_picture: null
+})
+
+const userInitials = computed(() => {
+  if (!userProfile.value.full_name) return 'U'
+  return userProfile.value.full_name
+    .split(' ')
+    .map(name => name.charAt(0))
+    .join('')
+    .toUpperCase()
+})
+
+const toggleRightDrawer = () => {
+  rightDrawerOpen.value = !rightDrawerOpen.value
+}
+
+const triggerFileUpload = () => {
+  fileInput.value?.click()
+}
+
+const handleProfilePictureUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+    
+    try {
+      const formData = new FormData()
+      formData.append('profile_picture', file)
+      
+      const response = await api.post('/users/profile-picture/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      
+      userProfile.value.profile_picture = response.data.profile_picture
+      alert('Profile picture updated successfully!')
+    } catch (error) {
+      console.error('Profile picture upload failed:', error)
+      alert('Failed to upload profile picture. Please try again.')
+    }
   }
 }
 
-const user = ref<User | null>(null)
-const stats = ref({
-  patients: 45,
-  appointments: 8,
-  consultations: 12,
-  revenue: '$12,450'
-})
-
-const patients = ref([
-  { id: 1, name: 'John Doe', condition: 'Hypertension' },
-  { id: 2, name: 'Jane Smith', condition: 'Diabetes' },
-  { id: 3, name: 'Mike Johnson', condition: 'Asthma' },
-  { id: 4, name: 'Sarah Wilson', condition: 'Heart Disease' }
-])
-
-const userInitials = computed(() => {
-  if (!user.value?.full_name) return 'D'
-  return user.value.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
-})
-
-onMounted(() => {
-  const userStr = localStorage.getItem('user')
-  if (userStr) {
-    user.value = JSON.parse(userStr)
-  }
+const navigateTo = (route: string) => {
+  // Close drawer first
+  rightDrawerOpen.value = false
   
-  if (!user.value || user.value.role !== 'doctor') {
-    void router.push('/login')
+  // Navigate to different sections (you can implement actual routing)
+  switch (route) {
+    case 'dashboard':
+      // Already on dashboard
+      break
+    case 'appointments':
+      alert('Appointments page - Coming soon!')
+      break
+    case 'messaging':
+      alert('Messaging page - Coming soon!')
+      break
+    case 'patients':
+      alert('Patient Management page - Coming soon!')
+      break
+    case 'analytics':
+      alert('Analytics page - Coming soon!')
+      break
+    case 'settings':
+      alert('Settings page - Coming soon!')
+      break
   }
-})
+}
 
 const logout = () => {
   localStorage.removeItem('access_token')
@@ -240,61 +226,140 @@ const logout = () => {
   localStorage.removeItem('user')
   void router.push('/login')
 }
+
+onMounted(() => {
+  // Load user profile data from localStorage or API
+  const userData = localStorage.getItem('user')
+  if (userData) {
+    const user = JSON.parse(userData)
+    userProfile.value = {
+      full_name: user.full_name || 'Dr. John Doe',
+      specialization: user.doctor_profile?.specialization || 'General Medicine',
+      role: user.role || 'Doctor',
+      profile_picture: user.profile_picture || null
+    }
+  }
+})
 </script>
 
 <style scoped>
-.doctor-dashboard {
-  background-color: #f5f5f5;
-  min-height: 100vh;
-}
-
-.dashboard-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px;
-}
-
-.header-content {
+.search-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+}
+
+.search-input {
+  max-width: 600px;
+  width: 100%;
+}
+
+.q-header {
+  background: #286660 !important;
+}
+
+.q-toolbar {
+  background: #286660 !important;
+}
+
+.q-avatar {
+  background: white;
+  border-radius: 8px;
+}
+
+.q-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Drawer Styles */
+.drawer-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-profile-section {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.profile-picture-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+
+.profile-avatar {
+  border: 3px solid #1e7668;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
+  justify-content: center;
+  background: #1e7668;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #1e7668 !important;
 }
 
 .user-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+  margin-top: 10px;
 }
 
-.user-details h5 {
-  color: white;
-  margin: 0;
-}
-
-.user-details p {
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-}
-
-.dashboard-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.stat-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.stat-card .text-h6 {
-  font-weight: bold;
+.user-name {
+  margin: 0 0 5px 0;
   color: #333;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.stat-card .text-subtitle2 {
+.user-specialization {
+  margin: 0 0 10px 0;
   color: #666;
+  font-size: 14px;
+}
+
+.navigation-menu {
+  flex: 1;
+  padding: 10px 0;
+}
+
+.nav-item {
+  margin: 5px 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.nav-item:hover {
+  background: rgba(30, 118, 104, 0.1);
+}
+
+.nav-item .q-icon {
+  color: #1e7668;
+}
+
+.logout-section {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.logout-btn {
+  width: 100%;
 }
 </style>

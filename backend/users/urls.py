@@ -6,7 +6,7 @@ from . import views
 urlpatterns = [
     # API endpoints for authentication
     path('register/', views.register, name='register'),
-    path('login/', views.CustomTokenObtainPairView.as_view(), name='login'),
+    path('login/', views.login, name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # API endpoints for user profiles

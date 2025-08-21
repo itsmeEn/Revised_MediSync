@@ -14,7 +14,7 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ 
+const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post('http://localhost:8000/api/users/token/refresh/', {
+          const response = await axios.post('http://localhost:8001/api/users/token/refresh/', {
             refresh: refreshToken
           });
 

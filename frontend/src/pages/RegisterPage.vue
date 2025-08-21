@@ -186,73 +186,110 @@ onMounted(() => {
 })
 
 const onRegister = async () => {
-  loading.value = true
+  // Validate required fields based on role
+  if (role.value === 'doctor') {
+    if (!formData.value.license_number || !formData.value.specialization) {
+      alert('License number and specialization are required for doctors.');
+      return;
+    }
+  } else if (role.value === 'nurse') {
+    if (!formData.value.license_number) {
+      alert('License number is required for nurses.');
+      return;
+    }
+  }
+  
+  // A boolean flag is set to true to indicate that the registration process has started.
+  loading.value = true;
   
   try {
-    const registrationData = {
-      ...formData.value,
-      role: role.value
+    // A FormData object is instantiated to handle the data submission.
+    // This is necessary for including file uploads, such as images and documents.
+    const registrationData = new FormData();
+    
+    // The function retrieves the file input elements for the profile picture and verification document.
+    const profilePictureInput = document.getElementById('profile_picture') as HTMLInputElement;
+    const verificationDocumentInput = document.getElementById('verification_document') as HTMLInputElement;
+
+    // It is checked if a profile picture file has been selected, and if so, it is appended to the FormData object.
+    if (profilePictureInput?.files?.[0]) {
+      registrationData.append('profile_picture', profilePictureInput.files[0]);
+    }
+    // It is checked if a verification document file has been selected, and if so, it is appended to the FormData object.
+    if (verificationDocumentInput?.files?.[0]) {
+      registrationData.append('verification_document', verificationDocumentInput.files[0]);
+    }
+    
+    // The function iterates through the common form fields and appends them to the FormData object.
+    Object.entries(formData.value).forEach(([key, value]) => {
+      registrationData.append(key, value);
+    });
+    // The user's role is appended to the FormData object.
+    registrationData.append('role', role.value);
+
+    // The FormData object, ready for submission, is logged to the console for debugging.
+    console.log('Sending registration data (FormData):', registrationData);
+    
+    // Debug: Log the actual form data being sent
+    for (const [key, value] of registrationData.entries()) {
+      console.log(`${key}:`, value);
     }
 
-    console.log('Sending registration data:', registrationData)
+    // An HTTP POST request is sent to the registration endpoint.
+    // Axios automatically configures the correct 'Content-Type' header for FormData.
+    const response = await api.post('/users/register/', registrationData);
 
-    const response = await api.post('/users/register/', registrationData)
-
-    // Store tokens
-    localStorage.setItem('access_token', response.data.tokens.access)
-    localStorage.setItem('refresh_token', response.data.tokens.refresh)
+    // Upon successful registration, the access and refresh tokens are stored in local storage.
+    localStorage.setItem('access_token', response.data.tokens.access);
+    localStorage.setItem('refresh_token', response.data.tokens.refresh);
     
-    // Store user data
-    localStorage.setItem('user', JSON.stringify(response.data.user))
+    // The user's data from the response is stored in local storage.
+    localStorage.setItem('user', JSON.stringify(response.data.user));
 
-    alert('Account created successfully!')
+    // A success message is displayed to the user.
+    alert('Account created successfully!');
 
-    // Redirect to verification page
-    void router.push('/verification')
+    // The user is redirected to the verification page after successful registration.
+    void router.push('/verification');
 
   } catch (error: unknown) {
-    console.error('Registration error:', error)
+    // If the registration request fails, the error is logged to the console.
+    console.error('Registration error:', error);
     
-    let errorMessage = 'Registration failed. Please try again.'
+    // A default error message is set.
+    let errorMessage = 'Registration failed. Please try again.';
     
+    // It is checked if the error is an AxiosError to handle specific HTTP response details.
     if (error instanceof AxiosError) {
+      console.error('Axios error response:', error.response?.data);
+      console.error('Axios error status:', error.response?.status);
+      
+      // If the server provided a response body with the error details, it is processed.
       if (error.response?.data) {
-        if (typeof error.response.data === 'string') {
-          errorMessage = error.response.data
-        } else if (typeof error.response.data === 'object' && error.response.data !== null) {
-          const data = error.response.data as Record<string, unknown>
-          if (data.error && typeof data.error === 'string') {
-            errorMessage = data.error
-          } else if (data.detail && typeof data.detail === 'string') {
-            errorMessage = data.detail
-          } else if (data.message && typeof data.message === 'string') {
-            errorMessage = data.message
-          } else if (data.error && typeof data.error === 'object') {
-            errorMessage = JSON.stringify(data.error)
-          } else if (data.detail && typeof data.detail === 'object') {
-            errorMessage = JSON.stringify(data.detail)
-          } else if (data.message && typeof data.message === 'object') {
-            errorMessage = JSON.stringify(data.message)
-          }
+        // More robust error handling for validation errors from Django is applied here.
+        if (typeof error.response.data === 'object' && error.response.data !== null) {
+          // The error data object is converted to a readable JSON string.
+          errorMessage = JSON.stringify(error.response.data, null, 2);
+        } else if (typeof error.response.data === 'string') {
+          // If the error data is a string, it is used directly as the error message.
+          errorMessage = error.response.data;
         }
-      } else if (error.response?.status === 400) {
-        errorMessage = 'Invalid data provided. Please check your information.'
-      } else if (error.response?.status === 500) {
-        errorMessage = 'Server error. Please try again later.'
       }
     }
     
-    alert(`Registration failed: ${errorMessage}`)
+    // The final error message is displayed to the user.
+    alert(`Registration failed: ${errorMessage}`);
   } finally {
-    loading.value = false
+    // The loading flag is set to false, indicating that the registration process has completed.
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
 .register-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #286660;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -327,8 +364,8 @@ const onRegister = async () => {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  border-color: #1e7668;
+  box-shadow: 0 0 0 2px rgba(30, 118, 104, 0.2);
 }
 
 .form-group textarea {
@@ -340,7 +377,7 @@ const onRegister = async () => {
   margin-top: 8px;
   background: none;
   border: none;
-  color: #667eea;
+  color: #1e7668;
   cursor: pointer;
   font-size: 14px;
 }
@@ -354,7 +391,7 @@ const onRegister = async () => {
 .register-btn {
   width: 100%;
   padding: 12px;
-  background: #667eea;
+  background: #1e7668;
   color: white;
   border: none;
   border-radius: 8px;
@@ -365,7 +402,7 @@ const onRegister = async () => {
 }
 
 .register-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #6ca299;
 }
 
 .register-btn:disabled {
@@ -387,14 +424,14 @@ const onRegister = async () => {
 .link-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: #1e7668;
   cursor: pointer;
   font-size: 14px;
   text-decoration: underline;
 }
 
 .link-btn:hover {
-  color: #5a6fd8;
+  color: #6ca299;
 }
 
 @media (max-width: 768px) {

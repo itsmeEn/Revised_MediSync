@@ -150,7 +150,7 @@ const onResetPassword = async () => {
 <style scoped>
 .reset-password-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #286660;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -214,8 +214,8 @@ const onResetPassword = async () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  border-color: #1e7668;
+  box-shadow: 0 0 0 2px rgba(30, 118, 104, 0.2);
 }
 
 .form-group button {
@@ -247,7 +247,7 @@ const onResetPassword = async () => {
 .reset-btn {
   width: 100%;
   padding: 12px;
-  background: #667eea;
+  background: #1e7668;
   color: white;
   border: none;
   border-radius: 8px;
@@ -258,7 +258,7 @@ const onResetPassword = async () => {
 }
 
 .reset-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #6ca299;
 }
 
 .reset-btn:disabled {

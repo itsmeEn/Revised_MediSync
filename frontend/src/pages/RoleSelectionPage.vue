@@ -65,7 +65,7 @@ const continueToRegistration = () => {
 <style scoped>
 .role-selection-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #286660;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,8 +125,8 @@ const continueToRegistration = () => {
 }
 
 .role-card.selected {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.05);
+  border-color: #1e7668;
+  background: rgba(30, 118, 104, 0.05);
 }
 
 .role-icon {
@@ -158,7 +158,7 @@ const continueToRegistration = () => {
 
 .continue-btn {
   padding: 12px 30px;
-  background: #667eea;
+  background: #1e7668;
   color: white;
   border: none;
   border-radius: 8px;
@@ -169,7 +169,7 @@ const continueToRegistration = () => {
 }
 
 .continue-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #6ca299;
 }
 
 .continue-btn:disabled {
@@ -180,8 +180,8 @@ const continueToRegistration = () => {
 .back-btn {
   padding: 12px 30px;
   background: transparent;
-  color: #667eea;
-  border: 1px solid #667eea;
+  color: #1e7668;
+  border: 1px solid #1e7668;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 500;
@@ -190,7 +190,7 @@ const continueToRegistration = () => {
 }
 
 .back-btn:hover {
-  background: #667eea;
+  background: #1e7668;
   color: white;
 }
 

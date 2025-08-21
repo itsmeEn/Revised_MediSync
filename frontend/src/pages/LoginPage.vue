@@ -62,9 +62,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
+import { AxiosError } from 'axios'
 
 const router = useRouter()
+const $q = useQuasar()
 
 const email = ref('')
 const password = ref('')
@@ -80,34 +83,117 @@ const onLogin = async () => {
       password: password.value
     })
 
-    // Store tokens
-    localStorage.setItem('access_token', response.data.tokens.access)
-    localStorage.setItem('refresh_token', response.data.tokens.refresh)
-    
-    // Store user data
-    localStorage.setItem('user', JSON.stringify(response.data.user))
+    console.log('Login response:', response.data)  // Add debug logging
+    console.log('Response status:', response.status)  // Add debug logging
 
-    alert('Login successful!')
+    // Check if response has the expected structure
+    if (!response.data.access || !response.data.refresh) {
+      console.error('Response missing tokens:', response.data)  // Add debug logging
+      throw new Error('Invalid response structure: missing tokens')
+    }
+
+    // Store tokens
+    localStorage.setItem('access_token', response.data.access)
+    localStorage.setItem('refresh_token', response.data.refresh)
+    
+    // Store user data (if available)
+    if (response.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+    }
+
+    // Show success toast notification
+    $q.notify({
+      type: 'positive',
+      message: 'Login successful!',
+      position: 'top',
+      timeout: 2000
+    })
 
     // Redirect based on user role
     const user = response.data.user
-    switch (user.role) {
-      case 'doctor':
-        void router.push('/doctor-dashboard')
-        break
-      case 'nurse':
-        void router.push('/nurse-dashboard')
-        break
-      case 'patient':
-        void router.push('/patient-dashboard')
-        break
-      default:
-        void router.push('/')
+    console.log('=== LOGIN DEBUG INFO ===')
+    console.log('Full response data:', response.data)
+    console.log('User data for redirect:', user)
+    console.log('User role:', user?.role)
+    console.log('User is_verified:', user?.is_verified)
+    console.log('User email:', user?.email)
+    console.log('========================')
+    
+    // Check if user is verified
+    if (user && !user.is_verified) {
+      console.log('User not verified, redirecting to verification page')
+      setTimeout(() => {
+        console.log('Executing redirect to verification page...')
+        router.push('/verification').then(() => {
+          console.log('Successfully redirected to verification page')
+        }).catch((error) => {
+          console.error('Error redirecting to verification page:', error)
+        })
+      }, 1000) // Small delay to show the toast
+      return
     }
+    
+    // If user is verified or no verification required, redirect to role-based dashboard
+    setTimeout(() => {
+      console.log('Executing role-based redirect...')
+      if (!user || !user.role) {
+        console.log('No user data or role, redirecting to home')
+        router.push('/').then(() => {
+          console.log('Successfully redirected to home')
+        }).catch((error) => {
+          console.error('Error redirecting to home:', error)
+        })
+        return
+      }
+      
+      console.log(`Redirecting to ${user.role} dashboard...`)
+      let redirectPromise: Promise<unknown>
+      
+      switch (user.role) {
+        case 'doctor':
+          console.log('Redirecting to doctor dashboard')
+          redirectPromise = router.push('/doctor-dashboard')
+          break
+        case 'nurse':
+          console.log('Redirecting to nurse dashboard')
+          redirectPromise = router.push('/nurse-dashboard')
+          break
+        case 'patient':
+          console.log('Redirecting to patient dashboard')
+          redirectPromise = router.push('/patient-dashboard')
+          break
+        default:
+          console.log('No matching role, redirecting to home')
+          redirectPromise = router.push('/')
+      }
+      
+      redirectPromise.then(() => {
+        console.log(`Successfully redirected to ${user.role} dashboard`)
+      }).catch((error) => {
+        console.error('Error during redirect:', error)
+      })
+    }, 1000) // Small delay to show the toast
 
   } catch (error: unknown) {
     console.error('Login error:', error)
-    alert('Login failed. Please try again.')
+    
+    let errorMessage = 'Login failed. Please try again.'
+    
+    if (error instanceof AxiosError) {
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || error.response.data.error || errorMessage
+      }
+    } else if (error instanceof Error) {
+      errorMessage = error.message
+    }
+    
+    // Show error toast notification
+    $q.notify({
+      type: 'negative',
+      message: `Login failed: ${errorMessage}`,
+      position: 'top',
+      timeout: 4000
+    })
   } finally {
     loading.value = false
   }
@@ -117,7 +203,7 @@ const onLogin = async () => {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #286660;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -179,8 +265,8 @@ const onLogin = async () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  border-color: #1e7668;
+  box-shadow: 0 0 0 2px rgba(30, 118, 104, 0.2);
 }
 
 .forgot-password {
@@ -191,7 +277,7 @@ const onLogin = async () => {
 .forgot-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: #1e7668;
   font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
@@ -214,7 +300,7 @@ const onLogin = async () => {
 .login-btn {
   width: 100%;
   padding: 12px;
-  background: #667eea;
+  background: #1e7668;
   color: white;
   border: none;
   border-radius: 8px;
@@ -225,7 +311,7 @@ const onLogin = async () => {
 }
 
 .login-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #6ca299;
 }
 
 .login-btn:disabled {
@@ -247,13 +333,13 @@ const onLogin = async () => {
 .link-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: #1e7668;
   cursor: pointer;
   font-size: 14px;
   text-decoration: underline;
 }
 
 .link-btn:hover {
-  color: #5a6fd8;
+  color: #6ca299;
 }
 </style>

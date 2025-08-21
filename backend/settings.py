@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "backend.operations.apps.OperationsConfig",
+    "admin_site.apps.AdminSiteConfig",
 ]
 
 MIDDLEWARE = [
@@ -125,6 +126,11 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# Media files (User uploads)
+# https://docs.djangoproject.com/en/5.2/topics/files/
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -134,6 +140,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom User Model
 # https://docs.djangoproject.com/en/5.2/topics/auth/customizing/#substituting-a-custom-user-model
 AUTH_USER_MODEL = "users.User"
+
+# Admin Site Configuration
+ADMIN_SITE_AUTH_USER_MODEL = "admin_site.AdminUser"
+
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    'admin_site.backends.AdminUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 # Django REST Framework Configuration
 # https://www.django-rest-framework.org/api-guide/settings/
@@ -174,6 +189,11 @@ CORS_ALLOW_METHODS = [
     "PUT",
 ]
 
+# Security settings for development
+# Allow iframe embedding for media files
+X_FRAME_OPTIONS = 'ALLOWALL'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -182,11 +202,12 @@ SIMPLE_JWT = {
 
 # Email Backend Configuration
 # https://docs.djangoproject.com/en/5.2/topics/email/
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # For development, logs emails to console
-# For production, you would typically use SMTP or a third-party service like SendGrid, Mailgun, etc.
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = "smtp.your-email-provider.com"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = "euniceibardaloza5@gmail.com"
-# EMAIL_HOST_PASSWORD = "your-email-password"
+
+# Use Gmail SMTP for both development and production
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "nitzydiones@gmail.com"
+EMAIL_HOST_PASSWORD = "vyqo dpsl twkg inzp"
+DEFAULT_FROM_EMAIL = "nitzydiones@gmail.com"  
