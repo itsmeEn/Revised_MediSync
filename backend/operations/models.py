@@ -393,3 +393,23 @@ class Messaging(models.Model):
 
     def __str__(self):
         return f"From {self.sender.full_name} to {self.receiver.full_name}: {self.message[:50]}..."
+
+#doctor availability management
+class DoctorAvailability(models.Model):
+    """Doctor availability management for blocking dates and setting schedules."""
+    doctor = models.ForeignKey(GeneralDoctorProfile, on_delete=models.CASCADE, related_name="availability")
+    date = models.DateField(help_text="Date when doctor is unavailable")
+    reason = models.CharField(max_length=255, blank=True, help_text="Reason for unavailability")
+    is_blocked = models.BooleanField(default=True, help_text="Whether the date is blocked")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["date"]
+        db_table = "doctor_availability"
+        verbose_name = "Doctor Availability"
+        verbose_name_plural = "Doctor Availability"
+        unique_together = ["doctor", "date"]
+
+    def __str__(self):
+        return f"Dr. {self.doctor.user.full_name} - {self.date} ({'Blocked' if self.is_blocked else 'Available'})"

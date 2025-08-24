@@ -72,10 +72,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
 
 const router = useRouter()
 const route = useRoute()
+const $q = useQuasar()
 
 const newPassword = ref('')
 const confirmPassword = ref('')
@@ -94,7 +96,12 @@ onMounted(() => {
   token.value = route.params.token as string
   
   if (!uidb64.value || !token.value) {
-    alert('Invalid reset link. Please request a new password reset.')
+    $q.notify({
+      type: 'negative',
+      message: 'Invalid reset link. Please request a new password reset.',
+      position: 'top',
+      timeout: 4000
+    })
     void router.push('/forgot-password')
   }
 })

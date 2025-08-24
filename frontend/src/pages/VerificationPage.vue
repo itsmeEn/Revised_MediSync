@@ -76,9 +76,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
 
 const router = useRouter()
+const $q = useQuasar()
 
 interface User {
   id: number
@@ -128,10 +130,15 @@ const redirectToDashboard = (role: string) => {
 }
 
 const verifyNow = async () => {
-  if (!verificationDocument.value) {
-    alert('Please upload a verification document first')
-    return
-  }
+      if (!verificationDocument.value) {
+      $q.notify({
+        type: 'negative',
+        message: 'Please upload a verification document first',
+        position: 'top',
+        timeout: 3000
+      })
+      return
+    }
 
   verifying.value = true
   
@@ -154,7 +161,12 @@ const verifyNow = async () => {
       }
     })
 
-    alert('Account verified successfully!')
+          $q.notify({
+        type: 'positive',
+        message: 'Account verified successfully!',
+        position: 'top',
+        timeout: 3000
+      })
 
     const user = getCurrentUser()
     if (user) {
@@ -164,7 +176,12 @@ const verifyNow = async () => {
   } catch (error: unknown) {
     console.error('Verification error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Verification failed. Please try again.'
-    alert(`Error: ${errorMessage}`)
+    $q.notify({
+      type: 'negative',
+      message: `Error: ${errorMessage}`,
+      position: 'top',
+      timeout: 4000
+    })
   } finally {
     verifying.value = false
   }
@@ -186,7 +203,12 @@ const verifyLater = async () => {
       })
     }
 
-    alert('You can verify your account later from your dashboard.')
+    $q.notify({
+      type: 'info',
+      message: 'You can verify your account later from your dashboard.',
+      position: 'top',
+      timeout: 3000
+    })
 
     const user = getCurrentUser()
     if (user) {
@@ -196,7 +218,12 @@ const verifyLater = async () => {
   } catch (error: unknown) {
     console.error('Verification error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Failed to save document. Please try again.'
-    alert(`Error: ${errorMessage}`)
+    $q.notify({
+      type: 'negative',
+      message: `Error: ${errorMessage}`,
+      position: 'top',
+      timeout: 4000
+    })
   } finally {
     verifying.value = false
   }

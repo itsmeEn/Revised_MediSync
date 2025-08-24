@@ -50,12 +50,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
     license_number = serializers.CharField(required=False, write_only=True)
     specialization = serializers.CharField(required=False, write_only=True)
+    department = serializers.CharField(required=False, write_only=True)
 
     class Meta:
         model = User
         fields = [
             "email", "full_name", "role", "date_of_birth", "gender", 
-            "password", "password2", "license_number", "specialization", 
+            "password", "password2", "license_number", "specialization", "department",
             "profile_picture", "verification_document"
         ]
         extra_kwargs = {"password": {"write_only": True}}
@@ -103,6 +104,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"role_fields": "License number and specialization are required for doctors."})
         if role == 'nurse' and not attrs.get('license_number'):
             raise serializers.ValidationError({"role_fields": "License number is required for nurses."})
+        if role == 'nurse' and not attrs.get('department'):
+            raise serializers.ValidationError({"role_fields": "Department is required for nurses."})
 
         return attrs
 
@@ -110,6 +113,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop("password2")
         validated_data.pop("license_number", None)
         validated_data.pop("specialization", None)
+        validated_data.pop("department", None)
         
         user = User.objects.create_user(**validated_data)
         return user

@@ -27,6 +27,9 @@ api.interceptors.request.use(
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔐 Adding auth token to request:', config.url);
+    } else {
+      console.warn('⚠️ No access token found for request:', config.url);
     }
     return config;
   },
@@ -44,22 +47,28 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      console.log('🔄 401 Unauthorized detected, attempting token refresh...');
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post('http://localhost:8001/api/users/token/refresh/', {
+          console.log('📤 Attempting to refresh token...');
+          const response = await axios.post('http://localhost:8000/api/users/token/refresh/', {
             refresh: refreshToken
           });
 
           const { access } = response.data;
           localStorage.setItem('access_token', access);
+          console.log('✅ Token refreshed successfully');
 
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return api(originalRequest);
+        } else {
+          console.warn('⚠️ No refresh token found');
         }
-      } catch {
+      } catch (refreshError) {
+        console.error('❌ Token refresh failed:', refreshError);
         // Refresh token failed, redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');

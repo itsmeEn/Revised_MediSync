@@ -86,6 +86,7 @@ class NurseProfile(models.Model):
     """Profile model for users with the 'nurse' role."""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="nurse_profile")
     license_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    department = models.CharField(max_length=255, blank=True, help_text="Department where the nurse works")
 
     class Meta:
         db_table = "nurse_profiles"

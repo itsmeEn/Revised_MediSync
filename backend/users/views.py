@@ -65,7 +65,8 @@ def register(request):
                 elif user.role == 'nurse':
                     NurseProfile.objects.create(
                         user=user,
-                        license_number=request.data.get('license_number')
+                        license_number=request.data.get('license_number'),
+                        department=request.data.get('department')
                     )
                 elif user.role == 'patient':
                     PatientProfile.objects.create(

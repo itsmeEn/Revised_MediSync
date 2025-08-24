@@ -109,15 +109,27 @@
             </div>
 
             <div v-if="role === 'nurse'" class="role-specific-fields">
-              <div class="form-group">
-                <label for="nurse_license">Nursing License Number *</label>
-                <input
-                  id="nurse_license"
-                  v-model="formData.license_number"
-                  type="text"
-                  required
-                  placeholder="Enter your nursing license number"
-                />
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="nurse_license">Nursing License Number *</label>
+                  <input
+                    id="nurse_license"
+                    v-model="formData.license_number"
+                    type="text"
+                    required
+                    placeholder="Enter your nursing license number"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="department">Department *</label>
+                  <input
+                    id="department"
+                    v-model="formData.department"
+                    type="text"
+                    required
+                    placeholder="e.g., Emergency, ICU, Pediatrics"
+                  />
+                </div>
               </div>
             </div>
 
@@ -147,18 +159,32 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
 import { AxiosError } from 'axios'
 
+interface RegistrationFormData {
+  full_name: string
+  email: string
+  date_of_birth: string
+  gender: string
+  password: string
+  password2: string
+  license_number: string
+  specialization: string
+  department: string
+}
+
 const router = useRouter()
 const route = useRoute()
+const $q = useQuasar()
 
 const role = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
 const showPassword2 = ref(false)
 
-const formData = ref({
+const formData = ref<RegistrationFormData>({
   full_name: '',
   email: '',
   date_of_birth: '',
@@ -166,7 +192,8 @@ const formData = ref({
   password: '',
   password2: '',
   license_number: '',
-  specialization: ''
+  specialization: '',
+  department: ''
 })
 
 const roleTitle = computed(() => {
@@ -189,14 +216,24 @@ const onRegister = async () => {
   // Validate required fields based on role
   if (role.value === 'doctor') {
     if (!formData.value.license_number || !formData.value.specialization) {
-      alert('License number and specialization are required for doctors.');
+      $q.notify({
+        type: 'negative',
+        message: 'License number and specialization are required for doctors.',
+        position: 'top',
+        timeout: 4000
+      })
       return;
     }
-  } else if (role.value === 'nurse') {
-    if (!formData.value.license_number) {
-      alert('License number is required for nurses.');
-      return;
-    }
+      } else if (role.value === 'nurse') {
+      if (!formData.value.license_number || !formData.value.department) {
+        $q.notify({
+          type: 'negative',
+          message: 'License number and department are required for nurses.',
+          position: 'top',
+          timeout: 4000
+        })
+        return;
+      }
   }
   
   // A boolean flag is set to true to indicate that the registration process has started.
@@ -247,7 +284,12 @@ const onRegister = async () => {
     localStorage.setItem('user', JSON.stringify(response.data.user));
 
     // A success message is displayed to the user.
-    alert('Account created successfully!');
+          $q.notify({
+        type: 'positive',
+        message: 'Account created successfully!',
+        position: 'top',
+        timeout: 3000
+      });
 
     // The user is redirected to the verification page after successful registration.
     void router.push('/verification');
@@ -278,7 +320,12 @@ const onRegister = async () => {
     }
     
     // The final error message is displayed to the user.
-    alert(`Registration failed: ${errorMessage}`);
+          $q.notify({
+        type: 'negative',
+        message: `Registration failed: ${errorMessage}`,
+        position: 'top',
+        timeout: 4000
+      });
   } finally {
     // The loading flag is set to false, indicating that the registration process has completed.
     loading.value = false;

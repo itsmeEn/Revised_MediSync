@@ -1,0 +1,2034 @@
+<template>
+  <q-layout view="hHh Lpr fFf">
+
+    <q-header reveal elevated class="text-white" height-hint="98">
+      <q-toolbar>
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+        
+        <q-toolbar-title>
+          <q-avatar>
+            <img src="../assets/logo.png" alt="MediSync Logo" />
+          </q-avatar>
+          MediSync
+        </q-toolbar-title>
+      </q-toolbar>
+
+      <q-toolbar class="text-white">
+        <div class="search-container">
+          <q-input 
+            dark 
+            dense 
+            standout 
+            v-model="text" 
+            placeholder="Search appointments, patients..."
+            class="search-input"
+          >
+            <template v-slot:append>
+              <q-icon v-if="text === ''" name="search" />
+              <q-icon v-else name="clear" class="cursor-pointer" @click="text = ''" />
+            </template>
+          </q-input>
+        </div>
+        
+        <!-- Real-time Time and Weather -->
+        <div class="real-time-info">
+          <!-- Time Display -->
+          <div class="time-display">
+            <q-icon name="schedule" size="md" />
+            <span class="time-text">{{ currentTime }}</span>
+          </div>
+          
+          <!-- Weather Display -->
+          <div class="weather-display" v-if="weatherData">
+            <q-icon :name="getWeatherIcon(weatherData.condition)" size="sm" />
+            <span class="weather-text">{{ weatherData.temperature }}°C</span>
+            <span class="weather-location">{{ weatherData.location }}</span>
+          </div>
+          
+          <!-- Loading Weather -->
+          <div class="weather-loading" v-else-if="weatherLoading">
+            <q-spinner size="sm" />
+            <span class="weather-text">Loading weather...</span>
+          </div>
+          
+          <!-- Weather Error -->
+          <div class="weather-error" v-else-if="weatherError">
+            <q-icon name="error" size="sm" />
+            <span class="weather-text">Weather unavailable</span>
+          </div>
+        </div>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered>
+      <div class="drawer-content">
+        <!-- User Profile Section -->
+        <div class="user-profile-section">
+          <div class="profile-picture-container">
+            <q-avatar size="100px" class="profile-avatar">
+              <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
+              <div v-else class="profile-placeholder">
+                {{ userInitials }}
+              </div>
+            </q-avatar>
+            <q-btn
+              round
+              color="primary"
+              icon="camera_alt"
+              size="sm"
+              class="upload-btn"
+              @click="triggerFileUpload"
+            />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleProfilePictureUpload"
+            />
+          </div>
+          
+          <div class="user-info">
+            <h6 class="user-name">{{ userProfile.full_name }}</h6>
+            <p class="user-specialization">{{ userProfile.specialization }}</p>
+            <q-chip color="primary" text-color="white" size="sm">
+              {{ userProfile.role }}
+            </q-chip>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <q-list class="navigation-menu">
+          <q-item clickable v-ripple @click="navigateTo('doctor-dashboard')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="dashboard" />
+            </q-item-section>
+            <q-item-section>Dashboard</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('appointments')" class="nav-item active">
+            <q-item-section avatar>
+              <q-icon name="event" />
+            </q-item-section>
+            <q-item-section>Appointments</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('messaging')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="message" />
+            </q-item-section>
+            <q-item-section>Messaging</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('patients')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="people" />
+            </q-item-section>
+            <q-item-section>Patient Management</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="analytics" />
+            </q-item-section>
+            <q-item-section>Analytics</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('settings')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="settings" />
+            </q-item-section>
+            <q-item-section>Settings</q-item-section>
+          </q-item>
+        </q-list>
+
+        <!-- Logout Section -->
+        <div class="logout-section">
+          <q-btn
+            color="negative"
+            icon="logout"
+            label="Logout"
+            class="logout-btn"
+            @click="logout"
+          />
+        </div>
+      </div>
+    </q-drawer>
+
+    <q-page-container>
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <h2 class="page-title">Appointment Calendar</h2>
+          <p class="page-subtitle">Manage your appointments and schedule</p>
+        </div>
+        <div class="page-header-right">
+          <q-btn 
+            color="negative" 
+            icon="block" 
+            label="Block Date" 
+            @click="blockDate"
+            :disable="selectedDate?.isBlocked"
+            class="q-mr-sm"
+          />
+          <q-btn 
+            color="primary" 
+            icon="add" 
+            label="New Appointment" 
+            @click="showNewAppointmentDialog = true"
+          />
+        </div>
+      </div>
+
+      <div class="q-pa-md">
+        <!-- Calendar Navigation Bar -->
+        <div class="calendar-navigation-bar q-mb-md">
+          <div class="row items-center justify-between">
+            <!-- Month Navigation -->
+            <div class="col-auto">
+              <div class="month-navigation">
+                <q-btn 
+                  round 
+                  flat 
+                  icon="chevron_left" 
+                  @click="previousMonth"
+                  class="nav-btn"
+                />
+                <h4 class="month-year">{{ currentMonthYear }}</h4>
+                <q-btn 
+                  round 
+                  flat 
+                  icon="chevron_right" 
+                  @click="nextMonth"
+                  class="nav-btn"
+                />
+                <q-btn 
+                  flat 
+                  label="Today" 
+                  @click="goToToday"
+                  class="today-btn"
+                />
+              </div>
+            </div>
+            
+            <!-- View Selector and Export Options -->
+            <div class="col-auto">
+              <div class="view-export-controls">
+                <!-- View Selector -->
+                <q-btn-group flat class="view-selector">
+                  <q-btn 
+                    flat 
+                    label="Day" 
+                    :class="{ 'active-view': currentView === 'day' }"
+                    @click="setView('day')"
+                  />
+                  <q-btn 
+                    flat 
+                    label="Week" 
+                    :class="{ 'active-view': currentView === 'week' }"
+                    @click="setView('week')"
+                  />
+                  <q-btn 
+                    flat 
+                    label="Month" 
+                    :class="{ 'active-view': currentView === 'month' }"
+                    @click="setView('month')"
+                  />
+                </q-btn-group>
+                
+                <!-- Export/Print Options -->
+                <div class="export-controls">
+                  <q-btn 
+                    round 
+                    flat 
+                    icon="download" 
+                    @click="downloadSchedule"
+                    class="export-btn"
+                  />
+                  <q-btn 
+                    round 
+                    flat 
+                    icon="print" 
+                    @click="printSchedule"
+                    class="export-btn"
+                  />
+                  <q-btn 
+                    round 
+                    flat 
+                    icon="more_vert" 
+                    @click="showExportMenu = true"
+                    class="export-btn"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="calendar-grid">
+          <!-- Day Headers -->
+          <div class="calendar-row header-row">
+            <div v-for="day in weekDays" :key="day" class="calendar-cell header-cell">
+              {{ day }}
+            </div>
+          </div>
+
+          <!-- Calendar Days -->
+          <div v-for="(week, weekIndex) in calendarWeeks" :key="`week-${weekIndex}`" class="calendar-row">
+            <div 
+              v-for="(day, dayIndex) in week" 
+              :key="`day-${weekIndex}-${dayIndex}`" 
+              class="calendar-cell"
+              :class="{
+                'other-month': !day?.isCurrentMonth,
+                'today': day?.isToday,
+                'selected': day?.isSelected,
+                'has-appointments': day?.appointments?.length > 0,
+                'blocked': day?.isBlocked
+              }"
+              @click="selectDate(day)"
+            >
+              <div class="day-number">{{ day?.dayNumber }}</div>
+              <div v-if="day?.appointments?.length > 0" class="appointment-indicator">
+                <q-badge color="primary" :label="day.appointments.length" />
+              </div>
+              <div v-if="day?.isBlocked" class="blocked-indicator">
+                <q-icon name="block" color="negative" size="sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Appointments Section -->
+        <div class="upcoming-appointments-section q-mt-xl q-pa-lg">
+          <q-card class="appointments-card">
+            <q-card-section>
+              <div class="section-header">
+                <h3 class="section-title">Upcoming Appointments</h3>
+                <div class="filter-controls">
+                  <q-btn-group flat class="status-filter">
+                    <q-btn 
+                      flat 
+                      label="All" 
+                      :class="{ 'active-filter': selectedStatus === 'all' }"
+                      @click="filterByStatus('all')"
+                    />
+                    <q-btn 
+                      flat 
+                      label="Confirmed" 
+                      :class="{ 'active-filter': selectedStatus === 'confirmed' }"
+                      @click="filterByStatus('confirmed')"
+                    />
+                    <q-btn 
+                      flat 
+                      label="Pending" 
+                      :class="{ 'active-filter': selectedStatus === 'pending' }"
+                      @click="filterByStatus('pending')"
+                    />
+                    <q-btn 
+                      flat 
+                      label="Completed" 
+                      :class="{ 'active-filter': selectedStatus === 'completed' }"
+                      @click="filterByStatus('completed')"
+                    />
+                    <q-btn 
+                      flat 
+                      label="Cancelled" 
+                      :class="{ 'active-filter': selectedStatus === 'cancelled' }"
+                      @click="filterByStatus('cancelled')"
+                    />
+                  </q-btn-group>
+                </div>
+              </div>
+
+              <!-- Appointments List -->
+              <div class="appointments-list">
+                <q-card v-for="appointment in filteredAppointments" :key="appointment.id" class="appointment-card q-mb-md">
+                  <q-card-section>
+                    <div class="appointment-header">
+                      <div class="patient-info">
+                        <div class="patient-name">{{ appointment.patient_name }}</div>
+                        <div class="appointment-details">
+                          <q-icon name="schedule" size="sm" />
+                          <span>{{ formatAppointmentDateTime(appointment.appointment_date, appointment.appointment_time) }}</span>
+                          <q-chip 
+                            :color="getStatusColor(appointment.status)" 
+                            :label="appointment.status"
+                            size="sm"
+                            class="q-ml-sm"
+                          />
+                        </div>
+                      </div>
+                      <div class="appointment-actions">
+                        <q-btn 
+                          round 
+                          flat 
+                          icon="visibility" 
+                          color="primary"
+                          @click="viewMedicalAssessment(appointment)"
+                          class="q-mr-sm"
+                        >
+                          <q-tooltip>View Medical Assessment</q-tooltip>
+                        </q-btn>
+                        <q-btn 
+                          round 
+                          flat 
+                          icon="check_circle" 
+                          color="positive"
+                          @click="markAsCompleted(appointment)"
+                          v-if="appointment.status === 'confirmed'"
+                          class="q-mr-sm"
+                        >
+                          <q-tooltip>Mark as Completed</q-tooltip>
+                        </q-btn>
+                        <q-btn 
+                          round 
+                          flat 
+                          icon="schedule" 
+                          color="warning"
+                          @click="scheduleFollowUp(appointment)"
+                          v-if="appointment.status === 'confirmed'"
+                          class="q-mr-sm"
+                        >
+                          <q-tooltip>Schedule Follow-up</q-tooltip>
+                        </q-btn>
+                        <q-btn 
+                          round 
+                          flat 
+                          icon="cancel" 
+                          color="negative"
+                          @click="cancelAppointment(appointment)"
+                          v-if="appointment.status === 'confirmed' || appointment.status === 'pending'"
+                        >
+                          <q-tooltip>Cancel Appointment</q-tooltip>
+                        </q-btn>
+                      </div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+
+                <!-- Empty State -->
+                <div v-if="filteredAppointments.length === 0" class="empty-state">
+                  <q-icon name="event_busy" size="4rem" color="grey-4" />
+                  <h4>No appointments found</h4>
+                  <p>No appointments match the selected filter criteria.</p>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+    </q-page-container>
+
+    <!-- New Appointment Dialog -->
+    <q-dialog v-model="showNewAppointmentDialog" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">New Appointment</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="createAppointment" class="q-gutter-md">
+            <q-input
+              v-model="newAppointment.patient_name"
+              label="Patient Name"
+              outlined
+              :rules="[val => !!val || 'Patient name is required']"
+            />
+
+            <q-input
+              v-model="newAppointment.appointment_date"
+              label="Date"
+              outlined
+              type="date"
+              :rules="[val => !!val || 'Date is required']"
+            />
+
+            <q-input
+              v-model="newAppointment.appointment_time"
+              label="Time"
+              outlined
+              type="time"
+              :rules="[val => !!val || 'Time is required']"
+            />
+
+            <q-select
+              v-model="newAppointment.appointment_type"
+              :options="appointmentTypes"
+              label="Appointment Type"
+              outlined
+              :rules="[val => !!val || 'Appointment type is required']"
+            />
+
+            <q-input
+              v-model="newAppointment.notes"
+              label="Notes"
+              outlined
+              type="textarea"
+              rows="3"
+            />
+
+            <div class="row q-gutter-sm justify-end">
+              <q-btn label="Cancel" color="grey" v-close-popup />
+              <q-btn label="Create Appointment" type="submit" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Medical Assessment Dialog -->
+    <q-dialog v-model="showMedicalAssessmentDialog" maximized>
+      <q-card>
+        <q-card-section class="row items-center">
+          <div class="text-h6">Medical Assessment - {{ selectedAppointment?.patient_name }}</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section v-if="selectedAppointment?.medical_assessment">
+          <div class="assessment-content">
+            <div class="assessment-section">
+              <h5>Vital Signs</h5>
+              <div class="vital-signs-grid">
+                <div class="vital-sign">
+                  <span class="label">Blood Pressure:</span>
+                  <span class="value">{{ selectedAppointment.medical_assessment?.blood_pressure || 'Not recorded' }}</span>
+                </div>
+                <div class="vital-sign">
+                  <span class="label">Heart Rate:</span>
+                  <span class="value">{{ selectedAppointment.medical_assessment?.heart_rate ? `${selectedAppointment.medical_assessment.heart_rate} bpm` : 'Not recorded' }}</span>
+                </div>
+                <div class="vital-sign">
+                  <span class="label">Temperature:</span>
+                  <span class="value">{{ selectedAppointment.medical_assessment?.temperature ? `${selectedAppointment.medical_assessment.temperature}°C` : 'Not recorded' }}</span>
+                </div>
+                <div class="vital-sign">
+                  <span class="label">Weight:</span>
+                  <span class="value">{{ selectedAppointment.medical_assessment?.weight ? `${selectedAppointment.medical_assessment.weight} kg` : 'Not recorded' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="assessment-section">
+              <h5>Symptoms</h5>
+              <p>{{ selectedAppointment.medical_assessment?.symptoms || 'No symptoms recorded' }}</p>
+            </div>
+
+            <div class="assessment-section">
+              <h5>Nurse's Notes</h5>
+              <p>{{ selectedAppointment.medical_assessment?.nurse_notes || 'No notes recorded' }}</p>
+            </div>
+
+            <div class="assessment-section">
+              <h5>Assessment Date</h5>
+              <p>{{ selectedAppointment.medical_assessment?.assessment_date ? formatDate(selectedAppointment.medical_assessment.assessment_date) : 'Not recorded' }}</p>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section v-else>
+          <div class="no-assessment">
+            <q-icon name="medical_services" size="4rem" color="grey-4" />
+            <h4>No Medical Assessment Available</h4>
+            <p>No medical assessment has been completed for this patient yet.</p>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Follow-up Scheduling Dialog -->
+    <q-dialog v-model="showFollowUpDialog" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Schedule Follow-up</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="confirmFollowUp" class="q-gutter-md">
+            <q-input
+              v-model="followUpData.date"
+              label="Follow-up Date"
+              outlined
+              type="date"
+              :rules="[val => !!val || 'Date is required']"
+            />
+
+            <q-input
+              v-model="followUpData.time"
+              label="Follow-up Time"
+              outlined
+              type="time"
+              :rules="[val => !!val || 'Time is required']"
+            />
+
+            <q-input
+              v-model="followUpData.notes"
+              label="Follow-up Notes"
+              outlined
+              type="textarea"
+              rows="3"
+              placeholder="Reason for follow-up, instructions, etc."
+            />
+
+            <div class="row q-gutter-sm justify-end">
+              <q-btn label="Cancel" color="grey" v-close-popup />
+              <q-btn label="Schedule Follow-up" type="submit" color="primary" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+  </q-layout>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { api } from 'src/boot/axios'
+
+const router = useRouter()
+const $q = useQuasar()
+
+// Drawer and navigation
+const rightDrawerOpen = ref(false)
+const text = ref('')
+
+// Real-time time and weather
+const currentTime = ref('')
+const weatherData = ref<{
+  temperature: number
+  condition: string
+  location: string
+  description: string
+} | null>(null)
+const weatherLoading = ref(false)
+const weatherError = ref(false)
+let timeInterval: NodeJS.Timeout | null = null
+
+// User profile
+const userProfile = ref<{
+  full_name: string
+  specialization?: string
+  role: string
+  profile_picture: string | null
+}>({
+  full_name: 'user',
+  specialization: 'specialization',
+  role: 'role',
+  profile_picture: null
+})
+
+const fileInput = ref<HTMLInputElement>()
+
+// Computed properties for user profile
+const userInitials = computed(() => {
+  if (!userProfile.value.full_name) return 'U'
+  return userProfile.value.full_name
+    .split(' ')
+    .map(name => name.charAt(0))
+    .join('')
+    .toUpperCase()
+})
+
+const profilePictureUrl = computed(() => {
+  if (!userProfile.value.profile_picture) {
+    return null
+  }
+  
+  // If it's already a full URL, return as is
+  if (userProfile.value.profile_picture.startsWith('http')) {
+    return userProfile.value.profile_picture
+  }
+  
+  // If it's a relative path, construct the full URL
+  if (userProfile.value.profile_picture.startsWith('/')) {
+    return `http://localhost:8000${userProfile.value.profile_picture}`
+  }
+  
+  // If it's just a filename, construct the full URL
+  return `http://localhost:8000/media/profile_pictures/${userProfile.value.profile_picture}`
+})
+
+// Types
+interface DayData {
+  date: Date
+  dayNumber: number
+  isCurrentMonth: boolean
+  isToday: boolean
+  isSelected: boolean
+  isBlocked: boolean
+  appointments: Appointment[]
+}
+
+interface Appointment {
+  id: number
+  patient_name: string
+  appointment_date: string
+  appointment_time: string
+  appointment_type: string
+  status: string
+  notes?: string
+  medical_assessment?: {
+    blood_pressure: string
+    heart_rate: number
+    temperature: number
+    weight: number
+    symptoms: string
+    nurse_notes: string
+    assessment_date: string
+  }
+}
+
+// Reactive data
+const currentDate = ref(new Date())
+const selectedDate = ref<DayData | null>(null)
+const showNewAppointmentDialog = ref(false)
+const appointments = ref<Appointment[]>([])
+const blockedDates = ref<string[]>([])
+const currentView = ref<'day' | 'week' | 'month'>('month')
+const showExportMenu = ref(false)
+
+// Upcoming appointments
+const selectedStatus = ref<'all' | 'confirmed' | 'pending' | 'completed' | 'cancelled'>('all')
+const showMedicalAssessmentDialog = ref(false)
+const showFollowUpDialog = ref(false)
+const selectedAppointment = ref<Appointment | null>(null)
+const followUpData = ref({
+  date: '',
+  time: '',
+  notes: ''
+})
+
+// New appointment form
+const newAppointment = ref({
+  patient_name: '',
+  appointment_date: '',
+  appointment_time: '',
+  appointment_type: '',
+  notes: ''
+})
+
+const appointmentTypes = [
+  'consultation',
+  'follow_up',
+  'emergency'
+]
+
+// Computed properties
+const currentMonthYear = computed(() => {
+  return currentDate.value.toLocaleDateString('en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  })
+})
+
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+const calendarWeeks = computed(() => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth()
+  
+  const firstDay = new Date(year, month, 1)
+  const startDate = new Date(firstDay)
+  startDate.setDate(startDate.getDate() - firstDay.getDay())
+  
+  const weeks: DayData[][] = []
+  let currentWeek: DayData[] = []
+  
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(startDate)
+    date.setDate(startDate.getDate() + i)
+    
+    const dayData: DayData = {
+      date: date,
+      dayNumber: date.getDate(),
+      isCurrentMonth: date.getMonth() === month,
+      isToday: isToday(date),
+      isSelected: selectedDate.value ? isSameDate(date, selectedDate.value.date) : false,
+      isBlocked: isDateBlocked(date),
+      appointments: getAppointmentsForDate(date)
+    }
+    
+    currentWeek.push(dayData)
+    
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek)
+      currentWeek = []
+    }
+  }
+  
+  return weeks
+})
+
+
+
+// Time and weather functions
+const updateTime = () => {
+  const now = new Date()
+  
+  // Convert to 12-hour format with AM/PM beside the time
+  const hour = now.getHours()
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 || 12
+  const minute = now.getMinutes().toString().padStart(2, '0')
+  const second = now.getSeconds().toString().padStart(2, '0')
+  
+  currentTime.value = `${hour12}:${minute}:${second} ${ampm}`
+}
+
+const getWeatherIcon = (condition: string) => {
+  const iconMap: Record<string, string> = {
+    'clear': 'wb_sunny',
+    'clouds': 'cloud',
+    'rain': 'opacity',
+    'snow': 'ac_unit',
+    'thunderstorm': 'flash_on',
+    'drizzle': 'grain',
+    'mist': 'cloud',
+    'fog': 'cloud',
+    'haze': 'cloud',
+    'smoke': 'cloud',
+    'dust': 'cloud',
+    'sand': 'cloud',
+    'ash': 'cloud',
+    'squall': 'air',
+    'tornado': 'air'
+  }
+  return iconMap[condition.toLowerCase()] || 'wb_sunny'
+}
+
+const fetchWeather = async () => {
+  weatherLoading.value = true
+  weatherError.value = false
+  
+  try {
+    // Get user's location (default to Manila if geolocation fails)
+    let latitude = 14.5995 // Default: Manila
+    let longitude = 120.9842
+    
+    if (navigator.geolocation) {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            timeout: 5000,
+            enableHighAccuracy: false
+          })
+        })
+        latitude = position.coords.latitude
+        longitude = position.coords.longitude
+      } catch {
+        console.log('Geolocation failed, using default location (Manila)')
+      }
+    }
+    
+    // Use OpenWeatherMap API
+    const apiKey = '5c328a0059938745d143138d206eb570'
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`)
+    
+    if (!response.ok) {
+      throw new Error('Weather API request failed')
+    }
+    
+    const data = await response.json()
+    
+    weatherData.value = {
+      temperature: Math.round(data.main.temp),
+      condition: data.weather[0].main.toLowerCase(),
+      location: data.name,
+      description: data.weather[0].description
+    }
+    
+  } catch (error) {
+    console.error('Weather fetch error:', error)
+    weatherError.value = true
+    
+    // Fallback weather data
+    weatherData.value = {
+      temperature: 22,
+      condition: 'clear',
+      location: 'Local Area',
+      description: 'Partly cloudy'
+    }
+  } finally {
+    weatherLoading.value = false
+  }
+}
+
+// Navigation functions
+const toggleRightDrawer = () => {
+  rightDrawerOpen.value = !rightDrawerOpen.value
+}
+
+const navigateTo = (route: string) => {
+  // Close drawer first
+  rightDrawerOpen.value = false
+  
+  // Navigate to different sections
+  switch (route) {
+    case 'doctor-dashboard':
+      void router.push('/doctor-dashboard')
+      break
+    case 'appointments':
+      // Already on appointments page
+      break
+    case 'messaging':
+      void router.push('/doctor-messaging')
+      break
+    case 'patients':
+      $q.notify({
+        type: 'info',
+        message: 'Patient Management page - Coming soon!',
+        position: 'top',
+        timeout: 3000
+      })
+      break
+    case 'analytics':
+      $q.notify({
+        type: 'info',
+        message: 'Analytics page - Coming soon!',
+        position: 'top',
+        timeout: 3000
+      })
+      break
+    case 'settings':
+      $q.notify({
+        type: 'info',
+        message: 'Settings page - Coming soon!',
+        position: 'top',
+        timeout: 3000
+      })
+      break
+  }
+}
+
+const logout = () => {
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('refresh_token')
+  localStorage.removeItem('user')
+  void router.push('/login')
+}
+
+// Profile picture functions
+const triggerFileUpload = () => {
+  fileInput.value?.click()
+}
+
+const handleProfilePictureUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+    if (!allowedTypes.includes(file.type)) {
+      $q.notify({
+        type: 'negative',
+        message: 'Please select a valid image file (JPG, PNG)',
+        position: 'top',
+        timeout: 3000
+      })
+      return
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      $q.notify({
+        type: 'negative',
+        message: 'File size must be less than 5MB',
+        position: 'top',
+        timeout: 3000
+      })
+      return
+    }
+    
+    try {
+      const formData = new FormData()
+      formData.append('profile_picture', file)
+      
+      const response = await api.post('/users/profile/update/picture/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      
+      userProfile.value.profile_picture = response.data.user.profile_picture
+      
+      // Show success toast
+      $q.notify({
+        type: 'positive',
+        message: 'Profile picture updated successfully!',
+        position: 'top',
+        timeout: 3000
+      })
+      
+      // Clear the file input
+      target.value = ''
+    } catch (error) {
+      console.error('Profile picture upload failed:', error)
+      $q.notify({
+        type: 'negative',
+        message: 'Failed to upload profile picture. Please try again.',
+        position: 'top',
+        timeout: 4000
+      })
+    }
+  }
+}
+
+// Fetch user profile from API
+const fetchUserProfile = async () => {
+  try {
+    const response = await api.get('/users/profile/')
+    const userData = response.data.user // The API returns nested user data
+    
+    userProfile.value = {
+      full_name: userData.full_name,
+      specialization: userData.doctor_profile?.specialization,
+      role: userData.role,
+      profile_picture: userData.profile_picture || null
+    }
+    
+    console.log('User profile loaded:', userProfile.value)
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error)
+    
+    // Fallback to localStorage
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      const user = JSON.parse(userData)
+      userProfile.value = {
+        full_name: user.full_name,
+        specialization: user.doctor_profile?.specialization,
+        role: user.role,
+        profile_picture: user.profile_picture || null
+      }
+    }
+  }
+}
+
+// Methods
+function isToday(date: Date): boolean {
+  const today = new Date()
+  return date.toDateString() === today.toDateString()
+}
+
+function isSameDate(date1: Date, date2: Date): boolean {
+  return date1.toDateString() === date2.toDateString()
+}
+
+function isDateBlocked(date: Date): boolean {
+  return blockedDates.value.some(blockedDate => 
+    isSameDate(new Date(blockedDate), date)
+  )
+}
+
+function getAppointmentsForDate(date: Date) {
+  return appointments.value.filter(appointment => 
+    isSameDate(new Date(appointment.appointment_date), date)
+  )
+}
+
+function selectDate(day: DayData | undefined) {
+  if (day && day.isCurrentMonth) {
+    selectedDate.value = day
+  }
+}
+
+function previousMonth() {
+  currentDate.value = new Date(
+    currentDate.value.getFullYear(),
+    currentDate.value.getMonth() - 1,
+    1
+  )
+}
+
+function nextMonth() {
+  currentDate.value = new Date(
+    currentDate.value.getFullYear(),
+    currentDate.value.getMonth() + 1,
+    1
+  )
+}
+
+function goToToday() {
+  currentDate.value = new Date()
+  const today = calendarWeeks.value
+    .flat()
+    .find(day => day.isToday)
+  if (today) {
+    selectedDate.value = today
+  }
+}
+
+
+
+async function fetchAppointments() {
+  try {
+    const response = await api.get('/operations/appointments/')
+    appointments.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch appointments:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load appointments',
+      position: 'top'
+    })
+  }
+}
+
+async function fetchBlockedDates() {
+  try {
+    // This would be a new endpoint for blocked dates
+    const response = await api.get('/operations/blocked-dates/')
+    blockedDates.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch blocked dates:', error)
+  }
+}
+
+async function blockDate() {
+  if (!selectedDate.value) return
+  
+  try {
+    const dateString = selectedDate.value.date.toISOString().split('T')[0]
+    if (dateString) {
+      await api.post('/operations/block-date/', {
+        date: dateString
+      })
+      
+      blockedDates.value.push(dateString)
+    }
+    selectedDate.value.isBlocked = true
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Date blocked successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Failed to block date:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to block date',
+      position: 'top'
+    })
+  }
+}
+
+async function createAppointment() {
+  try {
+    const appointmentData = {
+      ...newAppointment.value,
+      appointment_date: newAppointment.value.appointment_date + 'T' + newAppointment.value.appointment_time
+    }
+    
+    await api.post('/operations/create-appointment/', appointmentData)
+    
+    // Reset form
+    newAppointment.value = {
+      patient_name: '',
+      appointment_date: '',
+      appointment_time: '',
+      appointment_type: '',
+      notes: ''
+    }
+    
+    showNewAppointmentDialog.value = false
+    
+    // Refresh appointments
+    await fetchAppointments()
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Appointment created successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Failed to create appointment:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to create appointment',
+      position: 'top'
+    })
+  }
+}
+
+// Export Schedule Functions
+async function downloadSchedule() {
+  try {
+    // Get current month's appointments
+    const year = currentDate.value.getFullYear()
+    const month = currentDate.value.getMonth() + 1
+    
+    const response = await api.get(`/operations/appointments/?year=${year}&month=${month}`)
+    const appointments = response.data
+    
+    // Create CSV content
+    const csvContent = createCSVContent(appointments)
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `schedule_${year}_${month.toString().padStart(2, '0')}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Schedule downloaded successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Failed to download schedule:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to download schedule',
+      position: 'top'
+    })
+  }
+}
+
+function printSchedule() {
+  try {
+    // Create a printable version of the schedule
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      const year = currentDate.value.getFullYear()
+      const monthName = currentDate.value.toLocaleDateString('en-US', { month: 'long' })
+      
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Schedule - ${monthName} ${year}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .schedule-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            .schedule-table th, .schedule-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            .schedule-table th { background-color: #f2f2f2; font-weight: bold; }
+            @media print { body { margin: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Dr. ${userProfile.value.full_name} - Schedule</h1>
+            <h2>${monthName} ${year}</h2>
+            <p>Generated on ${new Date().toLocaleDateString()}</p>
+          </div>
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Patient</th>
+                <th>Type</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${generateScheduleRows()}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `
+      
+      printWindow.document.write(printContent)
+      printWindow.document.close()
+      printWindow.print()
+    }
+  } catch (error) {
+    console.error('Failed to print schedule:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to print schedule',
+      position: 'top'
+    })
+  }
+}
+
+
+
+// Helper functions for export
+function createCSVContent(appointments: Appointment[]): string {
+  const headers = ['Date', 'Time', 'Patient Name', 'Appointment Type', 'Status', 'Notes']
+  const rows = appointments.map(appointment => [
+    new Date(appointment.appointment_date).toLocaleDateString(),
+    appointment.appointment_time,
+    appointment.patient_name,
+    appointment.appointment_type,
+    appointment.status,
+    appointment.notes || ''
+  ])
+  
+  return [headers, ...rows]
+    .map(row => row.map(cell => `"${cell}"`).join(','))
+    .join('\n')
+}
+
+function generateScheduleRows(): string {
+  // This would generate HTML rows for the print function
+  // For now, return a placeholder
+  return `
+    <tr>
+      <td colspan="5" style="text-align: center; padding: 20px;">
+        Schedule data will be populated here
+      </td>
+    </tr>
+  `
+}
+
+
+
+// View management function
+function setView(view: 'day' | 'week' | 'month') {
+  currentView.value = view
+  // TODO: Implement different view logic
+  console.log('Switched to view:', view)
+}
+
+// Upcoming appointments functions
+const filteredAppointments = computed(() => {
+  if (selectedStatus.value === 'all') {
+    return appointments.value
+  }
+  return appointments.value.filter(appointment => appointment.status === selectedStatus.value)
+})
+
+function filterByStatus(status: 'all' | 'confirmed' | 'pending' | 'completed' | 'cancelled') {
+  selectedStatus.value = status
+}
+
+function formatAppointmentDateTime(date: string, time: string): string {
+  const dateObj = new Date(date)
+  const formattedDate = dateObj.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  })
+  return `${formattedDate} at ${time}`
+}
+
+function getStatusColor(status: string): string {
+  switch (status) {
+    case 'confirmed': return 'primary'
+    case 'pending': return 'warning'
+    case 'completed': return 'positive'
+    case 'cancelled': return 'negative'
+    default: return 'grey'
+  }
+}
+
+function viewMedicalAssessment(appointment: Appointment) {
+  selectedAppointment.value = appointment
+  showMedicalAssessmentDialog.value = true
+}
+
+async function markAsCompleted(appointment: Appointment) {
+  try {
+    await api.patch(`/operations/appointments/${appointment.id}/`, {
+      status: 'completed'
+    })
+    
+    // Update local appointment
+    const index = appointments.value.findIndex(a => a.id === appointment.id)
+    if (index !== -1 && appointments.value[index]) {
+      appointments.value[index].status = 'completed'
+    }
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Appointment marked as completed',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Failed to mark appointment as completed:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to update appointment status',
+      position: 'top'
+    })
+  }
+}
+
+function scheduleFollowUp(appointment: Appointment) {
+  selectedAppointment.value = appointment
+  followUpData.value = {
+    date: '',
+    time: '',
+    notes: ''
+  }
+  showFollowUpDialog.value = true
+}
+
+async function confirmFollowUp() {
+  if (!selectedAppointment.value) return
+  
+  try {
+    const followUpAppointment = {
+      patient_name: selectedAppointment.value.patient_name,
+      appointment_date: followUpData.value.date,
+      appointment_time: followUpData.value.time,
+      appointment_type: 'follow_up',
+      notes: followUpData.value.notes,
+      original_appointment_id: selectedAppointment.value.id
+    }
+    
+    await api.post('/operations/create-appointment/', followUpAppointment)
+    
+    showFollowUpDialog.value = false
+    await fetchAppointments()
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Follow-up appointment scheduled successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Failed to schedule follow-up:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to schedule follow-up appointment',
+      position: 'top'
+    })
+  }
+}
+
+async function cancelAppointment(appointment: Appointment) {
+  try {
+    await api.patch(`/operations/appointments/${appointment.id}/`, {
+      status: 'cancelled'
+    })
+    
+    // Update local appointment
+    const index = appointments.value.findIndex(a => a.id === appointment.id)
+    if (index !== -1 && appointments.value[index]) {
+      appointments.value[index].status = 'cancelled'
+    }
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Appointment cancelled successfully',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('Failed to cancel appointment:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to cancel appointment',
+      position: 'top'
+    })
+  }
+}
+
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+// Lifecycle
+onMounted(async () => {
+  console.log('DoctorAppointment component mounted successfully!')
+  
+  // Load user profile data from API
+  void fetchUserProfile()
+  
+  // Initialize real-time features
+  updateTime() // Set initial time
+  timeInterval = setInterval(updateTime, 1000) // Update every second
+  
+  // Fetch weather data
+  void fetchWeather()
+  
+  // Refresh weather every 30 minutes
+  setInterval(() => void fetchWeather(), 30 * 60 * 1000)
+  
+  try {
+    await fetchAppointments()
+    await fetchBlockedDates()
+    goToToday()
+  } catch (error) {
+    console.error('Error during component initialization:', error)
+  }
+})
+
+// Cleanup on component unmount
+onUnmounted(() => {
+  if (timeInterval) {
+    clearInterval(timeInterval)
+  }
+})
+</script>
+
+<style scoped>
+/* Header and Navigation Styles */
+.search-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+}
+
+.search-input {
+  max-width: 600px;
+  width: 100%;
+}
+
+/* Real-time info styles */
+.real-time-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: 20px;
+}
+
+.time-display,
+.weather-display,
+.weather-loading,
+.weather-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.time-display .q-icon,
+.weather-display .q-icon {
+  color: #286660;
+}
+
+.time-text,
+.weather-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #286660;
+  white-space: nowrap;
+}
+
+.weather-location {
+  font-size: 12px;
+  color: #666;
+  margin-left: 4px;
+}
+
+.weather-loading .q-spinner {
+  color: #286660;
+}
+
+.weather-error .q-icon {
+  color: #ff6b6b;
+}
+
+/* Page Header Styles */
+.page-header {
+  padding: 30px 20px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto 20px;
+}
+
+.page-header-left {
+  flex: 1;
+}
+
+.page-header-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.page-title {
+  color: #333;
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Drawer Styles */
+.drawer-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-profile-section {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.profile-picture-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+
+.profile-avatar {
+  border: 3px solid #1e7668;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e7668;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #1e7668 !important;
+}
+
+.user-info {
+  margin-top: 10px;
+}
+
+.user-name {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.user-specialization {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.navigation-menu {
+  flex: 1;
+  padding: 10px 0;
+}
+
+.nav-item {
+  margin: 5px 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.nav-item:hover {
+  background: rgba(30, 118, 104, 0.1);
+}
+
+.nav-item.active {
+  background: rgba(30, 118, 104, 0.2);
+  color: #1e7668;
+}
+
+.nav-item .q-icon {
+  color: #1e7668;
+}
+
+.logout-section {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.logout-btn {
+  width: 100%;
+}
+
+.q-header {
+  background: #286660 !important;
+}
+
+.q-toolbar {
+  background: #286660 !important;
+}
+
+.q-avatar {
+  background: white;
+  border-radius: 8px;
+}
+
+.q-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+
+/* Calendar Navigation Bar Styles */
+.calendar-navigation-bar {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-btn {
+  color: #666;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+}
+
+.nav-btn:hover {
+  background: #f5f5f5;
+}
+
+.month-year {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  min-width: 120px;
+  text-align: center;
+}
+
+.today-btn {
+  color: #666;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+}
+
+.today-btn:hover {
+  background: #f5f5f5;
+}
+
+.view-export-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.view-selector {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.view-selector .q-btn {
+  border-radius: 0;
+  color: #666;
+  font-weight: 500;
+  padding: 8px 16px;
+}
+
+.view-selector .q-btn.active-view {
+  background: white;
+  color: #333;
+  font-weight: 600;
+}
+
+.export-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.export-btn {
+  color: #666;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+}
+
+.export-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* Upcoming Appointments Styles */
+.upcoming-appointments-section {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.appointments-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.status-filter {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.status-filter .q-btn {
+  border-radius: 0;
+  color: #666;
+  font-weight: 500;
+  padding: 8px 16px;
+}
+
+.status-filter .q-btn.active-filter {
+  background: #286660;
+  color: white;
+  font-weight: 600;
+}
+
+.appointment-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.patient-info {
+  flex: 1;
+}
+
+.patient-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.appointment-details {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty-state h4 {
+  margin: 16px 0 8px 0;
+  color: #333;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+/* Medical Assessment Dialog Styles */
+.assessment-content {
+  max-width: 800px;
+}
+
+.assessment-section {
+  margin-bottom: 24px;
+}
+
+.assessment-section h5 {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  border-bottom: 2px solid #286660;
+  padding-bottom: 8px;
+}
+
+.vital-signs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.vital-sign {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.vital-sign .label {
+  font-weight: 500;
+  color: #666;
+}
+
+.vital-sign .value {
+  font-weight: 600;
+  color: #333;
+}
+
+.no-assessment {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.no-assessment h4 {
+  margin: 16px 0 8px 0;
+  color: #333;
+}
+
+.no-assessment p {
+  margin: 0;
+}
+
+/* Calendar Styles */
+.calendar-header {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-grid {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-cell {
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-cell:hover {
+  background-color: #f5f5f5;
+}
+
+.calendar-cell.header-cell {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  text-align: center;
+  min-height: 40px;
+  cursor: default;
+}
+
+.calendar-cell.header-cell:hover {
+  background-color: #f8f9fa;
+}
+
+.calendar-cell.other-month {
+  background-color: #f8f9fa;
+  color: #999;
+}
+
+.calendar-cell.today {
+  background-color: #e3f2fd;
+  border: 2px solid #2196f3;
+}
+
+.calendar-cell.selected {
+  background-color: #2196f3;
+  color: white;
+}
+
+.calendar-cell.has-appointments {
+  background-color: #fff3e0;
+}
+
+.calendar-cell.blocked {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.day-number {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.appointment-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.blocked-indicator {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+}
+
+.selected-date-info {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appointments-list {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-item {
+  border-radius: 4px;
+}
+</style>

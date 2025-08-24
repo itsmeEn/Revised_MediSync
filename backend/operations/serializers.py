@@ -1,98 +1,48 @@
 from rest_framework import serializers
-from .models import (
-    AppointmentManagement,
-    MedicineInventory,
-    Messaging,
-    Notification,
-    PriorityQueue,
-    QueueManagement,
-)
-from datetime import timedelta
+from .models import AppointmentManagement, QueueManagement, PriorityQueue, Notification, Messaging
+from backend.users.models import User
 
+class DashboardStatsSerializer(serializers.Serializer):
+    """Serializer for dashboard statistics"""
+    total_appointments = serializers.IntegerField()
+    total_patients = serializers.IntegerField()
+    normal_queue = serializers.IntegerField()
+    priority_queue = serializers.IntegerField()
+    notifications = serializers.IntegerField()
+    pending_assessment = serializers.IntegerField()
 
-class NotificationSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = Notification
-        fields = "__all__"
-
-
-class QueueManagementSerializer(serializers.ModelSerializer):
-    patient = serializers.StringRelatedField(read_only=True)
-    estimated_wait_time = serializers.DurationField(read_only=True)
-    actual_wait_time = serializers.DurationField(read_only=True)
-    position_in_queue = serializers.IntegerField(read_only=True)
-        
-    class Meta:
-        model = QueueManagement
-        fields = "__all__"
-
-    """
-        Get the estimated waiting time of arrivals based on total_patient, expected_patients, the time it started and ended
-        if in the hospital the average waiting is 1-3 hours we should get it's estimated time tama?
-    """
-    def get_estimated_wait_time(self, obj):
-       return obj.get_estimated_wait_time()
-   
-    """
-    get the number of patients ahead
-    """
-    def get_patients_ahead(self, obj):
-        return QueueManagement.objects.filter(
-        department=self.department, status__in=["waiting", "in_progress"],
-        position_in_queue__lt=self.position_in_queue
-        ).count()
-
-   
-
-class MedicineInventorySerializer(serializers.ModelSerializer):
-    inventory = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = MedicineInventory
-        fields = "__all__"
-        read_only_fields = ("is_expired", "is_available", "total_value")
-
-
-class AppointmentManagementSerializer(serializers.ModelSerializer):
-    patient = serializers.StringRelatedField(read_only=True)
-    doctor = serializers.StringRelatedField(read_only=True)
-
+class AppointmentSerializer(serializers.ModelSerializer):
+    patient_name = serializers.CharField(source='patient.user.full_name', read_only=True)
+    doctor_name = serializers.CharField(source='doctor.user.full_name', read_only=True)
+    
     class Meta:
         model = AppointmentManagement
-        fields = "__all__"
+        fields = ['appointment_id', 'patient_name', 'doctor_name', 'appointment_date', 'status', 'appointment_type']
 
+class QueueSerializer(serializers.ModelSerializer):
+    patient_name = serializers.CharField(source='patient.user.full_name', read_only=True)
+    
+    class Meta:
+        model = QueueManagement
+        fields = ['queue_number', 'patient_name', 'department', 'status', 'position_in_queue', 'enqueue_time']
 
 class PriorityQueueSerializer(serializers.ModelSerializer):
-    patient = serializers.StringRelatedField(read_only=True)
-    estimated_wait_time = serializers.DurationField(read_only=True)
-    priority_patients_ahead = serializers.SerializerMethodField()
+    patient_name = serializers.CharField(source='patient.user.full_name', read_only=True)
     
-
     class Meta:
         model = PriorityQueue
-        fields = "__all__"
-    
-        """
-        get estimated waiting time base on their priority level
-        """
-    def get_estimated_wait_time(self, obj):
-        return obj.get_estimated_wait_time()
-    
-    """
-    get the number of patients ahead
-    """
-    def get_priority_patients_ahead(self, obj):
-        return PriorityQueue.objects.filter(
-        department=self.department, priority_level=self.priority_level,
-        priority_position__lt=self.priority_position
-        ).count()
+        fields = ['queue_number', 'patient_name', 'priority_level', 'department', 'priority_position']
 
-class MessagingSerializer(serializers.ModelSerializer):
-    sender = serializers.StringRelatedField(read_only=True)
-    receiver = serializers.StringRelatedField(read_only=True)
-
+class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Messaging
-        fields = "__all__"
+        model = Notification
+        fields = ['id', 'message', 'is_read', 'created_at']
+
+# NurseChartSerializer commented out until NurseChart model is fully implemented
+# class NurseChartSerializer(serializers.ModelSerializer):
+#     patient_name = serializers.CharField(source='patient.user.full_name', read_only=True)
+#     nurse_name = serializers.CharField(source='nurse.user.full_name', read_only=True)
+#     
+#     class Meta:
+#         model = NurseChart
+#         fields = ['id', 'patient_name', 'nurse_name', 'chief_complaint', 'status', 'priority', 'created_at']

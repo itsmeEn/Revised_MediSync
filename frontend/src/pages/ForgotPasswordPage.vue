@@ -48,8 +48,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
 
+const $q = useQuasar()
 const email = ref('')
 const loading = ref(false)
 const resetEmailSent = ref(false)
@@ -67,11 +69,21 @@ const onRequestReset = async () => {
     // In development, show the reset URL in console
     if (response.data.reset_url) {
       console.log('Password reset URL:', response.data.reset_url)
-      alert(`Password reset link sent! Check the browser console for the reset URL (development mode).`)
+      $q.notify({
+        type: 'positive',
+        message: 'Password reset link sent! Check the browser console for the reset URL (development mode).',
+        position: 'top',
+        timeout: 4000
+      })
     }
   } catch (error: unknown) {
     console.error('Password reset error:', error)
-    alert('Failed to send reset link. Please check your email address and try again.')
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to send reset link. Please check your email address and try again.',
+      position: 'top',
+      timeout: 4000
+    })
   } finally {
     loading.value = false
   }
