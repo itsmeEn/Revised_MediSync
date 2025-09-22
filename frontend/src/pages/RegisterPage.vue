@@ -336,11 +336,30 @@ const onRegister = async () => {
 <style scoped>
 .register-page {
   min-height: 100vh;
-  background: #286660;
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  position: relative;
+}
+
+.register-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(248, 249, 250, 0.15) 50%, rgba(240, 242, 245, 0.08) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.register-page > * {
+  position: relative;
+  z-index: 1;
 }
 
 .register-container {

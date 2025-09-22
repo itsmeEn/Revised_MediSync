@@ -88,6 +88,7 @@ interface User {
   full_name: string
   role: string
   is_verified: boolean
+  verification_status: string
 }
 
 const verificationDocument = ref<File | null>(null)
@@ -105,6 +106,12 @@ onMounted(() => {
   const user = localStorage.getItem('user')
   if (!user) {
     void router.push('/login')
+  } else {
+    const userData = JSON.parse(user)
+    // If user is already verified or pending, redirect to dashboard
+    if (userData.verification_status === 'approved' || userData.verification_status === 'pending') {
+      redirectToDashboard(userData.role)
+    }
   }
 })
 
@@ -162,10 +169,10 @@ const verifyNow = async () => {
     })
 
           $q.notify({
-        type: 'positive',
-        message: 'Account verified successfully!',
+        type: 'info',
+        message: 'Verification request submitted successfully. Kindly wait for the admin to verify the uploaded file.',
         position: 'top',
-        timeout: 3000
+        timeout: 4000
       })
 
     const user = getCurrentUser()
@@ -205,9 +212,9 @@ const verifyLater = async () => {
 
     $q.notify({
       type: 'info',
-      message: 'You can verify your account later from your dashboard.',
+      message: 'Document uploaded. Kindly wait for the admin to verify the uploaded file.',
       position: 'top',
-      timeout: 3000
+      timeout: 4000
     })
 
     const user = getCurrentUser()
@@ -233,23 +240,55 @@ const verifyLater = async () => {
 <style scoped>
 .verification-page {
   min-height: 100vh;
-  background: #286660;
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  position: relative;
+}
+
+.verification-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(248, 249, 250, 0.15) 50%, rgba(240, 242, 245, 0.08) 100%);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .verification-container {
   width: 100%;
   max-width: 600px;
+  position: relative;
+  z-index: 1;
 }
 
 .verification-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
   border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   padding: 40px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.verification-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #286660, #6ca299, #b8d2ce);
+  border-radius: 16px 16px 0 0;
 }
 
 .text-center {

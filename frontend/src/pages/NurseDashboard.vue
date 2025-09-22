@@ -1,37 +1,39 @@
 <template>
   <q-layout view="hHh Lpr fFf">
 
-    <q-header reveal elevated class="text-white" height-hint="98">
-      <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+    <q-header elevated class="prototype-header">
+      <q-toolbar class="header-toolbar">
+        <!-- Menu button to open sidebar -->
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-toggle-btn" />
         
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="../assets/logo.png" alt="MediSync Logo" />
-          </q-avatar>
-          MediSync
-        </q-toolbar-title>
-      </q-toolbar>
-
-      <q-toolbar class="text-white">
+        <!-- Left side - Search bar -->
+        <div class="header-left">
         <div class="search-container">
           <q-input 
-            dark 
+              outlined
             dense 
-            standout 
             v-model="text" 
-            placeholder="Search patients, medications, tasks..."
+              placeholder="Search Patient, symptoms and Appointments"
             class="search-input"
-          >
-            <template v-slot:append>
-              <q-icon v-if="text === ''" name="search" />
-              <q-icon v-else name="clear" class="cursor-pointer" @click="text = ''" />
+              bg-color="white"
+            >
+              <template v-slot:prepend>
+                <q-icon name="search" color="grey-6" />
+              </template>
+              <template v-slot:append v-if="text">
+                <q-icon name="clear" class="cursor-pointer" @click="text = ''" />
             </template>
           </q-input>
+          </div>
         </div>
         
-        <!-- Real-time Time and Weather -->
-        <div class="real-time-info">
+        <!-- Right side - Notifications, Time, Weather -->
+        <div class="header-right">
+          <!-- Notifications -->
+          <q-btn flat round icon="notifications" class="notification-btn">
+            <q-badge color="red" floating>1</q-badge>
+          </q-btn>
+          
           <!-- Time Display -->
           <div class="time-display">
             <q-icon name="schedule" size="md" />
@@ -54,18 +56,29 @@
           <!-- Weather Error -->
           <div class="weather-error" v-else-if="weatherError">
             <q-icon name="error" size="sm" />
-            <span class="weather-text">Weather unavailable</span>
+            <span class="weather-text">Weather Update and Place</span>
           </div>
         </div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered>
-      <div class="drawer-content">
-        <!-- User Profile Section -->
-        <div class="user-profile-section">
+    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered class="prototype-sidebar" :width="280">
+      <div class="sidebar-content">
+        <!-- Logo Section -->
+        <div class="logo-section">
+          <div class="logo-container">
+            <q-avatar size="40px" class="logo-avatar">
+              <img src="../assets/logo.png" alt="MediSync Logo" />
+            </q-avatar>
+            <span class="logo-text">MediSync</span>
+          </div>
+          <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn" />
+        </div>
+
+        <!-- User Profile Section - Centered -->
+        <div class="sidebar-user-profile-centered">
           <div class="profile-picture-container">
-            <q-avatar size="100px" class="profile-avatar">
+            <q-avatar size="80px" class="profile-avatar">
               <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
               <div v-else class="profile-placeholder">
                 {{ userInitials }}
@@ -89,17 +102,20 @@
           </div>
           
           <div class="user-info">
-            <h6 class="user-name">{{ userProfile.full_name }}</h6>
-            <p class="user-specialization">{{ userProfile.department }}</p>
-            <q-chip color="primary" text-color="white" size="sm">
-              {{ userProfile.role }}
-            </q-chip>
+            <h6 class="user-name">{{ userProfile?.first_name }} {{ userProfile?.last_name }}</h6>
+            <p class="user-role">Nurse</p>
+            <q-chip 
+              :color="userProfile?.verification_status === 'verified' ? 'green' : 'orange'"
+              text-color="white"
+              size="sm"
+              :label="userProfile?.verification_status === 'verified' ? 'Verified' : 'Pending'"
+            />
           </div>
         </div>
 
         <!-- Navigation Menu -->
         <q-list class="navigation-menu">
-          <q-item clickable v-ripple @click="navigateTo('nurse-dashboard')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-dashboard')" class="nav-item active">
             <q-item-section avatar>
               <q-icon name="dashboard" />
             </q-item-section>
@@ -120,6 +136,13 @@
             <q-item-section>Medicine Inventory</q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple @click="navigateTo('patients')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="people" />
+            </q-item-section>
+            <q-item-section>Patient Management</q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="analytics" />
@@ -135,8 +158,8 @@
           </q-item>
         </q-list>
 
-        <!-- Logout Section -->
-        <div class="logout-section">
+        <!-- Logout Section - Footer -->
+        <div class="sidebar-footer">
           <q-btn
             color="negative"
             icon="logout"
@@ -148,95 +171,132 @@
       </div>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container class="page-container-with-fixed-header">
       <!-- Greeting Section -->
       <div class="greeting-section">
-        <div class="greeting-content">
-          <h2 class="greeting-text">
-            {{ greetingMessage }} {{ userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1) }}
-          </h2>
-          <p class="greeting-subtitle">Manage patient care and medical inventory</p>
-        </div>
+        <q-card class="greeting-card">
+          <q-card-section class="greeting-content">
+            <h2 class="greeting-text">
+              Good {{ getTimeOfDay() }}, Nurse {{ userProfile.full_name }}
+            </h2>
+            <p class="greeting-subtitle">Manage patient care and medical inventory - {{ currentDate }}</p>
+          </q-card-section>
+        </q-card>
       </div>
       
-      <!-- Carousel Section -->
-      <div class="carousel-section">
-        <q-carousel
-          animated
-          v-model="slide"
-          navigation
-          infinite
-          :autoplay="autoplay"
-          arrows
-          transition-prev="slide-right"
-          transition-next="slide-left"
-          @mouseenter="autoplay = false"
-          @mouseleave="autoplay = true"
-          class="dashboard-carousel"
-        >
-          <q-carousel-slide :name="1" img-src="https://cdn.quasar.dev/img/mountains.jpg" />
-          <q-carousel-slide :name="2" img-src="https://cdn.quasar.dev/img/parallax1.jpg" />
-          <q-carousel-slide :name="3" img-src="https://cdn.quasar.dev/img/parallax2.jpg" />
-          <q-carousel-slide :name="4" img-src="https://cdn.quasar.dev/img/quasar.jpg" />
-        </q-carousel>
-      </div>
-      
-      <!-- Dashboard Statistics Cards -->
-      <div class="stats-section">
-        <div class="stats-grid">
-          <!-- Patients Under Care Card -->
-          <q-card class="stat-card patients-card">
-            <q-card-section class="text-center">
-              <div class="stat-icon">
-                <q-icon name="people" size="2rem" />
+      <!-- Dashboard Content -->
+      <div class="dashboard-content">
+        <div class="dashboard-cards">
+          <!-- Today's Tasks Card -->
+          <q-card class="dashboard-card tasks-card">
+            <q-card-section class="card-content">
+              <div class="card-text">
+                <div class="card-title">Today's Tasks</div>
+                <div class="card-description">Fetch the total tasks assigned for today</div>
               </div>
-              <div class="stat-number">{{ dashboardStats.patientsUnderCare }}</div>
-              <div class="stat-label">Patients Under Care</div>
-              <div class="text-caption text-grey-6">Currently assigned patients</div>
+              <div class="card-icon task-icon">
+                <q-icon name="assignment" size="2.5rem" />
+              </div>
             </q-card-section>
           </q-card>
 
-          <!-- Pending Tasks Card -->
-          <q-card class="stat-card tasks-card">
-            <q-card-section class="text-center">
-              <div class="stat-icon">
-                <q-icon name="assignment" size="2rem" />
+          <!-- Patients Under Care Card -->
+          <q-card class="dashboard-card patients-card">
+            <q-card-section class="card-content">
+              <div class="card-text">
+                <div class="card-title">Patients Under Care</div>
+                <div class="card-description">Fetch the total patients assigned to nurse</div>
               </div>
-              <div class="stat-number">{{ dashboardStats.pendingTasks }}</div>
-              <div class="stat-label">Pending Tasks</div>
-              <div class="tasks-breakdown">
-                <div class="task-item">
-                  <span class="task-type urgent">Urgent: {{ dashboardStats.urgentTasks }}</span>
-                </div>
-                <div class="task-item">
-                  <span class="task-type routine">Routine: {{ dashboardStats.routineTasks }}</span>
-                </div>
+              <div class="card-icon patients-icon">
+                <q-icon name="people" size="2.5rem" />
               </div>
             </q-card-section>
           </q-card>
 
           <!-- Vitals Checked Card -->
-          <q-card class="stat-card vitals-card">
-            <q-card-section class="text-center">
-              <div class="stat-icon">
-                <q-icon name="favorite" size="2rem" />
+          <q-card class="dashboard-card vitals-card">
+            <q-card-section class="card-content">
+              <div class="card-text">
+                <div class="card-title">Vitals Checked</div>
+                <div class="card-description">Fetch all vitals checked today</div>
               </div>
-              <div class="stat-number">{{ dashboardStats.vitalsChecked }}</div>
-              <div class="stat-label">Vitals Checked Today</div>
+              <div class="card-icon vitals-icon">
+                <q-icon name="favorite" size="2.5rem" />
+              </div>
             </q-card-section>
           </q-card>
 
           <!-- Medications Administered Card -->
-          <q-card class="stat-card medications-card">
-            <q-card-section class="text-center">
-              <div class="stat-icon">
-                <q-icon name="medication" size="2rem" />
+          <q-card class="dashboard-card medications-card">
+            <q-card-section class="card-content">
+              <div class="card-text">
+                <div class="card-title">Medications Given</div>
+                <div class="card-description">Fetch all medications administered today</div>
               </div>
-              <div class="stat-number">{{ dashboardStats.medicationsAdministered }}</div>
-              <div class="stat-label">Medications Given</div>
+              <div class="card-icon medications-icon">
+                <q-icon name="medication" size="2.5rem" />
+              </div>
             </q-card-section>
           </q-card>
         </div>
+      </div>
+
+      <!-- Patient Care Management System -->
+      <div class="queueing-section">
+        <q-card class="queueing-card">
+          <q-card-section class="queueing-header">
+            <h3 class="queueing-title">QUEUEING MANAGEMENT SYSTEM</h3>
+            <div class="queueing-actions">
+              <q-btn
+                color="primary"
+                label="Call Next Patient"
+                icon="volume_up"
+                size="md"
+                @click="callNextPatient"
+                class="action-btn"
+              />
+              <q-btn
+                color="secondary"
+                label="Manage Queue"
+                icon="settings"
+                size="md"
+                @click="manageQueue"
+                class="action-btn"
+              />
+            </div>
+          </q-card-section>
+
+          <q-card-section class="queue-panels-section">
+            <!-- Patient Care Panels -->
+            <div class="queue-panels-container">
+              <!-- Normal Queues Panel -->
+              <div class="queue-panel normal-queue-panel">
+                <h4 class="queue-panel-title">Normal Queues</h4>
+                <div class="queue-content">
+                  <div v-if="normalQueue.length === 0" class="empty-queue">
+                    <p>No patients in normal queue</p>
+                  </div>
+                  <div v-else class="queue-list">
+                    <!-- Patient list items will go here -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Priority Queues Panel -->
+              <div class="queue-panel priority-queue-panel">
+                <h4 class="queue-panel-title">Priority Queues</h4>
+                <div class="queue-content">
+                  <div v-if="priorityQueue.length === 0" class="empty-queue">
+                    <p>No patients in priority queue</p>
+                  </div>
+                  <div v-else class="queue-list">
+                    <!-- Patient list items will go here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
       </div>
       
       <router-view />
@@ -269,9 +329,7 @@ const rightDrawerOpen = ref(false)
 const text = ref('')
 const fileInput = ref<HTMLInputElement>()
 
-// Carousel variables
-const slide = ref(1)
-const autoplay = ref(true)
+// Dashboard variables
 
 // Dashboard statistics
 const dashboardStats = ref({
@@ -282,6 +340,10 @@ const dashboardStats = ref({
   vitalsChecked: 0,
   medicationsAdministered: 0
 })
+
+// Queue management
+const normalQueue = ref([])
+const priorityQueue = ref([])
 
 // Real-time time and weather
 const currentTime = ref('')
@@ -297,15 +359,23 @@ let timeInterval: NodeJS.Timeout | null = null
 
 // Mock user profile data - replace with actual API call
 const userProfile = ref<{
+  first_name?: string
+  last_name?: string
   full_name: string
   department?: string
   role: string
   profile_picture: string | null
+  verification_status: string
+  email?: string
 }>({
+  first_name: '',
+  last_name: '',
   full_name: 'Nurse',
   department: 'General Ward',
   role: 'nurse',
-  profile_picture: null
+  profile_picture: null,
+  verification_status: 'not_submitted',
+  email: ''
 })
 
 const userInitials = computed(() => {
@@ -317,12 +387,21 @@ const userInitials = computed(() => {
     .toUpperCase()
 })
 
-// Dynamic greeting based on time of day
-const greetingMessage = computed(() => {
+const getTimeOfDay = () => {
   const hour = new Date().getHours()
-  if (hour < 12) return 'Good Morning!'
-  if (hour < 17) return 'Good Afternoon!'
-  return 'Good Evening!'
+  if (hour < 12) return 'morning'
+  if (hour < 18) return 'afternoon'
+  return 'evening'
+}
+
+const currentDate = computed(() => {
+  const now = new Date()
+  return now.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
 })
 
 // Format profile picture URL
@@ -479,13 +558,12 @@ const handleProfilePictureUpload = async (event: Event) => {
       const formData = new FormData()
       formData.append('profile_picture', file)
       
-      const response = await api.post('/users/profile/update/picture/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
+      const response = await api.post('/users/profile/update/picture/', formData)
       
       userProfile.value.profile_picture = response.data.user.profile_picture
+      
+      // Store profile picture in localStorage for cross-page sync
+      localStorage.setItem('profile_picture', response.data.user.profile_picture)
       
       // Show success toast
       $q.notify({
@@ -536,6 +614,9 @@ const navigateTo = (route: string) => {
     case 'medicine-inventory':
       void router.push('/nurse-medicine-inventory')
       break
+    case 'patients':
+      void router.push('/nurse-patient-management')
+      break
     case 'analytics':
       void router.push('/nurse-analytics')
       break
@@ -559,10 +640,19 @@ const fetchUserProfile = async () => {
     const userData = response.data.user // The API returns nested user data
     
     userProfile.value = {
+      first_name: userData.first_name,
+      last_name: userData.last_name,
       full_name: userData.full_name,
       department: userData.nurse_profile?.department,
       role: userData.role,
-      profile_picture: userData.profile_picture || null
+      profile_picture: userData.profile_picture || localStorage.getItem('profile_picture'),
+      verification_status: userData.verification_status,
+      email: userData.email
+    }
+    
+    // Store profile picture in localStorage if available
+    if (userData.profile_picture) {
+      localStorage.setItem('profile_picture', userData.profile_picture)
     }
     
     console.log('User profile loaded:', userProfile.value)
@@ -577,7 +667,8 @@ const fetchUserProfile = async () => {
         full_name: user.full_name,
         department: user.nurse_profile?.department,
         role: user.role,
-        profile_picture: user.profile_picture || null
+        profile_picture: user.profile_picture || null,
+        verification_status: user.verification_status || 'not_submitted'
       }
     }
   }
@@ -610,6 +701,23 @@ const fetchDashboardStats = () => {
   }
 }
 
+// Queue management methods
+const callNextPatient = () => {
+  $q.notify({
+    type: 'info',
+    message: 'Calling next patient...',
+    position: 'top'
+  })
+}
+
+const manageQueue = () => {
+  $q.notify({
+    type: 'info',
+    message: 'Opening queue management...',
+    position: 'top'
+  })
+}
+
 onMounted(() => {
   // Load user profile data from API
   void fetchUserProfile()
@@ -637,6 +745,30 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.page-background {
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
+  position: relative;
+}
+
+.page-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(248, 249, 250, 0.15) 50%, rgba(240, 242, 245, 0.08) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.page-background > * {
+  position: relative;
+  z-index: 1;
+}
+
 .search-container {
   display: flex;
   justify-content: center;
@@ -919,12 +1051,444 @@ onUnmounted(() => {
   color: #1e7668;
 }
 
-.logout-section {
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 20px;
   border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
 }
 
 .logout-btn {
   width: 100%;
+}
+
+/* Prototype Header Styles */
+.prototype-header {
+  background: #286660;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-toolbar {
+  padding: 0 24px;
+  min-height: 64px;
+}
+
+.menu-toggle-btn {
+  color: white;
+  margin-right: 16px;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 500px;
+}
+
+.search-input {
+  background: white;
+  border-radius: 8px;
+}
+
+.notification-btn {
+  color: white;
+}
+
+.time-display, .weather-display, .weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+/* Prototype Sidebar Styles */
+.prototype-sidebar {
+  background: white;
+  border-right: 1px solid #e0e0e0;
+}
+
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px; /* Space for footer */
+}
+
+.logo-section {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #286660;
+}
+
+.menu-btn {
+  color: #666;
+}
+
+.sidebar-user-profile {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.sidebar-user-profile-centered {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-picture-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(25%, 25%);
+}
+
+.verified-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: translate(-25%, 25%);
+  background: white;
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.user-role {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+}
+
+.navigation-menu {
+  flex: 1;
+  padding: 16px 0;
+}
+
+.nav-item {
+  margin: 4px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active {
+  background: #286660;
+  color: white;
+}
+
+.nav-item.active .q-icon {
+  color: white;
+}
+
+.nav-item:hover:not(.active) {
+  background: #f5f5f5;
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.logout-btn {
+  width: 100%;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Page Container with Background */
+.page-container-with-fixed-header {
+  background: #f8f9fa;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Greeting Section */
+.greeting-section {
+  padding: 24px;
+  background: transparent;
+}
+
+.greeting-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.greeting-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #286660, #6ca299, #b8d2ce);
+  border-radius: 16px 16px 0 0;
+}
+
+.greeting-content {
+  padding: 24px;
+}
+
+.greeting-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.greeting-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 1200px) {
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #286660, #6ca299, #b8d2ce);
+  border-radius: 16px 16px 0 0;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+}
+
+.card-text {
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: #34495e;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+.card-icon {
+  margin-left: 16px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover .card-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Colorful and relevant icons - matching Doctor Dashboard colors */
+.task-icon {
+  color: #2196f3; /* Blue for tasks/appointments */
+}
+
+.patients-icon {
+  color: #4caf50; /* Green for patients */
+}
+
+.vitals-icon {
+  color: #ff9800; /* Orange for completed/vitals */
+}
+
+.medications-icon {
+  color: #9c27b0; /* Purple for medications/assessment */
+}
+
+/* Queueing Section */
+.queueing-section {
+  padding: 0 24px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.queueing-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.queueing-header {
+  text-align: center;
+  padding: 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.queueing-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+.queueing-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  min-width: 180px;
+}
+
+.queue-panels-section {
+  padding: 24px;
+}
+
+.queue-panels-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.queue-panel {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  min-height: 200px;
+}
+
+.queue-panel-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.queue-content {
+  text-align: center;
+}
+
+.empty-queue {
+  color: #666;
+  font-style: italic;
+  padding: 40px 20px;
+}
+
+.queue-list {
+  /* Patient list styling will be added when patient data is implemented */
+  padding: 0;
 }
 </style>

@@ -38,13 +38,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
+
+    # Third-party apps
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
+    "corsheaders",
 
     # Local apps
     "backend.users.apps.UsersConfig",
-    "rest_framework",
-    "rest_framework.authtoken",
-    "corsheaders",
     "backend.operations.apps.OperationsConfig",
+    "backend.analytics.apps.AnalyticsConfig",
     "admin_site.apps.AdminSiteConfig",
 ]
 
@@ -84,8 +89,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+       "ENGINE": "django.db.backends.postgresql",
+        "NAME": "medisync",
+        "HOST": "localhost",
+        "PORT": "5432",
+        "USER": "postgres",
+        "PASSWORD": "admin1234", 
     }
 }
 
@@ -161,6 +170,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    # Enable JSON, form, and multipart parsers so endpoints like /users/register/
+    # can correctly accept FormData with optional file uploads.
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ],
 }
 
 # CORS Configuration
@@ -210,4 +226,21 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "nitzydiones@gmail.com"
 EMAIL_HOST_PASSWORD = "vyqo dpsl twkg inzp"
-DEFAULT_FROM_EMAIL = "nitzydiones@gmail.com"  
+DEFAULT_FROM_EMAIL = "nitzydiones@gmail.com"
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://localhost:6379/1',
+    }
+}  

@@ -1,37 +1,39 @@
 <template>
   <q-layout view="hHh Lpr fFf">
 
-    <q-header reveal elevated class="text-white" height-hint="98">
-      <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+    <q-header elevated class="prototype-header">
+      <q-toolbar class="header-toolbar">
+        <!-- Menu button to open sidebar -->
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-toggle-btn" />
         
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="../assets/logo.png" alt="MediSync Logo" />
-          </q-avatar>
-          MediSync
-        </q-toolbar-title>
-      </q-toolbar>
-
-      <q-toolbar class="text-white">
+        <!-- Left side - Search bar -->
+        <div class="header-left">
         <div class="search-container">
           <q-input 
-            dark 
+              outlined
             dense 
-            standout 
             v-model="text" 
-            placeholder="Search appointments, patients..."
+              placeholder="Search Patient, symptoms and Appointments"
             class="search-input"
-          >
-            <template v-slot:append>
-              <q-icon v-if="text === ''" name="search" />
-              <q-icon v-else name="clear" class="cursor-pointer" @click="text = ''" />
+              bg-color="white"
+            >
+              <template v-slot:prepend>
+                <q-icon name="search" color="grey-6" />
+              </template>
+              <template v-slot:append v-if="text">
+                <q-icon name="clear" class="cursor-pointer" @click="text = ''" />
             </template>
           </q-input>
+          </div>
         </div>
         
-        <!-- Real-time Time and Weather -->
-        <div class="real-time-info">
+        <!-- Right side - Notifications, Time, Weather -->
+        <div class="header-right">
+          <!-- Notifications -->
+          <q-btn flat round icon="notifications" class="notification-btn">
+            <q-badge color="red" floating>1</q-badge>
+          </q-btn>
+          
           <!-- Time Display -->
           <div class="time-display">
             <q-icon name="schedule" size="md" />
@@ -54,18 +56,29 @@
           <!-- Weather Error -->
           <div class="weather-error" v-else-if="weatherError">
             <q-icon name="error" size="sm" />
-            <span class="weather-text">Weather unavailable</span>
+            <span class="weather-text">Weather Update and Place</span>
           </div>
         </div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered>
-      <div class="drawer-content">
+    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered class="prototype-sidebar" :width="280">
+      <div class="sidebar-content">
+        <!-- Logo Section -->
+        <div class="logo-section">
+          <div class="logo-container">
+            <q-avatar size="40px" class="logo-avatar">
+              <img src="../assets/logo.png" alt="MediSync Logo" />
+            </q-avatar>
+            <span class="logo-text">MediSync</span>
+          </div>
+          <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn" />
+        </div>
+
         <!-- User Profile Section -->
-        <div class="user-profile-section">
+        <div class="sidebar-user-profile">
           <div class="profile-picture-container">
-            <q-avatar size="100px" class="profile-avatar">
+            <q-avatar size="80px" class="profile-avatar">
               <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
               <div v-else class="profile-placeholder">
                 {{ userInitials }}
@@ -86,13 +99,22 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
+            <q-icon 
+              :name="userProfile.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              class="verified-badge" 
+            />
           </div>
           
           <div class="user-info">
-            <h6 class="user-name">{{ userProfile.full_name }}</h6>
-            <p class="user-specialization">{{ userProfile.specialization }}</p>
-            <q-chip color="primary" text-color="white" size="sm">
-              {{ userProfile.role }}
+            <h6 class="user-name">{{ userProfile.full_name || 'Loading...' }}</h6>
+            <p class="user-role">{{ userProfile.specialization || 'Loading specialization...' }}</p>
+            <q-chip 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              text-color="white" 
+              size="sm"
+            >
+              {{ userProfile.verification_status === 'approved' ? 'Verified' : 'Not Verified' }}
             </q-chip>
           </div>
         </div>
@@ -155,29 +177,17 @@
       </div>
     </q-drawer>
 
-    <q-page-container>
-      <!-- Page Header -->
-      <div class="page-header">
-        <div class="page-header-left">
-          <h2 class="page-title">Appointment Calendar</h2>
-          <p class="page-subtitle">Manage your appointments and schedule</p>
-        </div>
-        <div class="page-header-right">
-          <q-btn 
-            color="negative" 
-            icon="block" 
-            label="Block Date" 
-            @click="blockDate"
-            :disable="selectedDate?.isBlocked"
-            class="q-mr-sm"
-          />
-          <q-btn 
-            color="primary" 
-            icon="add" 
-            label="New Appointment" 
-            @click="showNewAppointmentDialog = true"
-          />
-        </div>
+    <q-page-container class="page-container-with-fixed-header">
+      <!-- Greeting Section -->
+      <div class="greeting-section">
+        <q-card class="greeting-card">
+          <q-card-section class="greeting-content">
+            <h2 class="greeting-text">
+              Appointment Calendar
+            </h2>
+            <p class="greeting-subtitle">Manage your appointments and schedule</p>
+          </q-card-section>
+        </q-card>
       </div>
 
       <div class="q-pa-md">
@@ -210,6 +220,22 @@
                 />
               </div>
             </div>
+        <div class="col-auto">
+          <q-btn 
+            color="negative" 
+            icon="block" 
+            label="Block Date" 
+            @click="blockDate"
+            :disable="selectedDate?.isBlocked"
+            class="q-mr-sm"
+          />
+          <q-btn 
+            color="primary" 
+            icon="add" 
+            label="New Appointment" 
+            @click="showNewAppointmentDialog = true"
+          />
+        </div>
             
             <!-- View Selector and Export Options -->
             <div class="col-auto">
@@ -618,43 +644,56 @@ const userProfile = ref<{
   specialization?: string
   role: string
   profile_picture: string | null
+  verification_status: string
 }>({
   full_name: 'user',
   specialization: 'specialization',
   role: 'role',
-  profile_picture: null
+  profile_picture: null,
+  verification_status: 'not_submitted'
 })
 
-const fileInput = ref<HTMLInputElement>()
-
-// Computed properties for user profile
-const userInitials = computed(() => {
-  if (!userProfile.value.full_name) return 'U'
-  return userProfile.value.full_name
-    .split(' ')
-    .map(name => name.charAt(0))
-    .join('')
-    .toUpperCase()
-})
-
+// Profile picture handling
 const profilePictureUrl = computed(() => {
   if (!userProfile.value.profile_picture) {
     return null
   }
   
-  // If it's already a full URL, return as is
   if (userProfile.value.profile_picture.startsWith('http')) {
     return userProfile.value.profile_picture
   }
   
-  // If it's a relative path, construct the full URL
-  if (userProfile.value.profile_picture.startsWith('/')) {
-    return `http://localhost:8000${userProfile.value.profile_picture}`
-  }
-  
-  // If it's just a filename, construct the full URL
-  return `http://localhost:8000/media/profile_pictures/${userProfile.value.profile_picture}`
+  return `http://localhost:8000${userProfile.value.profile_picture}`
 })
+
+const userInitials = computed(() => {
+  const name = userProfile.value.full_name || 'User'
+  return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase()
+})
+
+const triggerFileUpload = () => {
+  const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+  if (fileInput) {
+    fileInput.click()
+  }
+}
+
+const handleProfilePictureUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+    // Handle file upload logic here
+    console.log('File selected:', file.name)
+  }
+}
+
+// File input reference removed - not used in new design
+
+// Computed properties for user profile
+
+// Time and date functions removed - not used in appointment page
+
+// Profile picture URL computed property removed - not used in new design
 
 // Types
 interface DayData {
@@ -882,28 +921,13 @@ const navigateTo = (route: string) => {
       void router.push('/doctor-messaging')
       break
     case 'patients':
-      $q.notify({
-        type: 'info',
-        message: 'Patient Management page - Coming soon!',
-        position: 'top',
-        timeout: 3000
-      })
+      void router.push('/doctor-patient-management')
       break
     case 'analytics':
-      $q.notify({
-        type: 'info',
-        message: 'Analytics page - Coming soon!',
-        position: 'top',
-        timeout: 3000
-      })
+      void router.push('/doctor-predictive-analytics')
       break
     case 'settings':
-      $q.notify({
-        type: 'info',
-        message: 'Settings page - Coming soon!',
-        position: 'top',
-        timeout: 3000
-      })
+      void router.push('/doctor-settings')
       break
   }
 }
@@ -915,72 +939,7 @@ const logout = () => {
   void router.push('/login')
 }
 
-// Profile picture functions
-const triggerFileUpload = () => {
-  fileInput.value?.click()
-}
-
-const handleProfilePictureUpload = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  if (target.files && target.files[0]) {
-    const file = target.files[0]
-    
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
-    if (!allowedTypes.includes(file.type)) {
-      $q.notify({
-        type: 'negative',
-        message: 'Please select a valid image file (JPG, PNG)',
-        position: 'top',
-        timeout: 3000
-      })
-      return
-    }
-    
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      $q.notify({
-        type: 'negative',
-        message: 'File size must be less than 5MB',
-        position: 'top',
-        timeout: 3000
-      })
-      return
-    }
-    
-    try {
-      const formData = new FormData()
-      formData.append('profile_picture', file)
-      
-      const response = await api.post('/users/profile/update/picture/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-      
-      userProfile.value.profile_picture = response.data.user.profile_picture
-      
-      // Show success toast
-      $q.notify({
-        type: 'positive',
-        message: 'Profile picture updated successfully!',
-        position: 'top',
-        timeout: 3000
-      })
-      
-      // Clear the file input
-      target.value = ''
-    } catch (error) {
-      console.error('Profile picture upload failed:', error)
-      $q.notify({
-        type: 'negative',
-        message: 'Failed to upload profile picture. Please try again.',
-        position: 'top',
-        timeout: 4000
-      })
-    }
-  }
-}
+// Profile picture functions removed - not used in new design
 
 // Fetch user profile from API
 const fetchUserProfile = async () => {
@@ -992,7 +951,8 @@ const fetchUserProfile = async () => {
       full_name: userData.full_name,
       specialization: userData.doctor_profile?.specialization,
       role: userData.role,
-      profile_picture: userData.profile_picture || null
+      profile_picture: userData.profile_picture || null,
+      verification_status: userData.verification_status || 'not_submitted'
     }
     
     console.log('User profile loaded:', userProfile.value)
@@ -1007,7 +967,8 @@ const fetchUserProfile = async () => {
         full_name: user.full_name,
         specialization: user.doctor_profile?.specialization,
         role: user.role,
-        profile_picture: user.profile_picture || null
+        profile_picture: user.profile_picture || null,
+        verification_status: user.verification_status || 'not_submitted'
       }
     }
   }
@@ -1476,13 +1437,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Header and Navigation Styles */
-.search-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 0 20px;
+.page-background {
+  background: #f8f9fa;
+  background-size: cover;
+  min-height: 100vh;
 }
+
+/* Header and Navigation Styles */
 
 .search-input {
   max-width: 600px;
@@ -1497,45 +1458,6 @@ onUnmounted(() => {
   margin-left: 20px;
 }
 
-.time-display,
-.weather-display,
-.weather-loading,
-.weather-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.time-display .q-icon,
-.weather-display .q-icon {
-  color: #286660;
-}
-
-.time-text,
-.weather-text {
-  font-size: 14px;
-  font-weight: 500;
-  color: #286660;
-  white-space: nowrap;
-}
-
-.weather-location {
-  font-size: 12px;
-  color: #666;
-  margin-left: 4px;
-}
-
-.weather-loading .q-spinner {
-  color: #286660;
-}
-
-.weather-error .q-icon {
-  color: #ff6b6b;
-}
 
 /* Page Header Styles */
 .page-header {
@@ -2030,5 +1952,214 @@ onUnmounted(() => {
 
 .appointment-item {
   border-radius: 4px;
+}
+
+/* Prototype Header Styles */
+.prototype-header {
+  background: #286660;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-toolbar {
+  padding: 0 24px;
+  min-height: 64px;
+}
+
+.menu-toggle-btn {
+  color: white;
+  margin-right: 16px;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 500px;
+}
+
+.search-input {
+  background: white;
+  border-radius: 8px;
+}
+
+.notification-btn {
+  color: white;
+}
+
+.time-display, .weather-display, .weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+/* Prototype Sidebar Styles */
+.prototype-sidebar {
+  background: white;
+  border-right: 1px solid #e0e0e0;
+}
+
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-section {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #286660;
+}
+
+.menu-btn {
+  color: #666;
+}
+
+.sidebar-user-profile {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.profile-picture-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.verified-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  border-radius: 50%;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.user-role {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+}
+
+.navigation-menu {
+  flex: 1;
+  padding: 16px 0;
+}
+
+.nav-item {
+  margin: 4px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active {
+  background: #286660;
+  color: white;
+}
+
+.nav-item.active .q-icon {
+  color: white;
+}
+
+.nav-item:hover:not(.active) {
+  background: #f5f5f5;
+}
+
+.logout-section {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.logout-btn {
+  width: 100%;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Page Container with Off-White Background */
+.page-container-with-fixed-header {
+  background: #f8f9fa;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Greeting Section */
+.greeting-section {
+  padding: 24px;
+  background: transparent;
+}
+
+.greeting-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.greeting-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #286660, #6ca299, #b8d2ce);
+  border-radius: 16px 16px 0 0;
+}
+
+.greeting-content {
+  padding: 24px;
+}
+
+.greeting-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.greeting-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
 }
 </style>

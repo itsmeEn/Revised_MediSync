@@ -376,20 +376,105 @@ class PriorityQueue(models.Model):
         return f"Priority Queue - Patient: {self.patient.user.full_name} ({self.priority_level})"
     
 #exchanging communications via messaging app
+class Conversation(models.Model):
+    """
+    Conversation model for grouping messages between users.
+    """
+    participants = models.ManyToManyField(Users, related_name="conversations")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ["-updated_at"]
+        db_table = "conversations"
+        verbose_name = "Conversation"
+        verbose_name_plural = "Conversations"
+
+    def __str__(self):
+        participant_names = [p.full_name for p in self.participants.all()]
+        return f"Conversation: {', '.join(participant_names)}"
+
+    def get_other_participant(self, user):
+        """Get the other participant in a 1-on-1 conversation"""
+        return self.participants.exclude(id=user.id).first()
+
+class Message(models.Model):
+    """
+    Enhanced messaging model with file support and reactions.
+    """ 
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="sent_messages")
+    content = models.TextField(help_text="Message content.")
+    file_attachment = models.FileField(
+        upload_to='message_attachments/', 
+        blank=True, 
+        null=True,
+        help_text="Optional file attachment"
+    )
+    file_name = models.CharField(max_length=255, blank=True, help_text="Original file name")
+    file_size = models.PositiveIntegerField(null=True, blank=True, help_text="File size in bytes")
+    is_read = models.BooleanField(default=False, help_text="Whether the message has been read")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp when the message was sent.")
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:        
+        ordering = ["created_at"]
+        db_table = "messages"
+        verbose_name = "Message"
+        verbose_name_plural = "Messages"
+
+    def __str__(self):
+        return f"Message from {self.sender.full_name}: {self.content[:50]}..."
+
+    @property
+    def has_attachment(self):
+        return bool(self.file_attachment)
+
+class MessageReaction(models.Model):
+    """
+    Model for message reactions (like, love, etc.)
+    """
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reactions")
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="message_reactions")
+    reaction_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('like', '👍'),
+            ('love', '❤️'),
+            ('laugh', '😂'),
+            ('wow', '😮'),
+            ('sad', '😢'),
+            ('angry', '😠'),
+        ],
+        default='like'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['message', 'user', 'reaction_type']
+        db_table = "message_reactions"
+        verbose_name = "Message Reaction"
+        verbose_name_plural = "Message Reactions"
+
+    def __str__(self):
+        return f"{self.user.full_name} reacted {self.reaction_type} to message"
+
+# Keep the old Messaging model for backward compatibility
 class Messaging(models.Model):
     """
-    Exchanges communications via messaging app.
+    Legacy messaging model - kept for backward compatibility.
     """ 
-    sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="sent_messages")
-    receiver = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="received_messages")
+    sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="legacy_sent_messages")
+    receiver = models.ForeignKey(Users, on_delete=models.CASCADE, related_name="legacy_received_messages")
     message = models.TextField(help_text="Message content.")    
     created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp when the message was sent.")  
     
     class Meta:        
         ordering = ["-created_at"]
         db_table = "messaging"
-        verbose_name = "Messaging"
-        verbose_name_plural = "Messaging"
+        verbose_name = "Legacy Messaging"
+        verbose_name_plural = "Legacy Messaging"
 
     def __str__(self):
         return f"From {self.sender.full_name} to {self.receiver.full_name}: {self.message[:50]}..."

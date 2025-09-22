@@ -1,37 +1,39 @@
 <template>
   <q-layout view="hHh Lpr fFf">
 
-    <q-header reveal elevated class="text-white" height-hint="98">
-      <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+    <q-header elevated class="prototype-header">
+      <q-toolbar class="header-toolbar">
+        <!-- Menu button to open sidebar -->
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-toggle-btn" />
         
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="../assets/logo.png" alt="MediSync Logo" />
-          </q-avatar>
-          MediSync
-        </q-toolbar-title>
-      </q-toolbar>
-
-      <q-toolbar class="text-white">
+        <!-- Left side - Search bar -->
+        <div class="header-left">
         <div class="search-container">
           <q-input 
-            dark 
+              outlined
             dense 
-            standout 
             v-model="text" 
-            placeholder="Search appointments, patients..."
+              placeholder="Search Patient, symptoms and Appointments"
             class="search-input"
-          >
-            <template v-slot:append>
-              <q-icon v-if="text === ''" name="search" />
-              <q-icon v-else name="clear" class="cursor-pointer" @click="text = ''" />
+              bg-color="white"
+            >
+              <template v-slot:prepend>
+                <q-icon name="search" color="grey-6" />
+              </template>
+              <template v-slot:append v-if="text">
+                <q-icon name="clear" class="cursor-pointer" @click="text = ''" />
             </template>
           </q-input>
+          </div>
         </div>
         
-        <!-- Real-time Time and Weather -->
-        <div class="real-time-info">
+        <!-- Right side - Notifications, Time, Weather -->
+        <div class="header-right">
+          <!-- Notifications -->
+          <q-btn flat round icon="notifications" class="notification-btn">
+            <q-badge color="red" floating>1</q-badge>
+          </q-btn>
+          
           <!-- Time Display -->
           <div class="time-display">
             <q-icon name="schedule" size="md" />
@@ -54,18 +56,29 @@
           <!-- Weather Error -->
           <div class="weather-error" v-else-if="weatherError">
             <q-icon name="error" size="sm" />
-            <span class="weather-text">Weather unavailable</span>
+            <span class="weather-text">Weather Update and Place</span>
           </div>
         </div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered>
-      <div class="drawer-content">
+    <q-drawer v-model="rightDrawerOpen" side="left" overlay bordered class="prototype-sidebar" :width="280">
+      <div class="sidebar-content">
+        <!-- Logo Section -->
+        <div class="logo-section">
+          <div class="logo-container">
+            <q-avatar size="40px" class="logo-avatar">
+              <img src="../assets/logo.png" alt="MediSync Logo" />
+            </q-avatar>
+            <span class="logo-text">MediSync</span>
+          </div>
+          <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn" />
+        </div>
+
         <!-- User Profile Section -->
-        <div class="user-profile-section">
+        <div class="sidebar-user-profile">
           <div class="profile-picture-container">
-            <q-avatar size="100px" class="profile-avatar">
+            <q-avatar size="80px" class="profile-avatar">
               <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
               <div v-else class="profile-placeholder">
                 {{ userInitials }}
@@ -86,13 +99,22 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
+            <q-icon 
+              :name="userProfile.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              class="verified-badge" 
+            />
           </div>
           
           <div class="user-info">
-            <h6 class="user-name">{{ userProfile.full_name }}</h6>
-            <p class="user-specialization">{{ userProfile.specialization }}</p>
-            <q-chip color="primary" text-color="white" size="sm">
-              {{ userProfile.role }}
+            <h6 class="user-name">{{ userProfile.full_name || 'Loading...' }}</h6>
+            <p class="user-role">{{ userProfile.specialization || 'Loading specialization...' }}</p>
+            <q-chip 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              text-color="white" 
+              size="sm"
+            >
+              {{ userProfile.verification_status === 'approved' ? 'Verified' : 'Not Verified' }}
             </q-chip>
           </div>
         </div>
@@ -156,17 +178,23 @@
     </q-drawer>
 
     <!-- Main Content -->
-    <q-page-container>
+    <q-page-container class="page-container-with-fixed-header">
+      <!-- Account Settings Section -->
+      <div class="greeting-section">
+        <q-card class="greeting-card">
+          <q-card-section class="greeting-content">
+            <h2 class="greeting-text">Account Settings</h2>
+            <p class="greeting-subtitle">Customize your MediSync experience</p>
+          </q-card-section>
+        </q-card>
+      </div>
+
       <div class="settings-page">
         <div class="settings-container">
-          <div class="settings-header">
-            <h2>Account Settings</h2>
-            <p>Customize your MediSync experience</p>
-          </div>
-
           <div class="settings-content">
-            <!-- Profile Settings Section -->
+            <!-- All Settings in One Card -->
             <q-card class="settings-card">
+              <!-- Profile Information Section -->
               <q-card-section>
                 <div class="text-h6">Profile Information</div>
                 <p class="text-caption">Your basic account information (read-only)</p>
@@ -231,29 +259,14 @@
                   </div>
                 </div>
               </q-card-section>
-            </q-card>
 
-            <!-- Appearance Settings Section -->
-            <q-card class="settings-card">
+              <!-- Appearance Section -->
               <q-card-section>
                 <div class="text-h6">Appearance</div>
                 <p class="text-caption">Customize the look and feel of your interface</p>
               </q-card-section>
               
               <q-card-section>
-                <!-- Dark/Light Mode Toggle -->
-                <div class="setting-item">
-                  <div class="setting-label">
-                    <q-icon name="dark_mode" class="q-mr-sm" />
-                    <span>Dark Mode</span>
-                  </div>
-                  <q-toggle
-                    v-model="settings.darkMode"
-                    @update:model-value="toggleDarkMode"
-                    color="primary"
-                  />
-                </div>
-
                 <!-- Text Size Setting -->
                 <div class="setting-item">
                   <div class="setting-label">
@@ -289,10 +302,8 @@
                   />
                 </div>
               </q-card-section>
-            </q-card>
 
-            <!-- Notification Settings Section -->
-            <q-card class="settings-card">
+              <!-- Notifications Section -->
               <q-card-section>
                 <div class="text-h6">Notifications</div>
                 <p class="text-caption">Manage your notification preferences</p>
@@ -332,25 +343,27 @@
                   />
                 </div>
               </q-card-section>
-            </q-card>
 
-            <!-- Save Settings Button -->
-            <div class="settings-actions">
-              <q-btn
-                color="primary"
-                label="Save Settings"
-                icon="save"
-                @click="saveSettings"
-                :loading="saving"
-              />
-              <q-btn
-                color="secondary"
-                label="Reset to Default"
-                icon="restore"
-                @click="resetSettings"
-                class="q-ml-md"
-              />
-            </div>
+              <!-- Action Buttons -->
+              <q-card-section>
+                <div class="settings-actions">
+                  <q-btn
+                    color="primary"
+                    label="Save Settings"
+                    icon="save"
+                    @click="saveSettings"
+                    :loading="saving"
+                  />
+                  <q-btn
+                    color="secondary"
+                    label="Reset to Default"
+                    icon="restore"
+                    @click="resetSettings"
+                    class="q-ml-md"
+                  />
+                </div>
+              </q-card-section>
+            </q-card>
           </div>
         </div>
       </div>
@@ -371,13 +384,23 @@ const text = ref('')
 // const loading = ref(false) // Unused variable
 const saving = ref(false)
 
+// Header functions
+const toggleRightDrawer = () => {
+  console.log('Toggle drawer called, current state:', rightDrawerOpen.value)
+  rightDrawerOpen.value = !rightDrawerOpen.value
+  console.log('New state:', rightDrawerOpen.value)
+}
+
+
+
 // User profile data
 const userProfile = ref({
   full_name: '',
   email: '',
   specialization: '',
   role: '',
-  profile_picture: ''
+  profile_picture: '',
+  verification_status: 'approved'
 })
 
 // Real-time data
@@ -393,7 +416,6 @@ const timeInterval = ref<ReturnType<typeof setInterval> | null>(null)
 
 // Settings data
 const settings = ref({
-  darkMode: false,
   textSize: 16,
   fontFamily: 'Roboto',
   emailNotifications: true,
@@ -401,8 +423,8 @@ const settings = ref({
   messageNotifications: true
 })
 
-// File input reference
-const fileInput = ref<HTMLInputElement>()
+// File input reference for profile picture upload
+const fileInput = ref<HTMLInputElement | null>(null)
 
 // Font options
 const fontOptions = [
@@ -415,19 +437,27 @@ const fontOptions = [
 ]
 
 // Computed properties
-const profilePictureUrl = computed(() => {
-  return userProfile.value.profile_picture || null
-})
-
 const userInitials = computed(() => {
   if (!userProfile.value.full_name) return 'U'
-  return userProfile.value.full_name
-    .split(' ')
-    .map(name => name.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
+  const names = userProfile.value.full_name.split(' ')
+  if (names.length >= 2) {
+    return `${names[0]?.charAt(0) || ''}${names[names.length - 1]?.charAt(0) || ''}`.toUpperCase()
+  }
+  return userProfile.value.full_name.charAt(0).toUpperCase()
 })
+
+const profilePictureUrl = computed(() => {
+  if (!userProfile.value.profile_picture) {
+    return null
+  }
+  
+  if (userProfile.value.profile_picture.startsWith('http')) {
+    return userProfile.value.profile_picture
+  }
+  
+  return `http://localhost:8000${userProfile.value.profile_picture}`
+})
+
 
 // Router and Quasar
 const router = useRouter()
@@ -435,12 +465,34 @@ const router = useRouter()
 const $q = useQuasar()
 
 // Methods
-const toggleRightDrawer = () => {
-  rightDrawerOpen.value = !rightDrawerOpen.value
-}
 
-const navigateTo = (path: string) => {
-  void router.push(`/${path}`)
+const navigateTo = (route: string) => {
+  // Close drawer first
+  rightDrawerOpen.value = false
+  
+  // Navigate to different sections
+  switch (route) {
+    case 'doctor-dashboard':
+      void router.push('/doctor-dashboard')
+      break
+    case 'appointments':
+      void router.push('/doctor-appointments')
+      break
+    case 'messaging':
+      void router.push('/doctor-messaging')
+      break
+    case 'patients':
+      void router.push('/doctor-patient-management')
+      break
+    case 'analytics':
+      void router.push('/doctor-predictive-analytics')
+      break
+    case 'settings':
+      // Already on settings page
+      break
+    default:
+      void router.push(`/${route}`)
+  }
 }
 
 const logout = () => {
@@ -450,61 +502,83 @@ const logout = () => {
   void router.push('/login')
 }
 
+// Profile picture upload functions
 const triggerFileUpload = () => {
   fileInput.value?.click()
 }
 
 const handleProfilePictureUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
-  if (!target.files || target.files.length === 0) return
-
-  const file = target.files[0]
-  if (!file) return
-  
-  const formData = new FormData()
-  formData.append('profile_picture', file)
-
-  try {
-    const response = await api.patch('/users/profile/picture/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-
-    userProfile.value.profile_picture = response.data.profile_picture
-
-    $q.notify({
-      type: 'positive',
-      message: 'Profile picture updated successfully!',
-      position: 'top',
-      timeout: 3000
-    })
-
-    // Clear the file input
-    target.value = ''
-  } catch (error: unknown) {
-    console.error('Profile picture upload failed:', error)
-
-    let errorMessage = 'Failed to upload profile picture. Please try again.'
-
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { data?: { profile_picture?: string[], detail?: string } } }
-      if (axiosError.response?.data?.profile_picture?.[0]) {
-        errorMessage = axiosError.response.data.profile_picture[0]
-      } else if (axiosError.response?.data?.detail) {
-        errorMessage = axiosError.response.data.detail
-      }
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+    if (!allowedTypes.includes(file.type)) {
+      $q.notify({
+        type: 'negative',
+        message: 'Please select a valid image file (JPG, PNG)',
+        position: 'top',
+        timeout: 3000
+      })
+      return
     }
-
-    $q.notify({
-      type: 'negative',
-      message: errorMessage,
-      position: 'top',
-      timeout: 4000
-    })
-
-    // Clear the file input
-    target.value = ''
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      $q.notify({
+        type: 'negative',
+        message: 'File size must be less than 5MB',
+        position: 'top',
+        timeout: 3000
+      })
+      return
+    }
+    
+    try {
+      const formData = new FormData()
+      formData.append('profile_picture', file)
+      
+      const response = await api.post('/users/profile/update/picture/', formData)
+      
+      userProfile.value.profile_picture = response.data.user.profile_picture
+      
+      // Store the updated profile picture in localStorage for cross-page sync
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+      currentUser.profile_picture = response.data.user.profile_picture
+      localStorage.setItem('user', JSON.stringify(currentUser))
+      
+      // Show success toast
+      $q.notify({
+        type: 'positive',
+        message: 'Profile picture updated successfully!',
+        position: 'top',
+        timeout: 3000
+      })
+      
+      // Clear the file input
+      target.value = ''
+    } catch (error: unknown) {
+      console.error('Profile picture upload failed:', error)
+      
+      let errorMessage = 'Failed to upload profile picture. Please try again.'
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { profile_picture?: string[], detail?: string } } }
+        if (axiosError.response?.data?.profile_picture?.[0]) {
+          errorMessage = axiosError.response.data.profile_picture[0]
+        } else if (axiosError.response?.data?.detail) {
+          errorMessage = axiosError.response.data.detail
+        }
+      }
+      
+      $q.notify({
+        type: 'negative',
+        message: errorMessage,
+        position: 'top',
+        timeout: 4000
+      })
+    }
   }
 }
 
@@ -577,12 +651,6 @@ const getWeatherIcon = (condition: string): string => {
 }
 
 // Settings functions
-const toggleDarkMode = (value: boolean) => {
-  settings.value.darkMode = value
-  // Apply dark mode to the application
-  document.body.classList.toggle('dark-mode', value)
-  localStorage.setItem('darkMode', value.toString())
-}
 
 const updateTextSize = (size: number | null) => {
   if (size === null) return
@@ -627,7 +695,6 @@ const saveSettings = async () => {
 
 const resetSettings = () => {
   settings.value = {
-    darkMode: false,
     textSize: 16,
     fontFamily: 'Roboto',
     emailNotifications: true,
@@ -638,10 +705,8 @@ const resetSettings = () => {
   // Reset CSS variables
   document.documentElement.style.removeProperty('--text-size')
   document.documentElement.style.removeProperty('--font-family')
-  document.body.classList.remove('dark-mode')
   
   // Clear localStorage
-  localStorage.removeItem('darkMode')
   localStorage.removeItem('textSize')
   localStorage.removeItem('fontFamily')
   
@@ -656,7 +721,19 @@ const resetSettings = () => {
 const fetchUserProfile = async () => {
   try {
     const response = await api.get('/users/profile/')
-    userProfile.value = response.data
+    const userData = response.data.user || response.data
+    
+    // Check localStorage for updated profile picture
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+    
+    userProfile.value = {
+      full_name: userData.full_name,
+      email: userData.email,
+      specialization: userData.doctor_profile?.specialization || userData.specialization,
+      role: userData.role,
+      profile_picture: storedUser.profile_picture || userData.profile_picture || null,
+      verification_status: userData.verification_status
+    }
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
   }
@@ -664,16 +741,13 @@ const fetchUserProfile = async () => {
 
 const loadSettings = () => {
   // Load settings from localStorage
-  const darkMode = localStorage.getItem('darkMode') === 'true'
   const textSize = parseInt(localStorage.getItem('textSize') || '16')
   const fontFamily = localStorage.getItem('fontFamily') || 'Roboto'
   
-  settings.value.darkMode = darkMode
   settings.value.textSize = textSize
   settings.value.fontFamily = fontFamily
   
   // Apply settings
-  toggleDarkMode(darkMode)
   updateTextSize(textSize)
   updateFontFamily(fontFamily)
 }
@@ -697,8 +771,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.page-background {
+  background: #f8f9fa;
+  background-size: cover;
+  min-height: 100vh;
+}
+
 .settings-page {
-  background-color: #f5f5f5;
+  /* background-color: #f5f5f5; */
   min-height: 100vh;
   padding: 20px;
 }
@@ -879,4 +959,225 @@ onUnmounted(() => {
 .search-input {
   width: 100%;
 }
+
+/* Prototype Header Styles */
+.prototype-header {
+  background: #286660;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-toolbar {
+  padding: 0 24px;
+  min-height: 64px;
+}
+
+.menu-toggle-btn {
+  color: white;
+  margin-right: 16px;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 500px;
+}
+
+.search-input {
+  background: white;
+  border-radius: 8px;
+}
+
+.notification-btn {
+  color: white;
+}
+
+.time-display, .weather-display, .weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+/* Prototype Sidebar Styles */
+.prototype-sidebar {
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  z-index: 2000;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f8f9fa;
+}
+
+.logo-section {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #286660;
+}
+
+.menu-btn {
+  color: #666;
+}
+
+.sidebar-user-profile {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.profile-picture-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(25%, 25%);
+}
+
+.verified-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  border-radius: 50%;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.user-role {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+}
+
+.navigation-menu {
+  flex: 1;
+  padding: 16px 0;
+}
+
+.nav-item {
+  margin: 4px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active {
+  background: #286660;
+  color: white;
+}
+
+.nav-item.active .q-icon {
+  color: white;
+}
+
+.nav-item:hover:not(.active) {
+  background: #f5f5f5;
+}
+
+.logout-section {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.logout-btn {
+  width: 100%;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Page Container with Off-White Background */
+.page-container-with-fixed-header {
+  background: #f8f9fa;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Prototype Header Styles */
+
+/* Greeting Section */
+.greeting-section {
+  padding: 24px;
+  background: transparent;
+}
+
+.greeting-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.greeting-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #286660, #6ca299, #b8d2ce);
+  border-radius: 16px 16px 0 0;
+}
+
+.greeting-content {
+  padding: 24px;
+}
+
+.greeting-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.greeting-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
 </style>

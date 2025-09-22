@@ -7,9 +7,9 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-from .models import AppointmentManagement, QueueManagement, PriorityQueue, Notification, Messaging, DoctorAvailability
+from .models import AppointmentManagement, QueueManagement, PriorityQueue, Notification, Messaging, DoctorAvailability, Conversation, Message, MessageReaction
 from backend.users.models import User
-from .serializers import DashboardStatsSerializer
+from .serializers import DashboardStatsSerializer, ConversationSerializer, MessageSerializer, CreateMessageSerializer, CreateReactionSerializer, UserSerializer
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -181,9 +181,15 @@ def doctor_blocked_dates(request):
     """
     try:
         doctor = request.user
+
+        # Safely resolve the doctor's profile; return empty list if none exists
+        from backend.users.models import GeneralDoctorProfile
+        doctor_profile = GeneralDoctorProfile.objects.filter(user=doctor).first()
+        if not doctor_profile:
+            return Response([], status=status.HTTP_200_OK)
         
         blocked_dates = DoctorAvailability.objects.filter(
-            doctor=doctor.doctor_profile,
+            doctor=doctor_profile,
             is_blocked=True
         ).values_list('date', flat=True)
         
@@ -209,10 +215,18 @@ def doctor_block_date(request):
             return Response({
                 'error': 'Date is required'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Resolve the doctor's profile safely
+        from backend.users.models import GeneralDoctorProfile
+        doctor_profile = GeneralDoctorProfile.objects.filter(user=doctor).first()
+        if not doctor_profile:
+            return Response({
+                'error': 'Doctor profile not found for this user.'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
         # Check if date is already blocked
         existing_block = DoctorAvailability.objects.filter(
-            doctor__user=doctor,
+            doctor=doctor_profile,
             date=date
         ).first()
         
@@ -223,7 +237,7 @@ def doctor_block_date(request):
         
         # Create new blocked date
         DoctorAvailability.objects.create(
-            doctor=doctor.doctor_profile,
+            doctor=doctor_profile,
             date=date,
             reason=reason,
             is_blocked=True
@@ -289,4 +303,246 @@ def doctor_create_appointment(request):
     except Exception as e:
         return Response({
             'error': f'Failed to create appointment: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Messaging Views
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_conversations(request):
+    """
+    Get all conversations for the current user
+    """
+    try:
+        user = request.user
+        
+        # Get conversations where user is a participant
+        conversations = Conversation.objects.filter(
+            participants=user,
+            is_active=True
+        ).prefetch_related('participants', 'messages__sender', 'messages__reactions__user')
+        
+        serializer = ConversationSerializer(conversations, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to fetch conversations: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_conversation(request):
+    """
+    Create a new conversation with another user
+    """
+    try:
+        user = request.user
+        other_user_id = request.data.get('other_user_id')
+        
+        if not other_user_id:
+            return Response({
+                'error': 'other_user_id is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if other user exists and is a doctor or nurse
+        try:
+            other_user = User.objects.get(id=other_user_id)
+            if other_user.role not in ['doctor', 'nurse']:
+                return Response({
+                    'error': 'Can only message doctors and nurses'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'User not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Check if conversation already exists
+        existing_conversation = Conversation.objects.filter(
+            participants=user
+        ).filter(
+            participants=other_user
+        ).first()
+        
+        if existing_conversation:
+            serializer = ConversationSerializer(existing_conversation, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        # Create new conversation
+        conversation = Conversation.objects.create()
+        conversation.participants.add(user, other_user)
+        
+        serializer = ConversationSerializer(conversation, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to create conversation: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_messages(request, conversation_id):
+    """
+    Get messages for a specific conversation
+    """
+    try:
+        user = request.user
+        
+        # Check if user is participant in conversation
+        conversation = Conversation.objects.filter(
+            id=conversation_id,
+            participants=user
+        ).first()
+        
+        if not conversation:
+            return Response({
+                'error': 'Conversation not found or access denied'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Get messages with reactions
+        messages = conversation.messages.all().prefetch_related('reactions__user')
+        serializer = MessageSerializer(messages, many=True)
+        
+        # Mark messages as read
+        conversation.messages.filter(is_read=False).exclude(sender=user).update(is_read=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to fetch messages: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_message(request, conversation_id):
+    """
+    Send a message to a conversation
+    """
+    try:
+        user = request.user
+        
+        # Check if user is participant in conversation
+        conversation = Conversation.objects.filter(
+            id=conversation_id,
+            participants=user
+        ).first()
+        
+        if not conversation:
+            return Response({
+                'error': 'Conversation not found or access denied'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = CreateMessageSerializer(data=request.data)
+        if serializer.is_valid():
+            message = serializer.save(
+                conversation=conversation,
+                sender=user
+            )
+            
+            # Update file information if attachment exists
+            if message.file_attachment:
+                message.file_name = message.file_attachment.name.split('/')[-1]
+                message.file_size = message.file_attachment.size
+                message.save()
+            
+            # Update conversation timestamp
+            conversation.save()
+            
+            response_serializer = MessageSerializer(message)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to send message: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_reaction(request, message_id):
+    """
+    Add a reaction to a message
+    """
+    try:
+        user = request.user
+        
+        # Get message and check if user has access
+        message = Message.objects.filter(
+            id=message_id,
+            conversation__participants=user
+        ).first()
+        
+        if not message:
+            return Response({
+                'error': 'Message not found or access denied'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = CreateReactionSerializer(data=request.data)
+        if serializer.is_valid():
+            reaction_type = serializer.validated_data['reaction_type']
+            
+            # Check if user already reacted with this type
+            existing_reaction = MessageReaction.objects.filter(
+                message=message,
+                user=user,
+                reaction_type=reaction_type
+            ).first()
+            
+            if existing_reaction:
+                # Remove existing reaction
+                existing_reaction.delete()
+                return Response({
+                    'message': 'Reaction removed',
+                    'action': 'removed'
+                }, status=status.HTTP_200_OK)
+            else:
+                # Remove other reactions from this user
+                MessageReaction.objects.filter(
+                    message=message,
+                    user=user
+                ).exclude(reaction_type=reaction_type).delete()
+                
+                # Add new reaction
+                reaction = MessageReaction.objects.create(
+                    message=message,
+                    user=user,
+                    reaction_type=reaction_type
+                )
+                
+                return Response({
+                    'message': 'Reaction added',
+                    'action': 'added',
+                    'reaction': CreateReactionSerializer(reaction).data
+                }, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to add reaction: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_available_users(request):
+    """
+    Get list of doctors and nurses available for messaging
+    """
+    try:
+        user = request.user
+        
+        # Get all doctors and nurses except current user
+        available_users = User.objects.filter(
+            role__in=['doctor', 'nurse'],
+            is_verified=True
+        ).exclude(id=user.id)
+        
+        serializer = UserSerializer(available_users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to fetch available users: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

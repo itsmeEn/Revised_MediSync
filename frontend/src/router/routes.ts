@@ -49,9 +49,14 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/DoctorSettings.vue')
   },
   {
-    path: '/doctor-analytics',
-    name: 'DoctorAnalytics',
-    component: () => import('pages/DoctorAnalytics.vue')
+    path: '/doctor-predictive-analytics',
+    name: 'DoctorPredictiveAnalytics',
+    component: () => import('pages/DoctorPredictiveAnalytics.vue')
+  },
+  {
+    path: '/doctor-patient-management',
+    name: 'DoctorPatientManagement',
+    component: () => import('pages/DoctorPatientManagement.vue')
   },
   {
     path: '/nurse-dashboard',
@@ -72,6 +77,11 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/nurse-settings',
     component: () => import('pages/NurseSettings.vue')
+  },
+  {
+    path: '/nurse-patient-management',
+    name: 'NursePatientManagement',
+    component: () => import('pages/NursePatientManagement.vue')
   },
   {
     path: '/patient-dashboard',

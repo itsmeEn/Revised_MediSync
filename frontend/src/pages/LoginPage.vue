@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page">
+  <div class="login-page" style="background: url('http://localhost:9000/background.png') no-repeat center center; background-size: cover;">
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
@@ -200,10 +200,29 @@ const onLogin = async () => {
 }
 </script>
 
-<style scoped>
+<style>
+body {
+  background: url('http://localhost:9000/background.png') no-repeat center center !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+  position: relative !important;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(248, 249, 250, 0.2) 50%, rgba(240, 242, 245, 0.1) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
 .login-page {
-  min-height: 100vh;
-  background: #286660;
+  min-height: 100vh !important;
+  background: transparent !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,10 +235,25 @@ const onLogin = async () => {
 }
 
 .login-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #286660, #6ca299, #b8d2ce);
+  border-radius: 16px 16px 0 0;
 }
 
 .login-header {
