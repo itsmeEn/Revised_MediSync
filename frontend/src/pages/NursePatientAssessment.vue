@@ -612,7 +612,8 @@ const saveAssessment = async () => {
 
 <style scoped>
 .nurse-patient-assessment {
-  background-color: #f5f5f5;
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
   min-height: 100vh;
 }
 

@@ -78,6 +78,34 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/PatientDashboard.vue')
   },
   {
+    path: '/patient-appointment',
+    component: () => import('pages/PatientAppointment.vue')
+  },
+  {
+    path: '/patient-medical-request',
+    component: () => import('pages/PatientMedicalRequest.vue')
+  },
+  {
+    path: '/patient-notifications',
+    component: () => import('pages/PatientNotifications.vue')
+  },
+  {
+    path: '/patient-settings',
+    component: () => import('pages/PatientSettings.vue')
+  },
+  {
+    path: '/patient-queue',
+    component: () => import('pages/PatientQueue.vue')
+  },
+  {
+    path: '/staff-queue-dashboard',
+    component: () => import('pages/StaffQueueDashboard.vue')
+  },
+  {
+    path: '/public-queue-display',
+    component: () => import('pages/PublicQueueDisplay.vue')
+  },
+  {
     path: '/home',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],

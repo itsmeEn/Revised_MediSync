@@ -156,7 +156,7 @@
     </q-drawer>
 
     <!-- Main Content -->
-    <q-page-container>
+    <q-page-container class="page-background">
       <div class="settings-page">
         <div class="settings-container">
           <div class="settings-header">
@@ -697,8 +697,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.page-background {
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
+}
+
 .settings-page {
-  background-color: #f5f5f5;
+  /* background-color: #f5f5f5; */
   min-height: 100vh;
   padding: 20px;
 }

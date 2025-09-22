@@ -93,7 +93,8 @@ const onRequestReset = async () => {
 <style scoped>
 .forgot-password-page {
   min-height: 100vh;
-  background: #286660;
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;

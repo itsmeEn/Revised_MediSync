@@ -14,23 +14,42 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  headers: {
-    'Content-Type': 'application/json',
+const resolveBaseURL = (): string => {
+  const override = localStorage.getItem('API_BASE_URL');
+  if (override) {
+    return override.replace(/\/$/, '');
   }
+  const host = window.location.hostname || 'localhost';
+  return `http://${host}:8000/api`;
+};
+
+const api = axios.create({
+  baseURL: resolveBaseURL()
 });
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
-    if (token) {
+
+    // Avoid attaching tokens to auth-related endpoints
+    const url = config.url || '';
+    const isAuthEndpoint =
+      url.includes('/users/login/') ||
+      url.includes('/users/register/') ||
+      url.includes('/users/forgot-password/') ||
+      url.includes('/users/reset-password') ||
+      url.includes('/users/token/refresh/');
+
+    if (token && !isAuthEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log('🔐 Adding auth token to request:', config.url);
-    } else {
+    } else if (!token) {
       console.warn('⚠️ No access token found for request:', config.url);
+    } else if (isAuthEndpoint) {
+      console.log('🚫 Skipping auth header for auth endpoint:', config.url);
     }
+
     return config;
   },
   (error) => {
@@ -46,7 +65,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Do not attempt refresh on auth endpoints
+    const url = originalRequest?.url || '';
+    const isAuthEndpoint =
+      url.includes('/users/login/') ||
+      url.includes('/users/register/') ||
+      url.includes('/users/forgot-password/') ||
+      url.includes('/users/reset-password') ||
+      url.includes('/users/token/refresh/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       console.log('🔄 401 Unauthorized detected, attempting token refresh...');
       originalRequest._retry = true;
 
@@ -54,7 +82,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
           console.log('📤 Attempting to refresh token...');
-          const response = await axios.post('http://localhost:8000/api/users/token/refresh/', {
+          const response = await axios.post(`${api.defaults.baseURL}/users/token/refresh/`, {
             refresh: refreshToken
           });
 

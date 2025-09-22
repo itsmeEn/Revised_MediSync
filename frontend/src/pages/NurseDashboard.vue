@@ -148,7 +148,7 @@
       </div>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container class="page-background">
       <!-- Greeting Section -->
       <div class="greeting-section">
         <div class="greeting-content">
@@ -637,6 +637,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.page-background {
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
+}
+
 .search-container {
   display: flex;
   justify-content: center;

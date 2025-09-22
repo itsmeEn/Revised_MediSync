@@ -155,7 +155,7 @@
       </div>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container class="page-background">
       <!-- Page Header -->
       <div class="page-header">
         <div class="page-header-left">
@@ -1476,6 +1476,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.page-background {
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
+}
+
 /* Header and Navigation Styles */
 .search-container {
   display: flex;

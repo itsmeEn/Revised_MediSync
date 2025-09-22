@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-jkac^7ayyqz9=+ksgij@fva4f&cv($)9+w=#d^u)mkozs&#hq&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -39,11 +39,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Local apps
-    "backend.users.apps.UsersConfig",
+    # Third-party apps
     "rest_framework",
     "rest_framework.authtoken",
+    "rest_framework_simplejwt",
     "corsheaders",
+
+    # Local apps
+    "backend.users.apps.UsersConfig",
     "backend.operations.apps.OperationsConfig",
     "admin_site.apps.AdminSiteConfig",
 ]
@@ -146,8 +149,8 @@ ADMIN_SITE_AUTH_USER_MODEL = "admin_site.AdminUser"
 
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [
-    'admin_site.backends.AdminUserBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'admin_site.backends.AdminUserBackend',
 ]
 
 # Django REST Framework Configuration
@@ -160,6 +163,13 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
+    ],
+    # Enable JSON, form, and multipart parsers so endpoints like /users/register/
+    # can correctly accept FormData with optional file uploads.
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
     ],
 }
 
@@ -187,6 +197,20 @@ CORS_ALLOW_METHODS = [
     "PATCH",
     "POST",
     "PUT",
+]
+
+# Additional CORS settings for development
+CORS_ALLOW_ALL_ORIGINS = True  # Only for development
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 # Security settings for development

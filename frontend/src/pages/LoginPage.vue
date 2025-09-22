@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page">
+  <div class="login-page" style="background: url('http://localhost:9000/background.png') no-repeat center center; background-size: cover;">
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
@@ -200,10 +200,11 @@ const onLogin = async () => {
 }
 </script>
 
-<style scoped>
+<style>
 .login-page {
   min-height: 100vh;
-  background: #286660;
+  background: url('http://localhost:9000/background.png') no-repeat center center;
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;

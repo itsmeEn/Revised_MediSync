@@ -56,25 +56,39 @@ def register(request):
                 # Create the appropriate profile based on the user's role
                 if user.role == 'doctor':
                     print("Creating doctor profile...")  # Add debug logging
-                    GeneralDoctorProfile.objects.create(
-                        user=user,
-                        license_number=request.data.get('license_number'),
-                        specialization=request.data.get('specialization')
-                    )
-                    print("Doctor profile created successfully")  # Add debug logging
+                    try:
+                        GeneralDoctorProfile.objects.create(
+                            user=user,
+                            license_number=request.data.get('license_number', ''),
+                            specialization=request.data.get('specialization', '')
+                        )
+                        print("Doctor profile created successfully")  # Add debug logging
+                    except Exception as e:
+                        print("Error creating doctor profile:", str(e))
+                        raise e
                 elif user.role == 'nurse':
-                    NurseProfile.objects.create(
-                        user=user,
-                        license_number=request.data.get('license_number'),
-                        department=request.data.get('department')
-                    )
+                    try:
+                        NurseProfile.objects.create(
+                            user=user,
+                            license_number=request.data.get('license_number', ''),
+                            department=request.data.get('department', '')
+                        )
+                        print("Nurse profile created successfully")
+                    except Exception as e:
+                        print("Error creating nurse profile:", str(e))
+                        raise e
                 elif user.role == 'patient':
-                    PatientProfile.objects.create(
-                        user=user,
-                        blood_type=request.data.get('blood_type', PatientProfile.BloodType.UNKNOWN),
-                        medical_condition=request.data.get('medical_condition', ''),
-                        medication=request.data.get('medication', '')
-                    )
+                    try:
+                        PatientProfile.objects.create(
+                            user=user,
+                            blood_type=request.data.get('blood_type', PatientProfile.BloodType.UNKNOWN),
+                            medical_condition=request.data.get('medical_condition', ''),
+                            medication=request.data.get('medication', '')
+                        )
+                        print("Patient profile created successfully")
+                    except Exception as e:
+                        print("Error creating patient profile:", str(e))
+                        raise e
                 
                 # Generate JWT tokens for the new user
                 refresh = RefreshToken.for_user(user)
@@ -115,15 +129,33 @@ def login(request):
         return Response({
             'error': 'Email and password are required.'
         }, status=status.HTTP_400_BAD_REQUEST)
-        
-    user = authenticate(request, email=email, password=password)
-    print("Authentication result - User:", user)  # Add debug logging
     
-    if user is not None:
-        if not user.is_active:
-            return Response({'error': 'User is not active.'}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        # Try to get user by email first
+        try:
+            user = User.objects.get(email=email)
+            print("User found:", user.email, "Active:", user.is_active)  # Add debug logging
+        except User.DoesNotExist:
+            print("User not found with email:", email)  # Add debug logging
+            return Response({
+                'error': 'Invalid credentials.',
+                'message': 'Email or password is incorrect. Please try again.'
+            }, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Generate JWT tokens without embedding user data
+        # Check if user is active
+        if not user.is_active:
+            print("User is not active")  # Add debug logging
+            return Response({'error': 'User account is not active.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Check password
+        if not user.check_password(password):
+            print("Password check failed")  # Add debug logging
+            return Response({
+                'error': 'Invalid credentials.',
+                'message': 'Email or password is incorrect. Please try again.'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
 
         # Create user data structure
@@ -144,12 +176,13 @@ def login(request):
         }
         print("Login response data:", response_data)  # Add debug logging
         return Response(response_data, status=status.HTTP_200_OK)
-    else:
-        print("Authentication failed - Invalid credentials")  # Add debug logging
+        
+    except Exception as e:
+        print("Login error:", str(e))  # Add debug logging
         return Response({
-            'error': 'Invalid credentials.',
-            'message': 'Email or password is incorrect. Please try again.'
-        }, status=status.HTTP_401_UNAUTHORIZED)
+            'error': 'Login failed.',
+            'message': 'An error occurred during login. Please try again.'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

@@ -8,7 +8,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 
 from .models import AppointmentManagement, QueueManagement, PriorityQueue, Notification, Messaging, DoctorAvailability
-from backend.users.models import User
+from backend.users.models import User, PatientProfile
 from .serializers import DashboardStatsSerializer
 
 @api_view(['GET'])
@@ -181,9 +181,15 @@ def doctor_blocked_dates(request):
     """
     try:
         doctor = request.user
+
+        # Safely resolve the doctor's profile; return empty list if none exists
+        from backend.users.models import GeneralDoctorProfile
+        doctor_profile = GeneralDoctorProfile.objects.filter(user=doctor).first()
+        if not doctor_profile:
+            return Response([], status=status.HTTP_200_OK)
         
         blocked_dates = DoctorAvailability.objects.filter(
-            doctor=doctor.doctor_profile,
+            doctor=doctor_profile,
             is_blocked=True
         ).values_list('date', flat=True)
         
@@ -209,10 +215,18 @@ def doctor_block_date(request):
             return Response({
                 'error': 'Date is required'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Resolve the doctor's profile safely
+        from backend.users.models import GeneralDoctorProfile
+        doctor_profile = GeneralDoctorProfile.objects.filter(user=doctor).first()
+        if not doctor_profile:
+            return Response({
+                'error': 'Doctor profile not found for this user.'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
         # Check if date is already blocked
         existing_block = DoctorAvailability.objects.filter(
-            doctor__user=doctor,
+            doctor=doctor_profile,
             date=date
         ).first()
         
@@ -223,7 +237,7 @@ def doctor_block_date(request):
         
         # Create new blocked date
         DoctorAvailability.objects.create(
-            doctor=doctor.doctor_profile,
+            doctor=doctor_profile,
             date=date,
             reason=reason,
             is_blocked=True
@@ -289,4 +303,396 @@ def doctor_create_appointment(request):
     except Exception as e:
         return Response({
             'error': f'Failed to create appointment: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ==================== PATIENT QUEUE MANAGEMENT SYSTEM ====================
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def patient_check_in(request):
+    """
+    Patient online check-in form.
+    Allows patients to check in and join the queue.
+    """
+    try:
+        patient = request.user
+        
+        # Verify user is a patient
+        if patient.role != 'patient':
+            return Response({
+                'error': 'Only patients can check in'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        # Get patient profile
+        try:
+            patient_profile = patient.patient_profile
+        except PatientProfile.DoesNotExist:
+            return Response({
+                'error': 'Patient profile not found'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        department = request.data.get('department', 'OPD')
+        appointment_id = request.data.get('appointment_id')
+        priority_level = request.data.get('priority_level')
+        
+        # Check if patient is already in queue
+        existing_queue = QueueManagement.objects.filter(
+            patient=patient_profile,
+            department=department,
+            status__in=['waiting', 'in_progress']
+        ).first()
+        
+        if existing_queue:
+            return Response({
+                'error': 'Patient is already in queue',
+                'queue_number': existing_queue.queue_number,
+                'position': existing_queue.position_in_queue
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create queue entry
+        queue_entry = QueueManagement.objects.create(
+            patient=patient_profile,
+            department=department,
+            status='waiting'
+        )
+        
+        # Create notification for patient
+        Notification.objects.create(
+            user=patient,
+            message=f"You have been added to the {department} queue. Your queue number is {queue_entry.queue_number}."
+        )
+        
+        return Response({
+            'message': 'Successfully checked in',
+            'queue_number': queue_entry.queue_number,
+            'position': queue_entry.position_in_queue,
+            'estimated_wait_time': str(queue_entry.get_estimated_wait_time()) if queue_entry.get_estimated_wait_time() else None
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to check in: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def patient_queue_status(request):
+    """
+    Get patient's current queue status and estimated wait time.
+    """
+    try:
+        patient = request.user
+        
+        if patient.role != 'patient':
+            return Response({
+                'error': 'Only patients can view queue status'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            patient_profile = patient.patient_profile
+        except PatientProfile.DoesNotExist:
+            return Response({
+                'error': 'Patient profile not found'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get current queue entries for patient
+        queue_entries = QueueManagement.objects.filter(
+            patient=patient_profile,
+            status__in=['waiting', 'in_progress']
+        ).order_by('-created_at')
+        
+        if not queue_entries.exists():
+            return Response({
+                'message': 'No active queue entries found'
+            }, status=status.HTTP_200_OK)
+        
+        queue_data = []
+        for entry in queue_entries:
+            estimated_wait = entry.get_estimated_wait_time()
+            queue_data.append({
+                'queue_number': entry.queue_number,
+                'department': entry.department,
+                'status': entry.status,
+                'position': entry.position_in_queue,
+                'estimated_wait_time': str(estimated_wait) if estimated_wait else None,
+                'enqueue_time': entry.enqueue_time,
+                'started_at': entry.started_at
+            })
+        
+        return Response({
+            'queues': queue_data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to get queue status: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def public_queue_display(request):
+    """
+    Public queue display for patients to see current queue status.
+    No authentication required.
+    """
+    try:
+        department = request.GET.get('department', 'OPD')
+        
+        # Get current queue for department
+        current_queue = QueueManagement.objects.filter(
+            department=department,
+            status__in=['waiting', 'in_progress']
+        ).order_by('position_in_queue')[:10]  # Show next 10 patients
+        
+        queue_data = []
+        for entry in current_queue:
+            queue_data.append({
+                'queue_number': entry.queue_number,
+                'patient_name': entry.patient.user.full_name,
+                'status': entry.status,
+                'position': entry.position_in_queue,
+                'estimated_wait_time': str(entry.get_estimated_wait_time()) if entry.get_estimated_wait_time() else None
+            })
+        
+        return Response({
+            'department': department,
+            'current_queue': queue_data,
+            'total_waiting': QueueManagement.objects.filter(
+                department=department,
+                status='waiting'
+            ).count()
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to get queue display: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ==================== STAFF QUEUE MANAGEMENT ====================
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def staff_queue_dashboard(request):
+    """
+    Staff dashboard for queue management.
+    Access restricted to nurses and doctors.
+    """
+    try:
+        user = request.user
+        
+        # Check if user is staff (nurse or doctor)
+        if user.role not in ['nurse', 'doctor']:
+            return Response({
+                'error': 'Access denied. Only staff members can access this dashboard.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        department = request.GET.get('department', 'OPD')
+        
+        # Get all queues for the department
+        normal_queue = QueueManagement.objects.filter(
+            department=department,
+            status__in=['waiting', 'in_progress']
+        ).order_by('position_in_queue')
+        
+        priority_queue = PriorityQueue.objects.filter(
+            department=department
+        ).order_by('priority_position')
+        
+        # Get statistics
+        stats = {
+            'total_waiting': QueueManagement.objects.filter(
+                department=department,
+                status='waiting'
+            ).count(),
+            'total_in_progress': QueueManagement.objects.filter(
+                department=department,
+                status='in_progress'
+            ).count(),
+            'total_completed_today': QueueManagement.objects.filter(
+                department=department,
+                status='completed',
+                finished_at__date=timezone.now().date()
+            ).count()
+        }
+        
+        return Response({
+            'department': department,
+            'normal_queue': [
+                {
+                    'id': q.id,
+                    'queue_number': q.queue_number,
+                    'patient_name': q.patient.user.full_name,
+                    'status': q.status,
+                    'position': q.position_in_queue,
+                    'enqueue_time': q.enqueue_time,
+                    'estimated_wait_time': str(q.get_estimated_wait_time()) if q.get_estimated_wait_time() else None
+                } for q in normal_queue
+            ],
+            'priority_queue': [
+                {
+                    'id': q.id,
+                    'queue_number': q.queue_number,
+                    'patient_name': q.patient.user.full_name,
+                    'priority_level': q.priority_level,
+                    'position': q.priority_position
+                } for q in priority_queue
+            ],
+            'stats': stats
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to get staff dashboard: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def call_next_patient(request):
+    """
+    Call the next patient in the queue.
+    Only accessible by staff.
+    """
+    try:
+        user = request.user
+        
+        if user.role not in ['nurse', 'doctor']:
+            return Response({
+                'error': 'Access denied. Only staff members can call patients.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        department = request.data.get('department', 'OPD')
+        
+        # Get next patient in queue
+        next_patient = QueueManagement.objects.filter(
+            department=department,
+            status='waiting'
+        ).order_by('position_in_queue').first()
+        
+        if not next_patient:
+            return Response({
+                'error': 'No patients waiting in queue'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Mark patient as in progress
+        next_patient.start_service()
+        
+        # Create notification for patient
+        Notification.objects.create(
+            user=next_patient.patient.user,
+            message=f"Your turn is up! Please proceed to the {department} counter. Queue number: {next_patient.queue_number}"
+        )
+        
+        return Response({
+            'message': 'Patient called successfully',
+            'patient_name': next_patient.patient.user.full_name,
+            'queue_number': next_patient.queue_number,
+            'position': next_patient.position_in_queue
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to call next patient: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_patient_service(request):
+    """
+    Mark a patient's service as completed.
+    Only accessible by staff.
+    """
+    try:
+        user = request.user
+        
+        if user.role not in ['nurse', 'doctor']:
+            return Response({
+                'error': 'Access denied. Only staff members can complete services.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        queue_id = request.data.get('queue_id')
+        
+        if not queue_id:
+            return Response({
+                'error': 'Queue ID is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            queue_entry = QueueManagement.objects.get(id=queue_id)
+        except QueueManagement.DoesNotExist:
+            return Response({
+                'error': 'Queue entry not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Complete the service
+        queue_entry.complete_service()
+        
+        # Create notification for patient
+        Notification.objects.create(
+            user=queue_entry.patient.user,
+            message=f"Your service at {queue_entry.department} has been completed. Thank you!"
+        )
+        
+        return Response({
+            'message': 'Service completed successfully',
+            'patient_name': queue_entry.patient.user.full_name,
+            'queue_number': queue_entry.queue_number
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to complete service: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def remove_patient_from_queue(request):
+    """
+    Remove a patient from the queue.
+    Only accessible by staff.
+    """
+    try:
+        user = request.user
+        
+        if user.role not in ['nurse', 'doctor']:
+            return Response({
+                'error': 'Access denied. Only staff members can remove patients.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        queue_id = request.data.get('queue_id')
+        reason = request.data.get('reason', 'Removed by staff')
+        
+        if not queue_id:
+            return Response({
+                'error': 'Queue ID is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            queue_entry = QueueManagement.objects.get(id=queue_id)
+        except QueueManagement.DoesNotExist:
+            return Response({
+                'error': 'Queue entry not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Mark as cancelled
+        queue_entry.status = 'cancelled'
+        queue_entry.dequeue_time = timezone.now()
+        queue_entry.save()
+        
+        # Update queue positions
+        queue_entry.update_queue_positions()
+        
+        # Create notification for patient
+        Notification.objects.create(
+            user=queue_entry.patient.user,
+            message=f"You have been removed from the {queue_entry.department} queue. Reason: {reason}"
+        )
+        
+        return Response({
+            'message': 'Patient removed from queue successfully',
+            'patient_name': queue_entry.patient.user.full_name,
+            'queue_number': queue_entry.queue_number
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Failed to remove patient: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

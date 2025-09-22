@@ -700,7 +700,8 @@ onMounted(() => {
 
 <style scoped>
 .nurse-settings {
-  background-color: #f5f5f5;
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
   min-height: 100vh;
 }
 

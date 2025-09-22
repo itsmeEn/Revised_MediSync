@@ -1382,6 +1382,9 @@ onUnmounted(() => {
 
 .page-container-with-fixed-header {
   padding-top: 98px !important;
+  background: url('/background.png') no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
 }
 
 .q-avatar {

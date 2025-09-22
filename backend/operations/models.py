@@ -82,24 +82,27 @@ class QueueManagement(models.Model):
         verbose_name_plural = "Queue Management"
         unique_together = ["department", "queue_number", "patient"] #each patient should have unique queue number when queueing in different departments
         
-    #fifo implementtion
+    #fifo implementation
     def save(self, *args, **kwargs):
-        #auto sign the queueung number in each patients
-        if not self.position_in_queue_number:
-            last_position = QueueManagement.objects.filter(
-                department=self.department, status_in_queue =[
-                    'waiting', 'in_progress', 'cancelled'
-                ]).aggregate(
-                    maximum_position = models.Max("position_in_queue", default=0
-                )["position" + 1]
-            )
-        
-        #automaticall assigns the patient queue number
+        # Auto assign the queue number if not set
         if not self.queue_number:
             last_queue_number = QueueManagement.objects.filter(
-                department=self.department).aggregate(
-                    maximum_queue_number = models.Max("queue_number", default=0)
-            )
+                department=self.department
+            ).aggregate(
+                maximum_queue_number=models.Max("queue_number", default=0)
+            )['maximum_queue_number']
+            self.queue_number = last_queue_number + 1
+        
+        # Auto assign position in queue if not set
+        if not self.position_in_queue:
+            last_position = QueueManagement.objects.filter(
+                department=self.department, 
+                status__in=['waiting', 'in_progress']
+            ).aggregate(
+                maximum_position=models.Max("position_in_queue", default=0)
+            )['maximum_position']
+            self.position_in_queue = last_position + 1
+        
         super().save(*args, **kwargs)
         self.update_queue_positions()
     
@@ -149,25 +152,25 @@ class QueueManagement(models.Model):
         
         return avg_service_time * patients_ahead_count
     
-    def started_at(self):
+    def start_service(self):
         """
-        The time where the service actually started.
+        Mark the service as started.
         """
         self.status = "in_progress"
         self.started_at = timezone.now()
         self.save()
         
+    def complete_service(self):
         """
-        time when the service is completed
+        Mark the service as completed.
         """
-    def completed_at(self):
         self.status = "completed"
-        self.completed_at = timezone.now()
+        self.finished_at = timezone.now()
         
         if self.started_at:
-            self.actual_wait_time = self.started_at - self.enqueue_time
+            self.actual_wait_time = self.finished_at - self.enqueue_time
         self.save()
-        #update the patients wueue positions or number 
+        # Update the patients queue positions
         self.update_queue_positions()
         
     def get_next_in_queue(self):
@@ -184,6 +187,7 @@ class QueueManagement(models.Model):
         Get the queue for a specific department.
         """
         queue = cls.objects.filter(department=department).order_by("position_in_queue")
+        return queue
         
     def __str__(self):
         return f"Queue {self.queue_number} - Patient: {self.patient.full_name}"
@@ -352,10 +356,10 @@ class PriorityQueue(models.Model):
             # Use a default value if no one has completed yet
             avg_service_time = timedelta(minutes=15) 
             
-        #count the patients in higher priority like seniors, pwd something like that
+        # Count the patients in higher priority like seniors, pwd
         higher_priority_count = PriorityQueue.objects.filter(
-            department=self.department,status_in=[
-                "waitng", "in_progress"],
+            department=self.department,
+            status__in=["waiting", "in_progress"],
             priority_level__in=["pwd", "senior"],
             priority_position__lt=self.priority_position
         ).count()
@@ -364,11 +368,12 @@ class PriorityQueue(models.Model):
             patients_ahead = higher_priority_count
         elif self.priority_level == "pwd":
             patients_ahead = higher_priority_count
-        else: #low priority or just the people in normal queues
+        else: # low priority or just the people in normal queues
             low_priority_count = PriorityQueue.objects.filter(
-                department=self.department,status_in=[
-                "waitng", "in_progress"]
+                department=self.department,
+                status__in=["waiting", "in_progress"]
             ).count()
+            patients_ahead = low_priority_count
         
         return avg_service_time * patients_ahead
 

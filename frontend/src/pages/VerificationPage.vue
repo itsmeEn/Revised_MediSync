@@ -234,8 +234,6 @@ const verifyLater = async () => {
 .verification-page {
   min-height: 100vh;
   background: #286660;
-  display: flex;
-  align-items: center;
   justify-content: center;
   padding: 20px;
 }
