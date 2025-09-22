@@ -17,7 +17,6 @@ A comprehensive healthcare management system with role-based authentication for 
 - Patient management and records
 - Appointment scheduling
 - Medical consultations
-- Revenue tracking
 - Professional profile management
 
 #### Nurse Dashboard
