@@ -21,4 +21,27 @@ urlpatterns = [
     path('messaging/conversations/<int:conversation_id>/send/', views.send_message, name='send_message'),
     path('messaging/messages/<int:message_id>/react/', views.add_reaction, name='add_reaction'),
     path('messaging/available-users/', views.get_available_users, name='get_available_users'),
+    
+    # Message notification endpoints
+    path('messaging/notifications/', views.get_message_notifications, name='get_message_notifications'),
+    path('messaging/notifications/<int:notification_id>/mark-sent/', views.mark_notification_as_sent, name='mark_notification_as_sent'),
+    path('messaging/messages/<int:message_id>/mark-read/', views.mark_message_as_read, name='mark_message_as_read'),
+    
+    # Medicine inventory endpoints
+    path('medicine-inventory/', views.get_medicine_inventory, name='get_medicine_inventory'),
+    path('medicine-inventory/add/', views.add_medicine, name='add_medicine'),
+    path('medicine-inventory/<int:medicine_id>/update/', views.update_medicine, name='update_medicine'),
+    path('medicine-inventory/<int:medicine_id>/delete/', views.delete_medicine, name='delete_medicine'),
+    
+    # Nurse queue endpoints
+    path('nurse/queue/patients/', views.nurse_queue_patients, name='nurse_queue_patients'),
+    
+    # Doctor selection endpoints
+    path('available-doctors/', views.get_available_doctors, name='get_available_doctors'),
+    path('assign-patient/', views.assign_patient_to_doctor, name='assign_patient_to_doctor'),
+    
+    # Doctor assignment endpoints
+    path('doctor/assignments/', views.get_doctor_assignments, name='get_doctor_assignments'),
+    path('doctor/assignments/<int:assignment_id>/accept/', views.accept_assignment, name='accept_assignment'),
+    path('doctor/assignments/<int:assignment_id>/consultation-notes/', views.consultation_notes, name='consultation_notes'),
 ]

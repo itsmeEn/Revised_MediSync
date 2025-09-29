@@ -16,14 +16,29 @@
               placeholder="Search Patient, symptoms and Appointments"
             class="search-input"
               bg-color="white"
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" color="grey-6" />
-              </template>
-              <template v-slot:append v-if="text">
-                <q-icon name="clear" class="cursor-pointer" @click="text = ''" />
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" color="grey-6" />
+            </template>
+            <template v-slot:append v-if="text">
+              <q-icon name="clear" class="cursor-pointer" @click="text = ''" />
             </template>
           </q-input>
+          
+          <!-- Search Results Dropdown -->
+          <div v-if="searchResults.length > 0" class="search-results">
+            <q-list dense>
+              <q-item v-for="result in searchResults" :key="`${result.type}-${result.data.id}`" clickable>
+                <q-item-section avatar>
+                  <q-icon :name="getSearchResultIcon(result.type)" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ getSearchResultTitle(result) }}</q-item-label>
+                  <q-item-label caption>{{ getSearchResultSubtitle(result) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
           </div>
         </div>
         
@@ -129,7 +144,7 @@
             <q-item-section>Patient Assessment</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('medicine-inventory')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-medicine-inventory')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="medication" />
             </q-item-section>
@@ -188,11 +203,12 @@
       <div class="dashboard-content">
         <div class="dashboard-cards">
           <!-- Today's Tasks Card -->
-          <q-card class="dashboard-card tasks-card">
+          <q-card class="dashboard-card tasks-card" clickable @click="showTasksDialog = true">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Today's Tasks</div>
-                <div class="card-description">Fetch the total tasks assigned for today</div>
+                <div class="card-number">{{ dashboardStats.todaysTasks }}</div>
+                <div class="card-description">Tasks to be completed today</div>
               </div>
               <div class="card-icon task-icon">
                 <q-icon name="assignment" size="2.5rem" />
@@ -201,11 +217,12 @@
           </q-card>
 
           <!-- Patients Under Care Card -->
-          <q-card class="dashboard-card patients-card">
+          <q-card class="dashboard-card patients-card" clickable @click="showPatientsDialog = true">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Patients Under Care</div>
-                <div class="card-description">Fetch the total patients assigned to nurse</div>
+                <div class="card-number">{{ dashboardStats.patientsUnderCare }}</div>
+                <div class="card-description">Total patients in queue</div>
               </div>
               <div class="card-icon patients-icon">
                 <q-icon name="people" size="2.5rem" />
@@ -214,11 +231,12 @@
           </q-card>
 
           <!-- Vitals Checked Card -->
-          <q-card class="dashboard-card vitals-card">
+          <q-card class="dashboard-card vitals-card" clickable @click="showVitalsDialog = true">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Vitals Checked</div>
-                <div class="card-description">Fetch all vitals checked today</div>
+                <div class="card-number">{{ dashboardStats.vitalsChecked }}</div>
+                <div class="card-description">Completed patient assessments</div>
               </div>
               <div class="card-icon vitals-icon">
                 <q-icon name="favorite" size="2.5rem" />
@@ -227,11 +245,12 @@
           </q-card>
 
           <!-- Medications Administered Card -->
-          <q-card class="dashboard-card medications-card">
+          <q-card class="dashboard-card medications-card" clickable @click="showMedicationsDialog = true">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Medications Given</div>
-                <div class="card-description">Fetch all medications administered today</div>
+                <div class="card-number">{{ dashboardStats.medicationsGiven }}</div>
+                <div class="card-description">Total medications in inventory</div>
               </div>
               <div class="card-icon medications-icon">
                 <q-icon name="medication" size="2.5rem" />
@@ -302,11 +321,159 @@
       <router-view />
     </q-page-container>
 
+    <!-- Today's Tasks Modal -->
+    <q-dialog v-model="showTasksDialog">
+      <q-card class="modal-card">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Today's Tasks</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+        <q-card-section>
+          <div class="tasks-list">
+            <q-list v-if="todaysTasks.length > 0">
+              <q-item v-for="task in todaysTasks" :key="task.id">
+                <q-item-section avatar>
+                  <q-icon :name="task.icon" :color="task.color" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ task.title }}</q-item-label>
+                  <q-item-label caption>{{ task.description }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip :color="task.status_color" text-color="white" :label="task.status" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div v-else class="empty-state">
+              <q-icon name="assignment" size="3rem" color="grey-4" />
+              <p class="text-grey-6">No tasks for today</p>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Patients Under Care Modal -->
+    <q-dialog v-model="showPatientsDialog">
+      <q-card class="modal-card">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Patients Under Care</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+        <q-card-section>
+          <div class="patients-list">
+            <q-list v-if="normalQueue.length > 0 || priorityQueue.length > 0">
+              <q-item v-for="patient in normalQueue" :key="patient.id">
+                <q-item-section avatar>
+                  <q-icon name="person" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ patient.patient_name }}</q-item-label>
+                  <q-item-label caption>Queue #{{ patient.queue_number }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip color="blue" text-color="white" label="Normal" />
+                </q-item-section>
+              </q-item>
+              <q-item v-for="patient in priorityQueue" :key="patient.id">
+                <q-item-section avatar>
+                  <q-icon name="person" color="red" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ patient.patient_name }}</q-item-label>
+                  <q-item-label caption>Queue #{{ patient.queue_number }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip color="red" text-color="white" label="Priority" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div v-else class="empty-state">
+              <q-icon name="people" size="3rem" color="grey-4" />
+              <p class="text-grey-6">No patients in queue</p>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Vitals Checked Modal -->
+    <q-dialog v-model="showVitalsDialog">
+      <q-card class="modal-card">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Vitals Checked</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+        <q-card-section>
+          <div class="vitals-list">
+            <q-list v-if="completedAssessments.length > 0">
+              <q-item v-for="assessment in completedAssessments" :key="assessment.id">
+                <q-item-section avatar>
+                  <q-icon name="favorite" color="green" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ assessment.patient_name }}</q-item-label>
+                  <q-item-label caption>{{ assessment.vitals_summary }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip color="green" text-color="white" label="Completed" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div v-else class="empty-state">
+              <q-icon name="favorite" size="3rem" color="grey-4" />
+              <p class="text-grey-6">No completed assessments yet</p>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Medications Modal -->
+    <q-dialog v-model="showMedicationsDialog">
+      <q-card class="modal-card">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Medications in Inventory</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+        <q-card-section>
+          <div class="medications-list">
+            <q-list v-if="medicines.length > 0">
+              <q-item v-for="medicine in medicines" :key="medicine.id">
+                <q-item-section avatar>
+                  <q-icon name="medication" color="purple" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ medicine.medicine_name }}</q-item-label>
+                  <q-item-label caption>{{ medicine.medicine_name }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip 
+                    :color="medicine.stock_level === 'Low' ? 'red' : medicine.stock_level === 'Medium' ? 'orange' : 'green'" 
+                    text-color="white" 
+                    :label="`${medicine.current_stock} units`" 
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div v-else class="empty-state">
+              <q-icon name="medication" size="3rem" color="grey-4" />
+              <p class="text-grey-6">No medications in inventory</p>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
@@ -329,21 +496,224 @@ const rightDrawerOpen = ref(false)
 const text = ref('')
 const fileInput = ref<HTMLInputElement>()
 
+// Type definitions for search
+interface DoctorData {
+  id: number
+  full_name: string
+  specialization: string
+  department?: string
+  is_available?: boolean
+  current_patients?: number
+  profile_picture?: string
+}
+
+interface MedicineData {
+  id: number
+  medicine_name: string
+  current_stock: number
+  unit_price?: number
+  minimum_stock_level?: number
+  expiry_date?: string
+  batch_number?: string
+  usage_pattern?: string
+  stock_level?: string
+}
+
+interface PatientData {
+  id: number
+  patient_name: string
+  queue_number: string
+  department?: string
+  status?: string
+  position_in_queue?: number
+  enqueue_time?: string
+  priority_level?: string
+  priority_position?: number
+}
+
+interface SearchResult {
+  type: 'patient' | 'doctor' | 'medicine'
+  data: PatientData | DoctorData | MedicineData
+}
+
+interface TaskData {
+  id: number
+  title: string
+  description: string
+  icon: string
+  color: string
+  status: string
+  status_color: string
+}
+
+interface AssessmentData {
+  id: number
+  patient_name: string
+  vitals_summary: string
+  status: string
+}
+
+// Search functionality
+const searchResults = ref<SearchResult[]>([])
+const isSearching = ref(false)
+
+// Dialog states
+const showTasksDialog = ref(false)
+const showPatientsDialog = ref(false)
+const showVitalsDialog = ref(false)
+const showMedicationsDialog = ref(false)
+
+// Queue data
+const normalQueue = ref<PatientData[]>([])
+const priorityQueue = ref<PatientData[]>([])
+
+// Medicine data
+const medicines = ref<MedicineData[]>([])
+
+// Task and assessment data
+const todaysTasks = ref<TaskData[]>([])
+const completedAssessments = ref<AssessmentData[]>([])
+
+const performSearch = async (query: string) => {
+  if (!query.trim()) {
+    searchResults.value = []
+    return
+  }
+  
+  try {
+    isSearching.value = true
+    
+    // Search patients
+    const patientsResponse = await api.get('/operations/nurse/queue/patients/')
+    const patients = [
+      ...patientsResponse.data.normal_queue,
+      ...patientsResponse.data.priority_queue
+    ].filter(patient => 
+      patient.patient_name.toLowerCase().includes(query.toLowerCase())
+    )
+    
+    // Search doctors
+    const doctorsResponse = await api.get('/operations/available-doctors/')
+    const doctors = doctorsResponse.data.filter((doctor: DoctorData) =>
+      doctor.full_name.toLowerCase().includes(query.toLowerCase()) ||
+      doctor.specialization.toLowerCase().includes(query.toLowerCase())
+    )
+    
+    // Search medicines
+    const medicinesResponse = await api.get('/operations/medicine-inventory/')
+    const medicines = medicinesResponse.data.filter((medicine: MedicineData) =>
+      medicine.medicine_name.toLowerCase().includes(query.toLowerCase())
+    )
+    
+    searchResults.value = [
+      ...patients.map((p: PatientData) => ({ type: 'patient' as const, data: p })),
+      ...doctors.map((d: DoctorData) => ({ type: 'doctor' as const, data: d })),
+      ...medicines.map((m: MedicineData) => ({ type: 'medicine' as const, data: m }))
+    ]
+    
+  } catch (error) {
+    console.error('Search error:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Search failed',
+      position: 'top',
+      timeout: 3000
+    })
+  } finally {
+    isSearching.value = false
+  }
+}
+
+// Watch for search input changes
+watch(text, (newValue: string) => {
+  if (newValue && newValue.length > 2) {
+    void performSearch(newValue)
+  } else {
+    searchResults.value = []
+  }
+})
+
+// Search result helpers
+const getSearchResultIcon = (type: string) => {
+  switch (type) {
+    case 'patient': return 'person'
+    case 'doctor': return 'medical_services'
+    case 'medicine': return 'medication'
+    default: return 'search'
+  }
+}
+
+const getSearchResultTitle = (result: SearchResult) => {
+  switch (result.type) {
+    case 'patient': 
+      return (result.data as PatientData).patient_name || 'Unknown Patient'
+    case 'doctor': 
+      return (result.data as DoctorData).full_name || 'Unknown Doctor'
+    case 'medicine': 
+      return (result.data as MedicineData).medicine_name || 'Unknown Medicine'
+    default: return 'Unknown'
+  }
+}
+
+const getSearchResultSubtitle = (result: SearchResult) => {
+  switch (result.type) {
+    case 'patient': 
+      return `Queue: ${(result.data as PatientData).queue_number || 'N/A'}`
+    case 'doctor': 
+      return (result.data as DoctorData).specialization || 'General'
+    case 'medicine': 
+      return `Stock: ${(result.data as MedicineData).current_stock || 0}`
+    default: return ''
+  }
+}
+
 // Dashboard variables
 
 // Dashboard statistics
 const dashboardStats = ref({
+  todaysTasks: 0,
   patientsUnderCare: 0,
-  pendingTasks: 0,
-  urgentTasks: 0,
-  routineTasks: 0,
   vitalsChecked: 0,
-  medicationsAdministered: 0
+  medicationsGiven: 0
 })
 
-// Queue management
-const normalQueue = ref([])
-const priorityQueue = ref([])
+// Queue management (removed duplicate declarations)
+
+// Load dashboard statistics
+const loadDashboardStats = async () => {
+  try {
+    // Load patients in queue (normal + priority)
+    const patientsResponse = await api.get('/operations/nurse/queue/patients/')
+    const totalPatients = patientsResponse.data.normal_queue.length + patientsResponse.data.priority_queue.length
+    
+    // Load medicine inventory count
+    const medicinesResponse = await api.get('/operations/medicine-inventory/')
+    const totalMedicines = medicinesResponse.data.length
+    
+    // Load completed patient assessments (vitals checked) - this would be from assignments
+    // For now, we'll use a placeholder - in real implementation, this would come from completed assignments
+    const vitalsChecked = 0 // TODO: Implement actual vitals count from completed assessments
+    
+    // Today's tasks based on actual patient data
+    const todaysTasksCount = totalPatients > 0 ? (totalPatients + (patientsResponse.data.priority_queue.length > 0 ? 1 : 0)) : 0
+    
+    dashboardStats.value = {
+      todaysTasks: todaysTasksCount,
+      patientsUnderCare: totalPatients,
+      vitalsChecked,
+      medicationsGiven: totalMedicines
+    }
+    
+  } catch (error) {
+    console.error('Failed to load dashboard stats:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load dashboard statistics',
+      position: 'top',
+      timeout: 3000
+    })
+  }
+}
 
 // Real-time time and weather
 const currentTime = ref('')
@@ -611,7 +981,7 @@ const navigateTo = (route: string) => {
     case 'patient-assessment':
       void router.push('/nurse-patient-assessment')
       break
-    case 'medicine-inventory':
+    case 'nurse-medicine-inventory':
       void router.push('/nurse-medicine-inventory')
       break
     case 'patients':
@@ -674,30 +1044,78 @@ const fetchUserProfile = async () => {
   }
 }
 
-// Fetch dashboard statistics
-const fetchDashboardStats = () => {
+
+// Load queue data
+const loadQueueData = async () => {
   try {
-    // Mock data for now - replace with actual API call
-    dashboardStats.value = {
-      patientsUnderCare: 12,
-      pendingTasks: 8,
-      urgentTasks: 3,
-      routineTasks: 5,
-      vitalsChecked: 15,
-      medicationsAdministered: 22
-    }
-    console.log('Dashboard stats loaded:', dashboardStats.value)
+    const response = await api.get('/operations/nurse/queue/patients/')
+    normalQueue.value = response.data.normal_queue || []
+    priorityQueue.value = response.data.priority_queue || []
   } catch (error) {
-    console.error('Failed to fetch dashboard stats, using fallback:', error)
-    // Fallback data
-    dashboardStats.value = {
-      patientsUnderCare: 0,
-      pendingTasks: 0,
-      urgentTasks: 0,
-      routineTasks: 0,
-      vitalsChecked: 0,
-      medicationsAdministered: 0
+    console.error('Failed to load queue data:', error)
+  }
+}
+
+// Load medicine data
+const loadMedicineData = async () => {
+  try {
+    const response = await api.get('/operations/medicine-inventory/')
+    medicines.value = response.data
+  } catch (error) {
+    console.error('Failed to load medicine data:', error)
+  }
+}
+
+// Load today's tasks based on patient data
+const loadTodaysTasks = async () => {
+  try {
+    const tasks = []
+    
+    // Get queue data to generate tasks
+    const queueResponse = await api.get('/operations/nurse/queue/patients/')
+    const totalPatients = queueResponse.data.normal_queue.length + queueResponse.data.priority_queue.length
+    
+    // Generate tasks based on actual patient data
+    if (totalPatients > 0) {
+      tasks.push({
+        id: 1,
+        title: 'Patient Assessment',
+        description: `Assess ${totalPatients} patients in queue`,
+        icon: 'assignment',
+        color: 'primary',
+        status: 'Pending',
+        status_color: 'orange'
+      })
+      
+      if (queueResponse.data.priority_queue.length > 0) {
+        tasks.push({
+          id: 2,
+          title: 'Priority Patient Care',
+          description: `Attend to ${queueResponse.data.priority_queue.length} priority patients`,
+          icon: 'emergency',
+          color: 'red',
+          status: 'Urgent',
+          status_color: 'red'
+        })
+      }
     }
+    
+    todaysTasks.value = tasks
+  } catch (error) {
+    console.error('Failed to load tasks:', error)
+    todaysTasks.value = []
+  }
+}
+
+// Load completed assessments
+const loadCompletedAssessments = () => {
+  try {
+    // This would typically come from a backend endpoint for completed assessments
+    // For now, we'll use empty array as assessments are completed through the patient assessment page
+    completedAssessments.value = []
+  } catch (error) {
+    console.error('Failed to load completed assessments:', error)
+    completedAssessments.value = []
   }
 }
 
@@ -723,7 +1141,15 @@ onMounted(() => {
   void fetchUserProfile()
   
   // Load dashboard statistics
-  void fetchDashboardStats()
+  void loadDashboardStats()
+  
+  // Load queue and medicine data
+  void loadQueueData()
+  void loadMedicineData()
+  
+  // Load task and assessment data
+  void loadTodaysTasks()
+  void loadCompletedAssessments()
   
   // Initialize real-time features
   updateTime() // Set initial time
@@ -734,6 +1160,9 @@ onMounted(() => {
   
   // Refresh weather every 30 minutes
   setInterval(() => void fetchWeather(), 30 * 60 * 1000)
+  
+  // Refresh dashboard stats every 5 minutes
+  setInterval(() => void loadDashboardStats(), 5 * 60 * 1000)
 })
 
 // Cleanup on component unmount
@@ -746,27 +1175,9 @@ onUnmounted(() => {
 
 <style scoped>
 .page-background {
-  background: url('/background.png') no-repeat center center;
-  background-size: cover;
+  background: #f5f5f5;
   min-height: 100vh;
   position: relative;
-}
-
-.page-background::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(248, 249, 250, 0.15) 50%, rgba(240, 242, 245, 0.08) 100%);
-  z-index: 0;
-  pointer-events: none;
-}
-
-.page-background > * {
-  position: relative;
-  z-index: 1;
 }
 
 .search-container {
@@ -774,6 +1185,21 @@ onUnmounted(() => {
   justify-content: center;
   width: 100%;
   padding: 0 20px;
+  position: relative;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .search-input {
@@ -789,45 +1215,30 @@ onUnmounted(() => {
   margin-left: 20px;
 }
 
-.time-display,
-.weather-display,
-.weather-loading,
-.weather-error {
+.time-display, .weather-display, .weather-loading, .weather-error {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: white;
+  font-size: 14px;
 }
 
-.time-display .q-icon,
-.weather-display .q-icon {
-  color: #286660;
-}
 
 .time-text,
-.weather-text {
+.weather-text,
+.weather-location {
   font-size: 14px;
   font-weight: 500;
-  color: #286660;
-  white-space: nowrap;
+  color: white;
 }
 
 .weather-location {
   font-size: 12px;
-  color: #666;
-  margin-left: 4px;
+  opacity: 0.8;
 }
 
-.weather-loading .q-spinner {
-  color: #286660;
-}
 
-.weather-error .q-icon {
-  color: #ff6b6b;
-}
+
 
 /* Greeting Section Styles */
 .greeting-section {
@@ -1107,12 +1518,31 @@ onUnmounted(() => {
   color: white;
 }
 
-.time-display, .weather-display, .weather-loading, .weather-error {
+/* Pill-shaped elements for time, weather, and location */
+.time-pill, .weather-pill, .location-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  background: white;
+  color: #286660;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-text, .weather-text, .location-text {
+  white-space: nowrap;
+}
+
+.weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: white;
   font-size: 14px;
+  font-weight: 500;
 }
 
 /* Prototype Sidebar Styles */
@@ -1375,6 +1805,15 @@ onUnmounted(() => {
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
+.card-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #286660;
+  margin: 8px 0;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
 .card-description {
   font-size: 0.9rem;
   color: #34495e;
@@ -1490,5 +1929,99 @@ onUnmounted(() => {
 .queue-list {
   /* Patient list styling will be added when patient data is implemented */
   padding: 0;
+}
+
+/* Modal Styles */
+.modal-card {
+  min-width: 500px;
+  max-width: 600px;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card .q-card-section {
+  padding: 20px;
+}
+
+.modal-card .text-h6 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #286660;
+  margin: 0;
+}
+
+.modal-card .q-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.modal-card .q-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-card .q-item:last-child {
+  border-bottom: none;
+}
+
+.modal-card .q-item-section {
+  padding: 0 8px;
+}
+
+.modal-card .q-item-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.modal-card .q-item-label.caption {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+.modal-card .q-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+/* Empty state styling */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-state .q-icon {
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+  .modal-card {
+    min-width: 90vw;
+    max-width: 95vw;
+    margin: 20px;
+  }
+  
+  .modal-card .q-card-section {
+    padding: 16px;
+  }
+  
+  .modal-card .text-h6 {
+    font-size: 1.25rem;
+  }
 }
 </style>

@@ -49,13 +49,13 @@
           <!-- Loading Weather -->
           <div class="weather-loading" v-else-if="weatherLoading">
             <q-spinner size="sm" />
-            <span class="weather-text">Loading...</span>
+            <span class="weather-text">Loading weather...</span>
           </div>
           
           <!-- Weather Error -->
           <div class="weather-error" v-else-if="weatherError">
             <q-icon name="error" size="sm" />
-            <span class="weather-text">Weather unavailable</span>
+            <span class="weather-text">Weather Update and Place</span>
           </div>
         </div>
       </q-toolbar>
@@ -123,7 +123,7 @@
             <q-item-section>Patient Assessment</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('medicine-inventory')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-medicine-inventory')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="inventory" />
             </q-item-section>
@@ -137,7 +137,7 @@
             <q-item-section>Patient Management</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-analytics')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="bar_chart" />
             </q-item-section>
@@ -539,13 +539,13 @@ const navigateTo = (route: string) => {
     case 'patient-assessment':
       void router.push('/nurse-patient-assessment')
       break
-    case 'medicine-inventory':
+    case 'nurse-medicine-inventory':
       void router.push('/nurse-medicine-inventory')
       break
     case 'patients':
       // Already on patient management
       break
-    case 'analytics':
+    case 'nurse-analytics':
       void router.push('/nurse-analytics')
       break
     case 'settings':
@@ -620,11 +620,20 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   color: white;
+  font-size: 14px;
 }
 
-.time-text, .weather-text, .weather-location {
+.time-text,
+.weather-text,
+.weather-location {
   font-size: 14px;
   font-weight: 500;
+  color: white;
+}
+
+.weather-location {
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 /* Drawer Styles */
@@ -957,5 +966,60 @@ onMounted(() => {
   .patient-actions {
     justify-content: center;
   }
+}
+
+/* Header Styles */
+.prototype-header {
+  background: #286660;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-toolbar {
+  padding: 0 16px;
+}
+
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.search-container {
+  min-width: 300px;
+}
+
+.search-input {
+  border-radius: 8px;
+}
+
+/* Pill-shaped elements for time, weather, and location */
+.time-pill, .weather-pill, .location-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  color: #286660;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-text, .weather-text, .location-text {
+  white-space: nowrap;
+}
+
+.weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.weather-error .q-icon {
+  color: #ff6b6b;
 }
 </style>

@@ -13,7 +13,7 @@
             outlined
             dense
             v-model="text" 
-              placeholder="Search Analytics, Reports and Insights"
+              placeholder="Search Patient, symptoms and Appointments"
             class="search-input"
               bg-color="white"
             >
@@ -38,26 +38,26 @@
           <div class="time-display">
             <q-icon name="schedule" size="md" />
             <span class="time-text">{{ currentTime }}</span>
-    </div>
-
+          </div>
+          
           <!-- Weather Display -->
           <div class="weather-display" v-if="weatherData">
             <q-icon :name="getWeatherIcon(weatherData.condition)" size="sm" />
             <span class="weather-text">{{ weatherData.temperature }}°C</span>
             <span class="weather-location">{{ weatherData.location }}</span>
-              </div>
+          </div>
           
           <!-- Loading Weather -->
           <div class="weather-loading" v-else-if="weatherLoading">
             <q-spinner size="sm" />
             <span class="weather-text">Loading weather...</span>
-              </div>
+          </div>
           
           <!-- Weather Error -->
           <div class="weather-error" v-else-if="weatherError">
             <q-icon name="error" size="sm" />
             <span class="weather-text">Weather Update and Place</span>
-              </div>
+          </div>
               </div>
       </q-toolbar>
     </q-header>
@@ -122,7 +122,7 @@
             <q-item-section>Dashboard</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('medicine-inventory')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-medicine-inventory')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="medication" />
             </q-item-section>
@@ -143,14 +143,14 @@
             <q-item-section>Patient Management</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item active">
+          <q-item clickable v-ripple @click="navigateTo('nurse-analytics')" class="nav-item active">
             <q-item-section avatar>
               <q-icon name="analytics" />
             </q-item-section>
             <q-item-section>Analytics</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('settings')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-settings')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="settings" />
             </q-item-section>
@@ -693,8 +693,6 @@ const handleProfilePictureUpload = async (event: Event) => {
 /**
  * Fetches user profile data from the API and updates the local state
  * @returns {Promise<void>}
- * 
- * How it works:
  * 1. Makes API call to /users/profile/ endpoint
  * 2. Extracts user data from the response
  * 3. Updates the userProfile reactive reference with the data
@@ -811,7 +809,7 @@ const navigateTo = (route: string) => {
     case 'nurse-dashboard':
       void router.push('/nurse-dashboard')
       break
-    case 'medicine-inventory':
+    case 'nurse-medicine-inventory':
       void router.push('/nurse-medicine-inventory')
       break
     case 'patient-assessment':
@@ -820,7 +818,7 @@ const navigateTo = (route: string) => {
     case 'patients':
       void router.push('/nurse-patient-management')
       break
-    case 'analytics':
+    case 'nurse-analytics':
       // Already on analytics page
       break
     case 'settings':
@@ -1558,5 +1556,68 @@ onUnmounted(() => {
   .card-description {
     font-size: 12px;
   }
+}
+
+/* Header Styles */
+.prototype-header {
+  background: #286660;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-toolbar {
+  padding: 0 16px;
+}
+
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.search-container {
+  min-width: 300px;
+}
+
+.search-input {
+  border-radius: 8px;
+}
+
+.time-display, .weather-display, .weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-text,
+.weather-text,
+.weather-location {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+.weather-location {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.weather-error .q-icon {
+  color: #ff6b6b;
 }
 </style>

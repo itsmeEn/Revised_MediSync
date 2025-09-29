@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "corsheaders",
+    "channels",
+    "channels_redis",
+    "redis",
 
     # Local apps
     "backend.users.apps.UsersConfig",
@@ -243,4 +246,20 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': 'redis://localhost:6379/1',
     }
+}
+
+# Message Encryption Settings
+MESSAGE_ENCRYPTION_KEY = "your-32-character-secret-key-here"  # Change this in production
+
+# Channels Configuration for WebSocket
+ASGI_APPLICATION = "backend.asgi.application"
+
+# Channel Layers Configuration
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
 }  

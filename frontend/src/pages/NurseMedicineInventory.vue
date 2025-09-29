@@ -12,7 +12,7 @@
               outlined
             dense 
             v-model="text" 
-              placeholder="Search medicines, inventory and stock"
+              placeholder="Search Patient, symptoms and Appointments"
             class="search-input"
               bg-color="white"
             >
@@ -128,21 +128,21 @@
             <q-item-section>Patient Assessment</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('medicine-inventory')" class="nav-item active">
+          <q-item clickable v-ripple @click="navigateTo('nurse-medicine-inventory')" class="nav-item active">
             <q-item-section avatar>
               <q-icon name="medication" />
             </q-item-section>
             <q-item-section>Medicine Inventory</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-analytics')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="analytics" />
             </q-item-section>
             <q-item-section>Analytics</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('settings')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-settings')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="settings" />
             </q-item-section>
@@ -164,6 +164,18 @@
     </q-drawer>
 
     <q-page-container class="page-container-with-fixed-header">
+      <!-- Greeting Section -->
+      <div class="greeting-section">
+        <q-card class="greeting-card">
+          <q-card-section class="greeting-content">
+            <h2 class="greeting-text">
+              Good {{ getTimeOfDay() }}, {{ userProfile.role ? userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1) : 'Nurse' }} {{ userProfile.full_name || 'User' }}
+            </h2>
+            <p class="greeting-subtitle">Manage your medicine inventory - {{ currentDate }}</p>
+          </q-card-section>
+        </q-card>
+      </div>
+
       <!-- Page Header -->
       <div class="page-header">
         <div class="header-content">
@@ -736,6 +748,15 @@ const text = ref('')
 
 // Time and weather
 const currentTime = ref('')
+const currentDate = computed(() => {
+  const now = new Date()
+  return now.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+})
 const weatherData = ref<{
   temperature: number
   condition: string
@@ -745,6 +766,14 @@ const weatherLoading = ref(false)
 const weatherError = ref(false)
 let timeInterval: NodeJS.Timeout | null = null
 
+// Get time of day for greeting
+const getTimeOfDay = () => {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Morning'
+  if (hour < 17) return 'Afternoon'
+  return 'Evening'
+}
+
 // Profile picture
 const fileInput = ref<HTMLInputElement | null>(null)
 
@@ -752,22 +781,13 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const userProfile = ref<{
   first_name?: string
   last_name?: string
-  full_name: string
-  role: string
-  is_verified: boolean
-  verification_status: string
+  full_name?: string
+  role?: string
+  is_verified?: boolean
+  verification_status?: string
   profile_picture?: string | null
   email?: string
-}>({
-  first_name: '',
-  last_name: '',
-  full_name: '',
-  role: '',
-  is_verified: false,
-  verification_status: 'not_submitted',
-  profile_picture: null,
-  email: ''
-})
+}>({})
 
 const isUserVerified = computed(() => {
   return userProfile.value.verification_status === 'approved'
@@ -998,9 +1018,6 @@ const inventoryStats = computed(() => {
 })
 
 // Methods
-const goBack = () => {
-  void router.push('/nurse-dashboard')
-}
 
 const handleAddMedicineClick = () => {
   if (!isUserVerified.value) {
@@ -1561,6 +1578,55 @@ const fetchWeather = async () => {
   }
 }
 
+// Load medicine inventory from backend
+const loadMedicineInventory = async () => {
+  try {
+    loading.value = true
+    const response = await api.get('/operations/medicine-inventory/')
+    
+    // Transform backend data to frontend format
+    medicines.value = response.data.map((medicine: {
+      id: number
+      medicine_name: string
+      current_stock: number
+      expiry_date: string
+      minimum_stock_level: number
+      usage_pattern: string
+      stock_level: string
+      unit_price: number
+      batch_number: string
+    }) => ({
+      id: medicine.id,
+      name: medicine.medicine_name,
+      genericName: medicine.medicine_name, // Use same name for now
+      category: 'General', // Default category
+      dosage: 'As prescribed',
+      strength: 'Standard',
+      quantity: medicine.current_stock,
+      unit: 'units',
+      expiryDate: medicine.expiry_date,
+      minStockLevel: medicine.minimum_stock_level,
+      description: medicine.usage_pattern || '',
+      stockLevel: medicine.stock_level,
+      unitPrice: medicine.unit_price,
+      batchNumber: medicine.batch_number
+    }))
+    
+    // Check stock levels on initial load
+    checkStockLevels()
+  } catch (error) {
+    console.error('Failed to load medicine inventory:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load medicine inventory',
+      position: 'top',
+      timeout: 3000
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
   // Load user profile first
   void fetchUserProfile()
@@ -1572,13 +1638,8 @@ onMounted(() => {
   // Fetch weather data
   void fetchWeather()
   
-  // Load inventory data
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-    // Check stock levels on initial load
-    checkStockLevels()
-  }, 1000)
+  // Load inventory data from backend
+  void loadMedicineInventory()
 })
 
 onUnmounted(() => {
@@ -1591,9 +1652,55 @@ onUnmounted(() => {
 <style scoped>
 /* Page Container with Background */
 .page-container-with-fixed-header {
-  background: #f8f9fa;
+  background: #f5f5f5;
   min-height: 100vh;
+  padding-top: 64px; /* Account for fixed header */
+}
+
+/* Greeting Section */
+.greeting-section {
+  padding: 24px;
+  background: transparent;
+}
+
+.greeting-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: relative;
+  overflow: hidden;
+}
+
+.greeting-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+.greeting-content {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+}
+
+.greeting-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.greeting-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
 }
 
 .page-header {
@@ -1840,7 +1947,7 @@ onUnmounted(() => {
 .header-left, .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
 }
 
 .search-container {
@@ -1851,14 +1958,39 @@ onUnmounted(() => {
   border-radius: 8px;
 }
 
-.time-display,
-.weather-display,
-.weather-loading,
-.weather-error {
+.time-display, .weather-display, .weather-loading, .weather-error {
   display: flex;
   align-items: center;
   gap: 8px;
   color: white;
+  font-size: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-text,
+.weather-text,
+.weather-location {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+.weather-location {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .weather-error .q-icon {

@@ -194,11 +194,15 @@
       <div class="dashboard-cards-section">
         <div class="dashboard-cards-grid">
           <!-- Today's Appointment Card -->
-          <q-card class="dashboard-card appointments-card">
+          <q-card class="dashboard-card appointments-card" @click="showTodayAppointmentsModal">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Today's Appointment</div>
-                <div class="card-description">Fetch the total Appointment</div>
+                <div class="card-description">{{ dashboardStats.todayAppointments }} appointments today</div>
+                <div class="card-value">
+                  <q-spinner v-if="statsLoading" size="md" />
+                  <span v-else>{{ dashboardStats.todayAppointments }}</span>
+                </div>
               </div>
               <div class="card-icon">
                 <q-icon name="event" size="2.5rem" />
@@ -207,11 +211,15 @@
           </q-card>
 
           <!-- Total Patient Card -->
-          <q-card class="dashboard-card patients-card">
+          <q-card class="dashboard-card patients-card" @click="showTotalPatientsModal">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Total Patient</div>
-                <div class="card-description">Total patients for today</div>
+                <div class="card-description">Based on completed assessments</div>
+                <div class="card-value">
+                  <q-spinner v-if="statsLoading" size="md" />
+                  <span v-else>{{ dashboardStats.totalPatients }}</span>
+                </div>
               </div>
               <div class="card-icon">
                 <q-icon name="people" size="2.5rem" />
@@ -220,11 +228,15 @@
           </q-card>
 
           <!-- Completed Appointment Card -->
-          <q-card class="dashboard-card completed-card">
+          <q-card class="dashboard-card completed-card" @click="showCompletedAppointmentsModal">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Completed Appointment</div>
-                <div class="card-description">Fetch the all the completed appointment</div>
+                <div class="card-description">All transaction history</div>
+                <div class="card-value">
+                  <q-spinner v-if="statsLoading" size="md" />
+                  <span v-else>{{ dashboardStats.completedAppointments }}</span>
+                </div>
               </div>
               <div class="card-icon">
                 <q-icon name="check_circle" size="2.5rem" />
@@ -233,11 +245,15 @@
           </q-card>
 
           <!-- Pending Assessment Card -->
-          <q-card class="dashboard-card assessment-card">
+          <q-card class="dashboard-card assessment-card" @click="showPendingAssessmentsModal">
             <q-card-section class="card-content">
               <div class="card-text">
                 <div class="card-title">Pending Assessment</div>
-                <div class="card-description">Fetch pending assessment based on patient assessment</div>
+                <div class="card-description">Currently being assessed by nurses</div>
+                <div class="card-value">
+                  <q-spinner v-if="statsLoading" size="md" />
+                  <span v-else>{{ dashboardStats.pendingAssessments }}</span>
+                </div>
               </div>
               <div class="card-icon">
                 <q-icon name="assignment" size="2.5rem" />
@@ -246,6 +262,164 @@
           </q-card>
         </div>
       </div>
+
+      <!-- Modals -->
+      
+      <!-- Today's Appointments Modal -->
+      <q-dialog v-model="todayAppointmentsModal" persistent>
+        <q-card style="min-width: 800px; max-width: 90vw;">
+          <q-card-section class="row items-center q-pb-none">
+            <div class="text-h6">Today's Appointments</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+          
+          <q-card-section>
+            <q-list separator>
+              <q-item v-for="appointment in todayAppointments" :key="appointment.id" class="q-pa-md">
+                <q-item-section avatar>
+                  <q-avatar color="primary" text-color="white">
+                    {{ appointment.patient?.name?.charAt(0) || 'P' }}
+                  </q-avatar>
+                </q-item-section>
+                
+                <q-item-section>
+                  <q-item-label>{{ appointment.patient?.name || 'Unknown Patient' }}</q-item-label>
+                  <q-item-label caption>Appointment Time: {{ formatTime(appointment.appointment_time) }}</q-item-label>
+                  <q-item-label caption>Status: {{ appointment.status }}</q-item-label>
+                </q-item-section>
+                
+                <q-item-section side>
+                  <q-chip :color="getStatusColor(appointment.status)" text-color="white">
+                    {{ appointment.status }}
+                  </q-chip>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            
+            <div v-if="todayAppointments.length === 0" class="text-center q-pa-md text-grey-6">
+              No appointments scheduled for today.
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+
+      <!-- Total Patients Modal -->
+      <q-dialog v-model="totalPatientsModal" persistent>
+        <q-card style="min-width: 800px; max-width: 90vw;">
+          <q-card-section class="row items-center q-pb-none">
+            <div class="text-h6">Total Patients (Completed Assessments)</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+          
+          <q-card-section>
+            <q-list separator>
+              <q-item v-for="patient in totalPatients" :key="patient.id" class="q-pa-md">
+                <q-item-section avatar>
+                  <q-avatar color="green" text-color="white">
+                    {{ patient.patient?.name?.charAt(0) || 'P' }}
+                  </q-avatar>
+                </q-item-section>
+                
+                <q-item-section>
+                  <q-item-label>{{ patient.patient?.name || 'Unknown Patient' }}</q-item-label>
+                  <q-item-label caption>Assessment Date: {{ formatDate(patient.assessment_date) }}</q-item-label>
+                  <q-item-label caption>Completed by: {{ patient.nurse?.name || 'Unknown Nurse' }}</q-item-label>
+                </q-item-section>
+                
+                <q-item-section side>
+                  <q-chip color="green" text-color="white">
+                    Completed
+                  </q-chip>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            
+            <div v-if="totalPatients.length === 0" class="text-center q-pa-md text-grey-6">
+              No completed assessments found.
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+
+      <!-- Completed Appointments Modal -->
+      <q-dialog v-model="completedAppointmentsModal" persistent>
+        <q-card style="min-width: 800px; max-width: 90vw;">
+          <q-card-section class="row items-center q-pb-none">
+            <div class="text-h6">Completed Appointments (Transaction History)</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+          
+          <q-card-section>
+            <q-list separator>
+              <q-item v-for="appointment in completedAppointments" :key="appointment.id" class="q-pa-md">
+                <q-item-section avatar>
+                  <q-avatar color="orange" text-color="white">
+                    {{ appointment.patient?.name?.charAt(0) || 'P' }}
+                  </q-avatar>
+                </q-item-section>
+                
+                <q-item-section>
+                  <q-item-label>{{ appointment.patient?.name || 'Unknown Patient' }}</q-item-label>
+                  <q-item-label caption>Appointment Date: {{ formatDate(appointment.appointment_date) }}</q-item-label>
+                  <q-item-label caption>Completed: {{ formatDateTime(appointment.completed_at) }}</q-item-label>
+                </q-item-section>
+                
+                <q-item-section side>
+                  <q-chip color="orange" text-color="white">
+                    Completed
+                  </q-chip>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            
+            <div v-if="completedAppointments.length === 0" class="text-center q-pa-md text-grey-6">
+              No completed appointments found.
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+
+      <!-- Pending Assessments Modal -->
+      <q-dialog v-model="pendingAssessmentsModal" persistent>
+        <q-card style="min-width: 800px; max-width: 90vw;">
+          <q-card-section class="row items-center q-pb-none">
+            <div class="text-h6">Pending Assessments</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+          
+          <q-card-section>
+            <q-list separator>
+              <q-item v-for="assessment in pendingAssessments" :key="assessment.id" class="q-pa-md">
+                <q-item-section avatar>
+                  <q-avatar color="purple" text-color="white">
+                    {{ assessment.patient?.name?.charAt(0) || 'P' }}
+                  </q-avatar>
+                </q-item-section>
+                
+                <q-item-section>
+                  <q-item-label>{{ assessment.patient?.name || 'Unknown Patient' }}</q-item-label>
+                  <q-item-label caption>Assessment Started: {{ formatDateTime(assessment.created_at) }}</q-item-label>
+                  <q-item-label caption>Assigned Nurse: {{ assessment.nurse?.name || 'Unknown Nurse' }}</q-item-label>
+                </q-item-section>
+                
+                <q-item-section side>
+                  <q-chip color="purple" text-color="white">
+                    In Progress
+                  </q-chip>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            
+            <div v-if="pendingAssessments.length === 0" class="text-center q-pa-md text-grey-6">
+              No pending assessments found.
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
 
       
       <router-view />
@@ -259,6 +433,39 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
+
+// Type definitions
+interface Patient {
+  id: number
+  name: string
+  [key: string]: unknown
+}
+
+interface Nurse {
+  id: number
+  name: string
+  [key: string]: unknown
+}
+
+interface Appointment {
+  id: number
+  patient?: Patient
+  appointment_time?: string
+  appointment_date?: string
+  status: string
+  completed_at?: string
+  [key: string]: unknown
+}
+
+interface Assessment {
+  id: number
+  patient?: Patient
+  nurse?: Nurse
+  assessment_date?: string
+  status: string
+  created_at?: string
+  [key: string]: unknown
+}
 
 
 const router = useRouter()
@@ -274,11 +481,29 @@ const text = ref('')
 
 // Dashboard statistics
 const dashboardStats = ref({
-  todaySchedule: 0,
-  completedPatients: 0,
-  notifications: 0,
-  pendingAssessment: 0
+  todayAppointments: 0,
+  totalPatients: 0,
+  completedAppointments: 0,
+  pendingAssessments: 0
 })
+
+// Loading states for dashboard stats
+const statsLoading = ref(true)
+
+// Modal states
+const todayAppointmentsModal = ref(false)
+const totalPatientsModal = ref(false)
+const completedAppointmentsModal = ref(false)
+const pendingAssessmentsModal = ref(false)
+
+// Modal data
+const todayAppointments = ref<Appointment[]>([])
+const totalPatients = ref<Assessment[]>([])
+const completedAppointments = ref<Appointment[]>([])
+const pendingAssessments = ref<Assessment[]>([])
+
+// Loading states for modals
+const modalLoading = ref(false)
 
 
 // Real-time features
@@ -294,6 +519,7 @@ let timeInterval: NodeJS.Timeout | null = null
 
 // User profile data - fetched from API
 const userProfile = ref<{
+  id?: number
   full_name: string
   specialization?: string
   role: string
@@ -507,6 +733,7 @@ const fetchUserProfile = async () => {
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
     
     userProfile.value = {
+      id: userData.id,
       full_name: userData.full_name,
       specialization: userData.doctor_profile?.specialization,
       role: userData.role,
@@ -515,6 +742,9 @@ const fetchUserProfile = async () => {
     }
     
     console.log('User profile loaded:', userProfile.value)
+    
+    // Fetch dashboard stats after profile is loaded
+    await fetchDashboardStats()
   } catch (error) {
     console.error('Failed to fetch user profile:', error)
     
@@ -523,12 +753,16 @@ const fetchUserProfile = async () => {
     if (userData) {
       const user = JSON.parse(userData)
       userProfile.value = {
+        id: user.id,
         full_name: user.full_name,
         specialization: user.doctor_profile?.specialization,
         role: user.role,
         profile_picture: user.profile_picture || null,
         verification_status: user.verification_status || 'not_submitted'
       }
+      
+      // Still try to fetch dashboard stats
+      await fetchDashboardStats()
     } else {
       $q.notify({
         type: 'negative',
@@ -569,6 +803,132 @@ const navigateTo = (route: string) => {
   }
 }
 
+// Modal functions
+const showTodayAppointmentsModal = async () => {
+  modalLoading.value = true
+  todayAppointmentsModal.value = true
+  
+  try {
+    const response = await api.get('/operations/appointments/', {
+      params: {
+        doctor: userProfile.value.id,
+        date: new Date().toISOString().split('T')[0],
+        status: 'scheduled'
+      }
+    })
+    todayAppointments.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch today\'s appointments:', error)
+    todayAppointments.value = []
+  } finally {
+    modalLoading.value = false
+  }
+}
+
+const showTotalPatientsModal = async () => {
+  modalLoading.value = true
+  totalPatientsModal.value = true
+  
+  try {
+    const response = await api.get('/operations/patient-assessments/', {
+      params: {
+        status: 'completed'
+      }
+    })
+    totalPatients.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch total patients:', error)
+    totalPatients.value = []
+  } finally {
+    modalLoading.value = false
+  }
+}
+
+const showCompletedAppointmentsModal = async () => {
+  modalLoading.value = true
+  completedAppointmentsModal.value = true
+  
+  try {
+    const response = await api.get('/operations/appointments/', {
+      params: {
+        doctor: userProfile.value.id,
+        status: 'completed'
+      }
+    })
+    completedAppointments.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch completed appointments:', error)
+    completedAppointments.value = []
+  } finally {
+    modalLoading.value = false
+  }
+}
+
+const showPendingAssessmentsModal = async () => {
+  modalLoading.value = true
+  pendingAssessmentsModal.value = true
+  
+  try {
+    const response = await api.get('/operations/patient-assessments/', {
+      params: {
+        status: 'in_progress'
+      }
+    })
+    pendingAssessments.value = response.data.results || response.data || []
+  } catch (error) {
+    console.error('Failed to fetch pending assessments:', error)
+    pendingAssessments.value = []
+  } finally {
+    modalLoading.value = false
+  }
+}
+
+// Utility functions for formatting
+const formatTime = (timeString?: string) => {
+  if (!timeString) return 'N/A'
+  return new Date(timeString).toLocaleTimeString('en-US', {
+    hour12: true,
+    hour: 'numeric',
+    minute: '2-digit'
+  })
+}
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return 'N/A'
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+const formatDateTime = (dateString?: string) => {
+  if (!dateString) return 'N/A'
+  return new Date(dateString).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
+const getStatusColor = (status?: string) => {
+  switch (status?.toLowerCase()) {
+    case 'scheduled':
+      return 'blue'
+    case 'completed':
+      return 'green'
+    case 'cancelled':
+      return 'red'
+    case 'in_progress':
+      return 'orange'
+    default:
+      return 'grey'
+  }
+}
+
 
 const logout = () => {
   localStorage.removeItem('access_token')
@@ -580,25 +940,89 @@ const logout = () => {
 // Fetch dashboard statistics
 const fetchDashboardStats = async () => {
   try {
-    const response = await api.get('/operations/dashboard/stats/')
+    statsLoading.value = true
+    
+    // Fetch all required data in parallel
+    const [todayAppointmentsRes, totalPatientsRes, completedAppointmentsRes, pendingAssessmentsRes] = await Promise.all([
+      // Today's appointments for doctor
+      api.get('/operations/appointments/', {
+        params: {
+          doctor: userProfile.value.id,
+          date: new Date().toISOString().split('T')[0],
+          status: 'scheduled'
+        }
+      }).catch(() => ({ data: { count: 0 } })),
+      
+      // Total patients based on completed assessments
+      api.get('/operations/patient-assessments/', {
+        params: {
+          status: 'completed'
+        }
+      }).catch(() => ({ data: { count: 0 } })),
+      
+      // Completed appointments (transaction history)
+      api.get('/operations/appointments/', {
+        params: {
+          doctor: userProfile.value.id,
+          status: 'completed'
+        }
+      }).catch(() => ({ data: { count: 0 } })),
+      
+      // Pending assessments (currently being assessed by nurses)
+      api.get('/operations/patient-assessments/', {
+        params: {
+          status: 'in_progress'
+        }
+      }).catch(() => ({ data: { count: 0 } }))
+    ])
+    
     dashboardStats.value = {
-      todaySchedule: response.data.today_schedule || 0,
-      completedPatients: response.data.completed_patients || 0,
-      notifications: response.data.notifications || 0,
-      pendingAssessment: response.data.pending_assessment || 0
+      todayAppointments: todayAppointmentsRes.data.count || todayAppointmentsRes.data.results?.length || 0,
+      totalPatients: totalPatientsRes.data.count || totalPatientsRes.data.results?.length || 0,
+      completedAppointments: completedAppointmentsRes.data.count || completedAppointmentsRes.data.results?.length || 0,
+      pendingAssessments: pendingAssessmentsRes.data.count || pendingAssessmentsRes.data.results?.length || 0
     }
+    
+    console.log('Dashboard stats loaded:', dashboardStats.value)
   } catch (error) {
     console.error('Failed to fetch dashboard stats:', error)
+    
+    // Set default values on error
+    dashboardStats.value = {
+      todayAppointments: 0,
+      totalPatients: 0,
+      completedAppointments: 0,
+      pendingAssessments: 0
+    }
+  } finally {
+    statsLoading.value = false
   }
 }
 
 
-onMounted(() => {
-  // Load user profile data from API
-  void fetchUserProfile()
+// Daily refresh functionality
+const setupDailyRefresh = () => {
+  const now = new Date()
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setHours(0, 0, 0, 0)
   
-  // Load dashboard statistics
-  void fetchDashboardStats()
+  const msUntilMidnight = tomorrow.getTime() - now.getTime()
+  
+  setTimeout(() => {
+    // Refresh dashboard stats at midnight
+    void fetchDashboardStats()
+    
+    // Set up daily refresh
+    setInterval(() => {
+      void fetchDashboardStats()
+    }, 24 * 60 * 60 * 1000) // 24 hours
+  }, msUntilMidnight)
+}
+
+onMounted(() => {
+  // Load user profile data from API (this will also fetch dashboard stats)
+  void fetchUserProfile()
   
   // Initialize real-time features
   updateTime() // Set initial time
@@ -606,6 +1030,9 @@ onMounted(() => {
   
   // Fetch weather data
   void fetchWeatherData()
+  
+  // Setup daily refresh
+  setupDailyRefresh()
 })
 
 onUnmounted(() => {
@@ -874,6 +1301,7 @@ onUnmounted(() => {
   cursor: pointer;
   overflow: hidden;
   position: relative;
+  min-height: 140px;
 }
 
 .dashboard-card::before {
@@ -923,6 +1351,15 @@ onUnmounted(() => {
   font-size: 14px;
   color: #666;
   line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #286660;
+  line-height: 1;
+  margin-top: 8px;
 }
 
 .card-icon {
@@ -939,9 +1376,16 @@ onUnmounted(() => {
 
 /* Card-specific colors */
 .appointments-card .card-icon { color: #2196f3; }
+.appointments-card .card-value { color: #2196f3; }
+
 .patients-card .card-icon { color: #4caf50; }
+.patients-card .card-value { color: #4caf50; }
+
 .completed-card .card-icon { color: #ff9800; }
+.completed-card .card-value { color: #ff9800; }
+
 .assessment-card .card-icon { color: #9c27b0; }
+.assessment-card .card-value { color: #9c27b0; }
 
 
 /* Responsive Design */

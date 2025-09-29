@@ -75,8 +75,8 @@
           <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn" />
         </div>
 
-        <!-- User Profile Section -->
-        <div class="sidebar-user-profile">
+        <!-- User Profile Section - Centered -->
+        <div class="sidebar-user-profile-centered">
           <div class="profile-picture-container">
             <q-avatar size="80px" class="profile-avatar">
               <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
@@ -99,23 +99,17 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
-            <q-icon 
-              :name="userProfile.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
-              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
-              class="verified-badge" 
-            />
           </div>
           
           <div class="user-info">
-            <h6 class="user-name">{{ userProfile.full_name || 'Loading...' }}</h6>
-            <p class="user-role">{{ userProfile.specialization || 'Loading specialization...' }}</p>
+            <h6 class="user-name">{{ userProfile?.first_name }} {{ userProfile?.last_name }}</h6>
+            <p class="user-role">Doctor</p>
             <q-chip 
-              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
-              text-color="white" 
+              :color="userProfile?.verification_status === 'verified' ? 'green' : 'orange'"
+              text-color="white"
               size="sm"
-            >
-              {{ userProfile.verification_status === 'approved' ? 'Verified' : 'Not Verified' }}
-            </q-chip>
+              :label="userProfile?.verification_status === 'verified' ? 'Verified' : 'Pending'"
+            />
           </div>
         </div>
 
@@ -164,8 +158,8 @@
           </q-item>
         </q-list>
 
-        <!-- Logout Section -->
-        <div class="logout-section">
+        <!-- Logout Section - Footer -->
+        <div class="sidebar-footer">
           <q-btn
             color="negative"
             icon="logout"
@@ -194,173 +188,288 @@
           <div class="settings-content">
             <!-- All Settings in One Card -->
             <q-card class="settings-card">
-              <!-- Profile Information Section -->
               <q-card-section>
-                <div class="text-h6">Profile Information</div>
-                <p class="text-caption">Your basic account information (read-only)</p>
-              </q-card-section>
-              
-              <q-card-section>
-                <div class="row q-col-gutter-md">
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="userProfile.full_name"
-                      label="Full Name"
-                      readonly
-                      outlined
-                      dense
-                    >
-                      <template v-slot:prepend>
-                        <q-icon name="person" />
-                      </template>
-                    </q-input>
-                  </div>
+                <h6 class="text-h6 q-mb-lg text-center">Settings</h6>
+                
+                <!-- Profile Information Section -->
+                <div class="settings-section">
+                  <h6 class="text-subtitle1 q-mb-md">Profile Information</h6>
                   
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="userProfile.email"
-                      label="Email Address"
-                      readonly
-                      outlined
-                      dense
-                    >
-                      <template v-slot:prepend>
-                        <q-icon name="email" />
-                      </template>
-                    </q-input>
+                  <div class="profile-section">
+                    <div class="profile-picture-container">
+                      <q-avatar size="120px" class="profile-avatar">
+                        <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
+                        <div v-else class="profile-placeholder">
+                          {{ userInitials }}
+                        </div>
+                      </q-avatar>
+                      <q-btn
+                        round
+                        color="primary"
+                        icon="camera_alt"
+                        size="sm"
+                        class="upload-btn"
+                        @click="triggerFileUpload"
+                      />
+                      <input
+                        ref="fileInput"
+                        type="file"
+                        accept="image/*"
+                        style="display: none"
+                        @change="handleProfilePictureUpload"
+                      />
+                    </div>
+                    
+                    <div class="profile-form">
+                      <div class="row q-gutter-md">
+                        <div class="col-12">
+                          <q-input
+                            v-model="profileForm.fullName"
+                            label="Full Name"
+                            outlined
+                            readonly
+                            class="large-input"
+                          />
+                        </div>
+                        <div class="col-12">
+                          <q-input
+                            v-model="profileForm.email"
+                            label="Email Address"
+                            type="email"
+                            outlined
+                            readonly
+                            class="large-input"
+                          />
+                        </div>
+                        <div class="col-12">
+                          <q-input
+                            v-model="profileForm.phone"
+                            label="Phone Number"
+                            outlined
+                            mask="(###) ### - ####"
+                            class="large-input"
+                          />
+                        </div>
+                        <div class="col-12">
+                          <q-select
+                            v-model="profileForm.specialization"
+                            :options="specializationOptions"
+                            label="Specialization"
+                            outlined
+                            emit-value
+                            map-options
+                            class="large-input"
+                          />
+                        </div>
+                        <div class="col-12">
+                          <q-input
+                            v-model="profileForm.licenseNumber"
+                            label="Medical License Number"
+                            outlined
+                            readonly
+                            class="large-input"
+                          />
+                        </div>
+                        <div class="col-12">
+                          <q-input
+                            v-model="profileForm.bio"
+                            label="Bio"
+                            type="textarea"
+                            outlined
+                            rows="4"
+                            placeholder="Tell us about yourself..."
+                            class="large-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                </div>
+
+                <q-separator class="q-my-lg" />
+
+                <!-- Security Settings Section -->
+                <div class="settings-section">
+                  <h6 class="text-subtitle1 q-mb-md">Security Settings</h6>
                   
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="userProfile.role"
-                      label="Role"
-                      readonly
-                      outlined
-                      dense
-                    >
-                      <template v-slot:prepend>
-                        <q-icon name="badge" />
-                      </template>
-                    </q-input>
+                  <div class="row q-gutter-md">
+                    <div class="col-12">
+                      <q-input
+                        v-model="securityForm.currentPassword"
+                        label="Current Password"
+                        type="password"
+                        outlined
+                        :rules="[val => !!val || 'Current password is required']"
+                        class="large-input"
+                      />
+                    </div>
+                    <div class="col-12">
+                      <q-input
+                        v-model="securityForm.newPassword"
+                        label="New Password"
+                        type="password"
+                        outlined
+                        :rules="[
+                          val => !!val || 'New password is required',
+                          val => val.length >= 8 || 'Password must be at least 8 characters'
+                        ]"
+                        class="large-input"
+                      />
+                    </div>
+                    <div class="col-12">
+                      <q-input
+                        v-model="securityForm.confirmPassword"
+                        label="Confirm New Password"
+                        type="password"
+                        outlined
+                        :rules="[
+                          val => !!val || 'Please confirm your password',
+                          val => val === securityForm.newPassword || 'Passwords do not match'
+                        ]"
+                        class="large-input"
+                      />
+                    </div>
+                    <div class="col-12">
+                      <q-toggle
+                        v-model="securityForm.twoFactorAuth"
+                        label="Enable Two-Factor Authentication"
+                        color="primary"
+                        class="large-toggle"
+                      />
+                    </div>
                   </div>
+                </div>
+
+                <q-separator class="q-my-lg" />
+
+                <!-- Notification Preferences Section -->
+                <div class="settings-section">
+                  <h6 class="text-subtitle1 q-mb-md">Notification Preferences</h6>
                   
-                  <div class="col-12 col-md-6">
-                    <q-input
-                      v-model="userProfile.specialization"
-                      label="Specialization"
-                      readonly
-                      outlined
-                      dense
-                    >
-                      <template v-slot:prepend>
-                        <q-icon name="medical_services" />
-                      </template>
-                    </q-input>
+                  <div class="notification-settings">
+                    <div class="notification-item">
+                      <div class="notification-info">
+                        <div class="notification-title">Patient Alerts</div>
+                        <div class="notification-description">Receive notifications for patient emergencies and urgent care needs</div>
+                      </div>
+                      <q-toggle
+                        v-model="notificationSettings.patientAlerts"
+                        color="primary"
+                      />
+                    </div>
+                    
+                    <div class="notification-item">
+                      <div class="notification-info">
+                        <div class="notification-title">Appointment Reminders</div>
+                        <div class="notification-description">Get reminded about upcoming appointments and schedule changes</div>
+                      </div>
+                      <q-toggle
+                        v-model="notificationSettings.appointmentReminders"
+                        color="primary"
+                      />
+                    </div>
+                    
+                    <div class="notification-item">
+                      <div class="notification-info">
+                        <div class="notification-title">Message Notifications</div>
+                        <div class="notification-description">Notifications for new messages from patients and colleagues</div>
+                      </div>
+                      <q-toggle
+                        v-model="notificationSettings.messageNotifications"
+                        color="primary"
+                      />
+                    </div>
+                    
+                    <div class="notification-item">
+                      <div class="notification-info">
+                        <div class="notification-title">Analytics Updates</div>
+                        <div class="notification-description">Weekly analytics reports and predictive insights</div>
+                      </div>
+                      <q-toggle
+                        v-model="notificationSettings.analyticsUpdates"
+                        color="primary"
+                      />
+                    </div>
                   </div>
                 </div>
-              </q-card-section>
 
-              <!-- Appearance Section -->
-              <q-card-section>
-                <div class="text-h6">Appearance</div>
-                <p class="text-caption">Customize the look and feel of your interface</p>
-              </q-card-section>
-              
-              <q-card-section>
-                <!-- Text Size Setting -->
-                <div class="setting-item">
-                  <div class="setting-label">
-                    <q-icon name="text_fields" class="q-mr-sm" />
-                    <span>Text Size</span>
+                <q-separator class="q-my-lg" />
+
+                <!-- Account Status Section -->
+                <div class="settings-section">
+                  <h6 class="text-subtitle1 q-mb-md">Account Status</h6>
+                  
+                  <div class="row q-gutter-md">
+                    <div class="col-12 col-md-6">
+                      <div class="status-item">
+                        <div class="status-label">Account Type</div>
+                        <div class="status-value-right">Doctor</div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <div class="status-item">
+                        <div class="status-label">Verification Status</div>
+                        <div class="status-value-right">
+                          <q-chip
+                            :color="getVerificationColor(userProfile.verification_status)"
+                            text-color="white"
+                            :label="getVerificationLabel(userProfile.verification_status)"
+                            size="sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <div class="status-item">
+                        <div class="status-label">Last Login</div>
+                        <div class="status-value-right">{{ accountStatus.lastLogin }}</div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <div class="status-item">
+                        <div class="status-label">Member Since</div>
+                        <div class="status-value-right">{{ accountStatus.memberSince }}</div>
+                      </div>
+                    </div>
                   </div>
-                  <q-slider
-                    v-model="settings.textSize"
-                    :min="12"
-                    :max="24"
-                    :step="1"
-                    label
-                    label-always
-                    color="primary"
-                    class="q-mt-md"
-                    @update:model-value="updateTextSize"
-                  />
                 </div>
 
-                <!-- Font Family Setting -->
-                <div class="setting-item">
-                  <div class="setting-label">
-                    <q-icon name="font_download" class="q-mr-sm" />
-                    <span>Font Family</span>
-                  </div>
-                  <q-select
-                    v-model="settings.fontFamily"
-                    :options="fontOptions"
-                    outlined
-                    dense
-                    class="q-mt-sm"
-                    @update:model-value="updateFontFamily"
-                  />
-                </div>
-              </q-card-section>
+                <q-separator class="q-my-lg" />
 
-              <!-- Notifications Section -->
-              <q-card-section>
-                <div class="text-h6">Notifications</div>
-                <p class="text-caption">Manage your notification preferences</p>
-              </q-card-section>
-              
-              <q-card-section>
-                <div class="setting-item">
-                  <div class="setting-label">
-                    <q-icon name="notifications" class="q-mr-sm" />
-                    <span>Email Notifications</span>
+                <!-- Quick Actions Section -->
+                <div class="settings-section">
+                  <h6 class="text-subtitle1 q-mb-md">Quick Actions</h6>
+                  
+                  <div class="row q-gutter-md justify-center">
+                    <div class="col-12 col-md-3">
+                      <q-btn
+                        color="primary"
+                        label="Save Changes"
+                        icon="save"
+                        class="full-width large-button"
+                        @click="saveSettings"
+                        :loading="saving"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-btn
+                        color="secondary"
+                        label="Export Data"
+                        icon="download"
+                        class="full-width large-button"
+                        @click="exportData"
+                      />
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <q-btn
+                        color="accent"
+                        label="Backup Settings"
+                        icon="backup"
+                        class="full-width large-button"
+                        @click="backupSettings"
+                      />
+                    </div>
                   </div>
-                  <q-toggle
-                    v-model="settings.emailNotifications"
-                    color="primary"
-                  />
-                </div>
-
-                <div class="setting-item">
-                  <div class="setting-label">
-                    <q-icon name="schedule" class="q-mr-sm" />
-                    <span>Appointment Reminders</span>
-                  </div>
-                  <q-toggle
-                    v-model="settings.appointmentReminders"
-                    color="primary"
-                  />
-                </div>
-
-                <div class="setting-item">
-                  <div class="setting-label">
-                    <q-icon name="message" class="q-mr-sm" />
-                    <span>Message Notifications</span>
-                  </div>
-                  <q-toggle
-                    v-model="settings.messageNotifications"
-                    color="primary"
-                  />
-                </div>
-              </q-card-section>
-
-              <!-- Action Buttons -->
-              <q-card-section>
-                <div class="settings-actions">
-                  <q-btn
-                    color="primary"
-                    label="Save Settings"
-                    icon="save"
-                    @click="saveSettings"
-                    :loading="saving"
-                  />
-                  <q-btn
-                    color="secondary"
-                    label="Reset to Default"
-                    icon="restore"
-                    @click="resetSettings"
-                    class="q-ml-md"
-                  />
                 </div>
               </q-card-section>
             </q-card>
@@ -382,7 +491,6 @@ import { api } from '../boot/axios'
 const rightDrawerOpen = ref(false)
 const text = ref('')
 // const loading = ref(false) // Unused variable
-const saving = ref(false)
 
 // Header functions
 const toggleRightDrawer = () => {
@@ -395,6 +503,8 @@ const toggleRightDrawer = () => {
 
 // User profile data
 const userProfile = ref({
+  first_name: '',
+  last_name: '',
   full_name: '',
   email: '',
   specialization: '',
@@ -414,36 +524,66 @@ const weatherLoading = ref(false)
 const weatherError = ref(false)
 const timeInterval = ref<ReturnType<typeof setInterval> | null>(null)
 
-// Settings data
-const settings = ref({
-  textSize: 16,
-  fontFamily: 'Roboto',
-  emailNotifications: true,
-  appointmentReminders: true,
-  messageNotifications: true
+// Loading states
+const saving = ref(false)
+
+// Form data
+const profileForm = ref({
+  fullName: '',
+  email: '',
+  phone: '',
+  specialization: '',
+  licenseNumber: '',
+  bio: ''
 })
+
+const securityForm = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+  twoFactorAuth: false
+})
+
+const notificationSettings = ref({
+  patientAlerts: true,
+  appointmentReminders: true,
+  messageNotifications: true,
+  analyticsUpdates: true
+})
+
+// Account status
+const accountStatus = ref({
+  verified: true,
+  lastLogin: '2024-01-15 10:30 AM',
+  memberSince: '2023-06-15'
+})
+
+// Options
+const specializationOptions = [
+  { label: 'Internal Medicine', value: 'internal_medicine' },
+  { label: 'Cardiology', value: 'cardiology' },
+  { label: 'Dermatology', value: 'dermatology' },
+  { label: 'Emergency Medicine', value: 'emergency_medicine' },
+  { label: 'Family Medicine', value: 'family_medicine' },
+  { label: 'Neurology', value: 'neurology' },
+  { label: 'Orthopedics', value: 'orthopedics' },
+  { label: 'Pediatrics', value: 'pediatrics' },
+  { label: 'Psychiatry', value: 'psychiatry' },
+  { label: 'Radiology', value: 'radiology' },
+  { label: 'Surgery', value: 'surgery' },
+  { label: 'Other', value: 'other' }
+]
 
 // File input reference for profile picture upload
 const fileInput = ref<HTMLInputElement | null>(null)
 
-// Font options
-const fontOptions = [
-  { label: 'Roboto', value: 'Roboto' },
-  { label: 'Arial', value: 'Arial' },
-  { label: 'Helvetica', value: 'Helvetica' },
-  { label: 'Times New Roman', value: 'Times New Roman' },
-  { label: 'Georgia', value: 'Georgia' },
-  { label: 'Verdana', value: 'Verdana' }
-]
 
 // Computed properties
 const userInitials = computed(() => {
-  if (!userProfile.value.full_name) return 'U'
-  const names = userProfile.value.full_name.split(' ')
-  if (names.length >= 2) {
-    return `${names[0]?.charAt(0) || ''}${names[names.length - 1]?.charAt(0) || ''}`.toUpperCase()
+  if (!userProfile.value.first_name || !userProfile.value.last_name) {
+    return 'DR'
   }
-  return userProfile.value.full_name.charAt(0).toUpperCase()
+  return `${userProfile.value.first_name.charAt(0)}${userProfile.value.last_name.charAt(0)}`.toUpperCase()
 })
 
 const profilePictureUrl = computed(() => {
@@ -650,72 +790,216 @@ const getWeatherIcon = (condition: string): string => {
   return iconMap[condition] || 'wb_sunny'
 }
 
-// Settings functions
-
-const updateTextSize = (size: number | null) => {
-  if (size === null) return
-  settings.value.textSize = size
-  // Apply text size to the application
-  document.documentElement.style.setProperty('--text-size', `${size}px`)
-  localStorage.setItem('textSize', size.toString())
-}
-
-const updateFontFamily = (font: string) => {
-  settings.value.fontFamily = font
-  // Apply font family to the application
-  document.documentElement.style.setProperty('--font-family', font)
-  localStorage.setItem('fontFamily', font)
-}
 
 const saveSettings = async () => {
   saving.value = true
-  
+
   try {
-    // Save settings to backend
-    await api.post('/users/settings/', settings.value)
-    
+    // Save profile information
+    await api.put('/users/profile/update/', {
+      email: profileForm.value.email,
+      phone: profileForm.value.phone,
+      bio: profileForm.value.bio,
+      doctor_profile: {
+        specialization: profileForm.value.specialization
+      }
+    })
+
+    // Save notification preferences
+    await api.put('/users/notification-preferences/', {
+      patient_alerts: notificationSettings.value.patientAlerts,
+      appointment_reminders: notificationSettings.value.appointmentReminders,
+      message_notifications: notificationSettings.value.messageNotifications,
+      analytics_updates: notificationSettings.value.analyticsUpdates
+    })
+
+    // Save security settings if password is being changed
+    if (securityForm.value.newPassword) {
+      if (securityForm.value.newPassword !== securityForm.value.confirmPassword) {
+        $q.notify({
+          type: 'negative',
+          message: 'New passwords do not match',
+          position: 'top'
+        })
+        return
+      }
+
+      await api.put('/users/change-password/', {
+        current_password: securityForm.value.currentPassword,
+        new_password: securityForm.value.newPassword
+      })
+
+      // Reset password fields
+      securityForm.value.currentPassword = ''
+      securityForm.value.newPassword = ''
+      securityForm.value.confirmPassword = ''
+    }
+
     $q.notify({
       type: 'positive',
       message: 'Settings saved successfully!',
-      position: 'top',
-      timeout: 3000
+      position: 'top'
     })
+
   } catch (error) {
-    console.error('Failed to save settings:', error)
+    console.error('Error saving settings:', error)
     $q.notify({
       type: 'negative',
       message: 'Failed to save settings. Please try again.',
-      position: 'top',
-      timeout: 4000
+      position: 'top'
     })
   } finally {
     saving.value = false
   }
 }
 
-const resetSettings = () => {
-  settings.value = {
-    textSize: 16,
-    fontFamily: 'Roboto',
-    emailNotifications: true,
-    appointmentReminders: true,
-    messageNotifications: true
+const exportData = async () => {
+  try {
+    $q.loading.show({
+      message: 'Exporting profile data...',
+      spinnerColor: 'primary'
+    })
+    
+    // Fetch complete profile data
+    const profileResponse = await api.get('/users/profile/')
+    const profileData = profileResponse.data.user
+    
+    // Create export data object
+    const exportData = {
+      profileInformation: {
+        fullName: profileData.full_name,
+        email: profileData.email,
+        phone: profileData.phone || 'Not provided',
+        specialization: profileData.doctor_profile?.specialization || 'Not specified',
+        licenseNumber: profileData.doctor_profile?.license_number || 'Not provided',
+        bio: profileData.bio || 'Not provided',
+        verificationStatus: profileData.verification_status,
+        memberSince: accountStatus.value.memberSince,
+        lastLogin: accountStatus.value.lastLogin
+      },
+      exportDate: new Date().toISOString(),
+      exportType: 'Doctor Profile Information',
+      exportedBy: profileData.full_name
+    }
+    
+    // Create and download JSON file
+    const dataStr = JSON.stringify(exportData, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `doctor-profile-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Profile data exported successfully!',
+      position: 'top',
+      timeout: 3000
+    })
+    
+  } catch (error) {
+    console.error('Export failed:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to export data. Please try again.',
+      position: 'top',
+      timeout: 4000
+    })
+  } finally {
+    $q.loading.hide()
   }
-  
-  // Reset CSS variables
-  document.documentElement.style.removeProperty('--text-size')
-  document.documentElement.style.removeProperty('--font-family')
-  
-  // Clear localStorage
-  localStorage.removeItem('textSize')
-  localStorage.removeItem('fontFamily')
-  
-  $q.notify({
-    type: 'info',
-    message: 'Settings reset to default values',
-    position: 'top',
-    timeout: 3000
-  })
+}
+
+const backupSettings = async () => {
+  try {
+    $q.loading.show({
+      message: 'Backing up patient management data...',
+      spinnerColor: 'primary'
+    })
+    
+    // Fetch patient management data
+    const patientsResponse = await api.get('/operations/patients/')
+    const appointmentsResponse = await api.get('/operations/appointments/')
+    
+    // Create backup data object
+    const backupData = {
+      patientManagement: {
+        patients: patientsResponse.data.results || patientsResponse.data,
+        appointments: appointmentsResponse.data.results || appointmentsResponse.data,
+        totalPatients: patientsResponse.data.count || 0,
+        totalAppointments: appointmentsResponse.data.count || 0
+      },
+      backupDate: new Date().toISOString(),
+      backupType: 'Patient Management Data',
+      backedUpBy: userProfile.value.full_name
+    }
+    
+    // Create and download JSON file
+    const dataStr = JSON.stringify(backupData, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `doctor-patient-management-backup-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Patient management data backed up successfully!',
+      position: 'top',
+      timeout: 3000
+    })
+    
+  } catch (error) {
+    console.error('Backup failed:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to backup data. Please try again.',
+      position: 'top',
+      timeout: 4000
+    })
+  } finally {
+    $q.loading.hide()
+  }
+}
+
+// Verification status helpers
+const getVerificationColor = (status: string | undefined) => {
+  switch (status) {
+    case 'verified':
+      return 'positive'
+    case 'pending':
+    case 'for_review':
+      return 'warning'
+    case 'declined':
+      return 'negative'
+    default:
+      return 'warning'
+  }
+}
+
+const getVerificationLabel = (status: string | undefined) => {
+  switch (status) {
+    case 'verified':
+      return 'Verified'
+    case 'pending':
+      return 'Pending'
+    case 'for_review':
+      return 'For Review'
+    case 'declined':
+      return 'Declined'
+    default:
+      return 'Unverified'
+  }
 }
 
 const fetchUserProfile = async () => {
@@ -727,6 +1011,8 @@ const fetchUserProfile = async () => {
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
     
     userProfile.value = {
+      first_name: userData.first_name,
+      last_name: userData.last_name,
       full_name: userData.full_name,
       email: userData.email,
       specialization: userData.doctor_profile?.specialization || userData.specialization,
@@ -739,23 +1025,45 @@ const fetchUserProfile = async () => {
   }
 }
 
-const loadSettings = () => {
-  // Load settings from localStorage
-  const textSize = parseInt(localStorage.getItem('textSize') || '16')
-  const fontFamily = localStorage.getItem('fontFamily') || 'Roboto'
-  
-  settings.value.textSize = textSize
-  settings.value.fontFamily = fontFamily
-  
-  // Apply settings
-  updateTextSize(textSize)
-  updateFontFamily(fontFamily)
+// Load user profile data
+const loadUserProfile = async () => {
+  try {
+    const response = await api.get('/users/profile/')
+    const userData = response.data.user
+    
+    profileForm.value = {
+      fullName: userData.full_name || '',
+      email: userData.email || '',
+      phone: userData.phone || '',
+      specialization: userData.doctor_profile?.specialization || '',
+      licenseNumber: userData.doctor_profile?.license_number || '',
+      bio: userData.bio || ''
+    }
+    
+  } catch (error) {
+    console.error('Failed to load user profile:', error)
+    
+    // Fallback to localStorage
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      const user = JSON.parse(userData)
+      profileForm.value = {
+        fullName: user.full_name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        specialization: user.doctor_profile?.specialization || '',
+        licenseNumber: user.doctor_profile?.license_number || '',
+        bio: user.bio || ''
+      }
+    }
+  }
 }
+
 
 // Lifecycle hooks
 onMounted(() => {
+  void loadUserProfile()
   void fetchUserProfile()
-  loadSettings()
   
   // Initialize real-time features
   updateTime()
@@ -1018,10 +1326,10 @@ onUnmounted(() => {
 }
 
 .sidebar-content {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  background: #f8f9fa;
+  padding-bottom: 80px; /* Space for footer */
 }
 
 .logo-section {
@@ -1048,10 +1356,13 @@ onUnmounted(() => {
   color: #666;
 }
 
-.sidebar-user-profile {
-  padding: 24px 20px;
-  border-bottom: 1px solid #e0e0e0;
+.sidebar-user-profile-centered {
+  padding: 20px;
   text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .profile-picture-container {
@@ -1090,31 +1401,32 @@ onUnmounted(() => {
 
 .navigation-menu {
   flex: 1;
-  padding: 16px 0;
+  padding: 8px 0;
 }
 
 .nav-item {
-  margin: 4px 16px;
+  margin: 4px 12px;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .nav-item.active {
-  background: #286660;
-  color: white;
-}
-
-.nav-item.active .q-icon {
-  color: white;
+  background: #e8f5e8;
+  color: #286660;
 }
 
 .nav-item:hover:not(.active) {
   background: #f5f5f5;
 }
 
-.logout-section {
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 20px;
   border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
 }
 
 .logout-btn {
@@ -1178,6 +1490,191 @@ onUnmounted(() => {
   font-size: 16px;
   color: #666;
   margin: 0;
+}
+
+/* Settings Section Styles */
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-section h6 {
+  color: #286660;
+  font-weight: 600;
+  border-bottom: 2px solid #e8f5e8;
+  padding-bottom: 8px;
+}
+
+/* Profile Section Styles */
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.profile-picture-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-avatar {
+  border: 3px solid #286660;
+  box-shadow: 0 4px 12px rgba(40, 102, 96, 0.2);
+}
+
+.profile-placeholder {
+  background: #286660;
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #286660;
+}
+
+.profile-form {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Notification Settings Styles */
+.notification-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.notification-info {
+  flex: 1;
+  margin-right: 16px;
+}
+
+.notification-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.notification-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Status Item Styles */
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.status-value {
+  font-weight: 600;
+  color: #333;
+}
+
+.status-value-right {
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+/* Large Input Styles */
+.large-input {
+  font-size: 16px;
+}
+
+.large-input .q-field__control {
+  min-height: 56px;
+  font-size: 16px;
+}
+
+.large-input .q-field__label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.large-input .q-field__native {
+  font-size: 16px;
+  padding: 12px 16px;
+}
+
+.large-toggle {
+  font-size: 16px;
+}
+
+.large-toggle .q-toggle__label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Large Button Styles */
+.large-button {
+  min-height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .notification-info {
+    margin-right: 0;
+  }
+  
+  .status-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }
 
 </style>

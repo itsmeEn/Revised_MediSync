@@ -12,7 +12,7 @@
               outlined
             dense 
             v-model="text" 
-              placeholder="Search patients, assessments and symptoms"
+              placeholder="Search Patient, symptoms and Appointments"
             class="search-input"
               bg-color="white"
             >
@@ -128,21 +128,21 @@
             <q-item-section>Patient Assessment</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('medicine-inventory')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-medicine-inventory')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="medication" />
             </q-item-section>
             <q-item-section>Medicine Inventory</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-analytics')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="analytics" />
             </q-item-section>
             <q-item-section>Analytics</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('settings')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-settings')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="settings" />
             </q-item-section>
@@ -164,6 +164,18 @@
     </q-drawer>
 
     <q-page-container class="page-container-with-fixed-header">
+      <!-- Greeting Section -->
+      <div class="greeting-section">
+        <q-card class="greeting-card">
+          <q-card-section class="greeting-content">
+            <h2 class="greeting-text">
+              Good {{ getTimeOfDay() }}, {{ userProfile.role ? userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1) : 'Nurse' }} {{ userProfile.full_name || 'User' }}
+            </h2>
+            <p class="greeting-subtitle">Patient assessment and doctor assignment - {{ currentDate }}</p>
+          </q-card-section>
+        </q-card>
+      </div>
+
       <!-- Page Header -->
       <div class="page-header">
         <div class="header-content">
@@ -217,7 +229,7 @@
                 </q-item-section>
                 <q-item-section>
                   <q-item-label>{{ scope.opt.name }}</q-item-label>
-                  <q-item-label caption>ID: {{ scope.opt.id }} | Age: {{ scope.opt.age }}</q-item-label>
+                  <q-item-label caption>ID: {{ scope.opt.id }} | Queue: {{ scope.opt.queueNumber }}</q-item-label>
                 </q-item-section>
               </q-item>
             </template>
@@ -225,8 +237,112 @@
         </q-card-section>
       </q-card>
 
-      <!-- Assessment Form -->
-      <div v-if="selectedPatient" class="assessment-form">
+      <!-- Doctor Selection Form -->
+      <div v-if="selectedPatient" class="doctor-selection-form">
+        <!-- Patient Info Card -->
+        <q-card class="patient-info-card">
+          <q-card-section>
+            <h6 class="text-h6 q-mb-md">Patient Information</h6>
+            <div class="row q-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-input
+                  :model-value="selectedPatient.name"
+                  label="Full Name"
+                  readonly
+                  outlined
+                />
+              </div>
+              <div class="col-12 col-md-3">
+                <q-input
+                  :model-value="selectedPatient.queueNumber"
+                  label="Queue Number"
+                  readonly
+                  outlined
+                />
+              </div>
+              <div class="col-12 col-md-3">
+                <q-input
+                  :model-value="selectedPatient.priority"
+                  label="Priority"
+                  readonly
+                  outlined
+                />
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+
+        <!-- Doctor Selection Card -->
+        <q-card class="doctor-selection-card">
+          <q-card-section>
+            <h6 class="text-h6 q-mb-md">Select Doctor</h6>
+            <div class="row q-gutter-md">
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="selectedSpecialization"
+                  :options="doctorSpecializations"
+                  label="Specialization Required"
+                  outlined
+                  clearable
+                  @update:model-value="onSpecializationChange"
+                />
+              </div>
+              <div class="col-12 col-md-6">
+                <q-select
+                  v-model="selectedDoctor"
+                  :options="availableDoctors"
+                  label="Available Doctors"
+                  option-label="name"
+                  option-value="id"
+                  emit-value
+                  map-options
+                  outlined
+                  clearable
+                  :disable="!selectedSpecialization"
+                >
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section avatar>
+                        <q-avatar color="primary" text-color="white">
+                          {{ scope.opt.name.charAt(0) }}
+                        </q-avatar>
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.name }}</q-item-label>
+                        <q-item-label caption>
+                          {{ scope.opt.specialization }} | 
+                          Patients: {{ scope.opt.currentPatients }}/10 |
+                          <span :class="scope.opt.isAvailable ? 'text-green' : 'text-red'">
+                            {{ scope.opt.isAvailable ? 'Available' : 'Busy' }}
+                          </span>
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+            </div>
+            
+            <!-- Assignment Button -->
+            <div class="row q-mt-md">
+              <div class="col-12">
+                <q-btn
+                  color="primary"
+                  label="Assign Patient to Doctor"
+                  icon="person_add"
+                  @click="assignPatientToDoctor"
+                  :loading="saving"
+                  :disable="!selectedPatient || !selectedDoctor"
+                  class="full-width"
+                />
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Assessment Form (Hidden for now) -->
+      <div v-if="false" class="assessment-form">
         <!-- Patient Info Card -->
         <q-card class="patient-info-card">
           <q-card-section>
@@ -576,6 +692,15 @@ const text = ref('')
 
 // Time and weather
 const currentTime = ref('')
+const currentDate = computed(() => {
+  const now = new Date()
+  return now.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+})
 const weatherData = ref<{
   temperature: number
   condition: string
@@ -585,14 +710,24 @@ const weatherLoading = ref(false)
 const weatherError = ref(false)
 let timeInterval: NodeJS.Timeout | null = null
 
+// Get time of day for greeting
+const getTimeOfDay = () => {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Morning'
+  if (hour < 17) return 'Afternoon'
+  return 'Evening'
+}
+
 // Profile picture
 const fileInput = ref<HTMLInputElement | null>(null)
 
 // User profile
 const userProfile = ref<{
+  id?: number
   first_name?: string
   last_name?: string
   full_name?: string
+  role?: string
   verification_status?: string
   profile_picture?: string | null
   email?: string
@@ -625,18 +760,53 @@ const userInitials = computed(() => {
   return `${userProfile.value.first_name.charAt(0)}${userProfile.value.last_name.charAt(0)}`.toUpperCase()
 })
 
-// Patient selection
-const selectedPatient = ref(null)
-const saving = ref(false)
+// Type definitions
+interface Patient {
+  id: number
+  name: string
+  queueNumber: string
+  department: string
+  status: string
+  position: number
+  enqueueTime: string
+  priority: string
+  priorityLevel?: string
+}
 
-// Patient options (mock data)
-const patientOptions = ref([
-  { id: 1, name: 'John Doe', age: 45, gender: 'Male' },
-  { id: 2, name: 'Jane Smith', age: 32, gender: 'Female' },
-  { id: 3, name: 'Mike Johnson', age: 58, gender: 'Male' },
-  { id: 4, name: 'Sarah Wilson', age: 29, gender: 'Female' },
-  { id: 5, name: 'Robert Brown', age: 67, gender: 'Male' }
+interface Doctor {
+  id: number
+  name: string
+  specialization: string
+  department: string
+  isAvailable: boolean
+  currentPatients: number
+}
+
+// Patient selection
+const selectedPatient = ref<Patient | null>(null)
+const saving = ref(false)
+const loading = ref(false)
+
+// Patient options (from queue)
+const patients = ref<Patient[]>([])
+const patientOptions = computed(() => patients.value)
+
+// Doctor selection
+const selectedDoctor = ref<Doctor | null>(null)
+const availableDoctors = ref<Doctor[]>([])
+const doctorSpecializations = ref([
+  'General Medicine',
+  'Cardiology',
+  'Neurology',
+  'Pediatrics',
+  'Orthopedics',
+  'Dermatology',
+  'Psychiatry',
+  'Emergency Medicine',
+  'Internal Medicine',
+  'Surgery'
 ])
+const selectedSpecialization = ref('')
 
 // Assessment data
 const assessment = ref({
@@ -708,12 +878,10 @@ const priorityLevels = [
 // Watch for patient selection changes
 watch(selectedPatient, (newPatient) => {
   if (newPatient) {
-    const patient = patientOptions.value.find(p => p.id === newPatient)
-    if (patient) {
-      assessment.value.patientName = patient.name
-      assessment.value.patientAge = patient.age.toString()
-      assessment.value.patientGender = patient.gender
-    }
+    // Patient is already selected, no need to find it again
+    assessment.value.patientName = newPatient.name
+    assessment.value.patientAge = 'N/A' // Age not available in queue data
+    assessment.value.patientGender = 'N/A' // Gender not available in queue data
   } else {
     // Reset form when no patient is selected
     assessment.value = {
@@ -934,10 +1102,6 @@ const fetchUserProfile = async () => {
   }
 }
 
-const goBack = () => {
-  void router.push('/nurse-dashboard')
-}
-
 const saveAssessment = async () => {
   if (!selectedPatient.value) {
     $q.notify({
@@ -988,6 +1152,165 @@ const saveAssessment = async () => {
   }
 }
 
+// Load patients from queue
+const loadQueuePatients = async () => {
+  try {
+    loading.value = true
+    const response = await api.get('/operations/nurse/queue/patients/')
+    
+    // Transform queue data to patient format
+    const normalPatients = response.data.normal_queue.map((queueItem: {
+      patient_id?: number
+      id: number
+      patient_name: string
+      queue_number: string
+      department: string
+      status: string
+      position_in_queue: number
+      enqueue_time: string
+    }) => ({
+      id: queueItem.patient_id || queueItem.id,
+      name: queueItem.patient_name,
+      queueNumber: queueItem.queue_number,
+      department: queueItem.department,
+      status: queueItem.status,
+      position: queueItem.position_in_queue,
+      enqueueTime: queueItem.enqueue_time,
+      priority: 'normal'
+    }))
+    
+    const priorityPatients = response.data.priority_queue.map((queueItem: {
+      patient_id?: number
+      id: number
+      patient_name: string
+      queue_number: string
+      department: string
+      priority_level: string
+      priority_position: number
+    }) => ({
+      id: queueItem.patient_id || queueItem.id,
+      name: queueItem.patient_name,
+      queueNumber: queueItem.queue_number,
+      department: queueItem.department,
+      priorityLevel: queueItem.priority_level,
+      position: queueItem.priority_position,
+      priority: 'high'
+    }))
+    
+    // Combine all patients
+    patients.value = [...normalPatients, ...priorityPatients]
+    
+  } catch (error) {
+    console.error('Failed to load queue patients:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load patient queue',
+      position: 'top',
+      timeout: 3000
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+// Load available doctors by specialization
+const loadAvailableDoctors = async (specialization: string) => {
+  try {
+    const response = await api.get('/operations/available-doctors/', {
+      params: { specialization }
+    })
+    
+    availableDoctors.value = response.data.map((doctor: {
+      id: number
+      full_name: string
+      specialization: string
+      department: string
+      is_available: boolean
+      current_patients: number
+      profile_picture?: string
+    }) => ({
+      id: doctor.id,
+      name: doctor.full_name,
+      specialization: doctor.specialization,
+      department: doctor.department,
+      isAvailable: doctor.is_available,
+      currentPatients: doctor.current_patients || 0
+    }))
+    
+  } catch (error) {
+    console.error('Failed to load available doctors:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load available doctors',
+      position: 'top',
+      timeout: 3000
+    })
+  }
+}
+
+// Handle specialization selection
+const onSpecializationChange = (specialization: string) => {
+  selectedSpecialization.value = specialization
+  selectedDoctor.value = null
+  if (specialization) {
+    void loadAvailableDoctors(specialization)
+  } else {
+    availableDoctors.value = []
+  }
+}
+
+// Assign patient to doctor
+const assignPatientToDoctor = async () => {
+  if (!selectedPatient.value || !selectedDoctor.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'Please select both patient and doctor',
+      position: 'top',
+      timeout: 3000
+    })
+    return
+  }
+  
+  try {
+    saving.value = true
+    
+    await api.post('/operations/assign-patient/', {
+      patient_id: selectedPatient.value?.id,
+      doctor_id: selectedDoctor.value?.id,
+      specialization: selectedSpecialization.value,
+      reason: `Patient assessment - ${selectedPatient.value?.name}`,
+      priority: selectedPatient.value?.priority === 'high' ? 'high' : 'medium'
+    })
+    
+    $q.notify({
+      type: 'positive',
+      message: `Patient ${selectedPatient.value?.name} assigned to Dr. ${selectedDoctor.value?.name}`,
+      position: 'top',
+      timeout: 3000
+    })
+    
+    // Reset selections
+    selectedPatient.value = null
+    selectedDoctor.value = null
+    selectedSpecialization.value = ''
+    availableDoctors.value = []
+    
+    // Reload patients to update queue
+    void loadQueuePatients()
+    
+  } catch (error) {
+    console.error('Failed to assign patient:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to assign patient to doctor',
+      position: 'top',
+      timeout: 3000
+    })
+  } finally {
+    saving.value = false
+  }
+}
+
 onMounted(() => {
   // Load user profile first
   void fetchUserProfile()
@@ -998,6 +1321,9 @@ onMounted(() => {
   
   // Fetch weather data
   void fetchWeather()
+  
+  // Load patients from queue
+  void loadQueuePatients()
 })
 
 onUnmounted(() => {
@@ -1010,9 +1336,55 @@ onUnmounted(() => {
 <style scoped>
 /* Page Container with Background */
 .page-container-with-fixed-header {
-  background: #f8f9fa;
+  background: #f5f5f5;
   min-height: 100vh;
+  padding-top: 64px; /* Account for fixed header */
+}
+
+/* Greeting Section */
+.greeting-section {
+  padding: 24px;
+  background: transparent;
+}
+
+.greeting-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: relative;
+  overflow: hidden;
+}
+
+.greeting-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+.greeting-content {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+}
+
+.greeting-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.greeting-subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
 }
 
 .page-header {
@@ -1116,7 +1488,7 @@ onUnmounted(() => {
 .header-left, .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
 }
 
 .search-container {
@@ -1127,14 +1499,34 @@ onUnmounted(() => {
   border-radius: 8px;
 }
 
-.time-display,
-.weather-display,
-.weather-loading,
-.weather-error {
+.time-display, .weather-display, .weather-loading, .weather-error {
   display: flex;
   align-items: center;
   gap: 8px;
   color: white;
+  font-size: 14px;
+}
+
+.time-text,
+.weather-text,
+.weather-location {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+.weather-location {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.weather-loading, .weather-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .weather-error .q-icon {

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AppointmentManagement, QueueManagement, PriorityQueue, Notification, Messaging, Conversation, Message, MessageReaction
+from .models import AppointmentManagement, QueueManagement, PriorityQueue, Notification, Messaging, Conversation, Message, MessageReaction, MessageNotification, MedicineInventory, PatientAssignment, ConsultationNotes
 from backend.users.models import User
 
 class DashboardStatsSerializer(serializers.Serializer):
@@ -67,11 +67,20 @@ class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
     reactions = MessageReactionSerializer(many=True, read_only=True)
     has_attachment = serializers.ReadOnlyField()
+    decrypted_content = serializers.SerializerMethodField()
+    is_delivered = serializers.ReadOnlyField()
+    read_at = serializers.ReadOnlyField()
+    delivered_at = serializers.ReadOnlyField()
     
     class Meta:
         model = Message
-        fields = ['id', 'sender', 'content', 'file_attachment', 'file_name', 'file_size', 
-                 'has_attachment', 'is_read', 'created_at', 'updated_at', 'reactions']
+        fields = ['id', 'sender', 'content', 'decrypted_content', 'file_attachment', 'file_name', 'file_size', 
+                 'has_attachment', 'is_read', 'is_delivered', 'read_at', 'delivered_at', 
+                 'created_at', 'updated_at', 'reactions']
+    
+    def get_decrypted_content(self, obj):
+        """Return decrypted content for the message"""
+        return obj.decrypt_content()
 
 class ConversationSerializer(serializers.ModelSerializer):
     """Serializer for conversations"""
@@ -134,3 +143,75 @@ class CreateReactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageReaction
         fields = ['reaction_type']
+
+class MessageNotificationSerializer(serializers.ModelSerializer):
+    """Serializer for message notifications"""
+    message = MessageSerializer(read_only=True)
+    recipient = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = MessageNotification
+        fields = ['id', 'message', 'recipient', 'notification_type', 'is_sent', 'sent_at', 'created_at']
+
+class MedicineInventorySerializer(serializers.ModelSerializer):
+    """Serializer for medicine inventory"""
+    stock_level = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MedicineInventory
+        fields = ['id', 'medicine_name', 'stock_number', 'current_stock', 'unit_price',
+                  'minimum_stock_level', 'expiry_date', 'batch_number', 'last_restocked',
+                  'usage_pattern', 'stock_level']
+
+    def get_stock_level(self, obj):
+        """Calculate stock level based on current stock and minimum level"""
+        if obj.current_stock == 0:
+            return 'out_of_stock'
+        elif obj.current_stock <= obj.minimum_stock_level:
+            return 'low_stock'
+        else:
+            return 'in_stock'
+
+
+class PatientAssignmentSerializer(serializers.ModelSerializer):
+    """Serializer for patient assignments"""
+    patient_name = serializers.CharField(source='patient.user.full_name', read_only=True)
+    doctor_name = serializers.CharField(source='doctor.user.full_name', read_only=True)
+    assigned_by_name = serializers.CharField(source='assigned_by.full_name', read_only=True)
+    patient_id = serializers.IntegerField(source='patient.id', read_only=True)
+    doctor_id = serializers.IntegerField(source='doctor.id', read_only=True)
+
+    class Meta:
+        model = PatientAssignment
+        fields = ['id', 'patient', 'patient_id', 'patient_name', 'doctor', 'doctor_id', 'doctor_name',
+                  'assigned_by', 'assigned_by_name', 'specialization_required', 'assignment_reason',
+                  'status', 'assigned_at', 'accepted_at', 'completed_at', 'priority']
+
+    def create(self, validated_data):
+        """Create a new patient assignment"""
+        return PatientAssignment.objects.create(**validated_data)
+
+
+class ConsultationNotesSerializer(serializers.ModelSerializer):
+    """Serializer for consultation notes"""
+    patient_name = serializers.CharField(source='patient.user.full_name', read_only=True)
+    doctor_name = serializers.CharField(source='doctor.user.full_name', read_only=True)
+    assignment_id = serializers.IntegerField(source='assignment.id', read_only=True)
+
+    class Meta:
+        model = ConsultationNotes
+        fields = ['id', 'assignment', 'assignment_id', 'doctor', 'patient', 'patient_name', 'doctor_name',
+                  'chief_complaint', 'history_of_present_illness', 'physical_examination', 'diagnosis',
+                  'treatment_plan', 'medications_prescribed', 'follow_up_instructions', 'additional_notes',
+                  'status', 'created_at', 'updated_at', 'completed_at']
+
+    def create(self, validated_data):
+        """Create new consultation notes"""
+        return ConsultationNotes.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update consultation notes"""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
