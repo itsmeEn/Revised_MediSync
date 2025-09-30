@@ -123,7 +123,7 @@
         <q-list class="navigation-menu">
           <q-item clickable v-ripple @click="navigateTo('doctor-dashboard')" class="nav-item">
             <q-item-section avatar>
-              <q-icon name="grid_view" />
+              <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>Dashboard</q-item-section>
           </q-item>
@@ -2244,5 +2244,58 @@ onUnmounted(() => {
   .factors-list {
     flex-direction: column;
   }
+}
+
+/* Profile Avatar Styles - Circular Design */
+.profile-avatar {
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e7668;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+}
+
+.verified-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 </style>

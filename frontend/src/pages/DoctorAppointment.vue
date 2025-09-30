@@ -1515,7 +1515,16 @@ onUnmounted(() => {
 }
 
 .profile-avatar {
-  border: 3px solid #1e7668;
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
 
 .profile-placeholder {
@@ -1533,9 +1542,14 @@ onUnmounted(() => {
 
 .upload-btn {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: -5px;
+  right: -5px;
   background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
 }
 
 .user-info {
@@ -2054,10 +2068,16 @@ onUnmounted(() => {
 
 .verified-badge {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  top: -5px;
+  right: -5px;
   background: white;
   border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 
 .user-name {

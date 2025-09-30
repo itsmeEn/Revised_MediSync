@@ -107,7 +107,7 @@
           
           <div class="user-info">
             <h6 class="user-name">{{ userProfile.full_name || 'Loading...' }}</h6>
-            <p class="user-role">{{ userProfile.specialization || 'Loading specialization...' }}</p>
+            <p class="user-role">Nurse</p>
             <q-chip 
               :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
               text-color="white" 
@@ -120,42 +120,42 @@
 
         <!-- Navigation Menu -->
         <q-list class="navigation-menu">
-          <q-item clickable v-ripple @click="navigateTo('doctor-dashboard')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-dashboard')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>Dashboard</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('appointments')" class="nav-item">
-            <q-item-section avatar>
-              <q-icon name="event" />
-            </q-item-section>
-            <q-item-section>Appointments</q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple @click="navigateTo('messaging')" class="nav-item active">
+          <q-item clickable v-ripple @click="navigateTo('nurse-messaging')" class="nav-item active">
             <q-item-section avatar>
               <q-icon name="message" />
             </q-item-section>
             <q-item-section>Messaging</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('patients')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('patient-assessment')" class="nav-item">
             <q-item-section avatar>
-              <q-icon name="people" />
+              <q-icon name="assignment" />
             </q-item-section>
-            <q-item-section>Patient Management</q-item-section>
+            <q-item-section>Patient Assessment</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-medicine-inventory')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="medication" />
+            </q-item-section>
+            <q-item-section>Medicine Inventory</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('nurse-analytics')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="analytics" />
             </q-item-section>
             <q-item-section>Analytics</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('settings')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-settings')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="settings" />
             </q-item-section>
@@ -630,8 +630,7 @@ const userProfile = ref<{
   verification_status: string
 }>({
   full_name: 'Loading...',
-  specialization: 'Loading specialization...',
-  role: 'doctor',
+  role: 'nurse',
   profile_picture: null,
   verification_status: 'not_submitted'
 })
@@ -697,7 +696,6 @@ const fetchUserProfile = async () => {
     
     userProfile.value = {
       full_name: userData.full_name,
-      specialization: userData.doctor_profile?.specialization,
       role: userData.role,
       profile_picture: storedUser.profile_picture || userData.profile_picture || null,
       verification_status: userData.verification_status
@@ -713,7 +711,6 @@ const fetchUserProfile = async () => {
       const user = JSON.parse(userData)
       userProfile.value = {
         full_name: user.full_name,
-        specialization: user.doctor_profile?.specialization,
         role: user.role,
         profile_picture: user.profile_picture || null,
         verification_status: user.verification_status || 'not_submitted'
@@ -998,23 +995,23 @@ const navigateTo = (route: string): void => {
   rightDrawerOpen.value = false
   
   switch (route) {
-    case 'doctor-dashboard':
-      void router.push('/doctor-dashboard')
+    case 'nurse-dashboard':
+      void router.push('/nurse-dashboard')
       break
-    case 'appointments':
-      void router.push('/doctor-appointments')
+    case 'patient-assessment':
+      void router.push('/nurse-patient-assessment')
       break
-    case 'messaging':
+    case 'nurse-messaging':
       // Already on messaging page
       break
-    case 'patients':
-      void router.push('/doctor-patient-management')
+    case 'nurse-medicine-inventory':
+      void router.push('/nurse-medicine-inventory')
       break
-    case 'analytics':
-      void router.push('/doctor-predictive-analytics')
+    case 'nurse-analytics':
+      void router.push('/nurse-analytics')
       break
-    case 'settings':
-      void router.push('/doctor-settings')
+    case 'nurse-settings':
+      void router.push('/nurse-settings')
       break
   }
 }
@@ -1148,7 +1145,7 @@ const fetchWeatherData = async (): Promise<void> => {
 
 // Lifecycle
 onMounted(() => {
-  console.log('🚀 DoctorMessaging component mounted')
+  console.log('🚀 NurseMessaging component mounted')
   getCurrentUser()
   void fetchUserProfile()
   updateTime()
@@ -1675,7 +1672,6 @@ onMounted(() => {
   max-height: 600px;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .chat-header {

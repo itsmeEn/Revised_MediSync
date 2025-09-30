@@ -98,16 +98,21 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
+            <q-icon 
+              :name="userProfile.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              class="verified-badge" 
+            />
           </div>
           
           <div class="user-info">
             <h6 class="user-name">{{ userProfile?.first_name }} {{ userProfile?.last_name }}</h6>
             <p class="user-role">Nurse</p>
             <q-chip 
-              :color="userProfile?.verification_status === 'verified' ? 'green' : 'orange'"
+              :color="userProfile?.verification_status === 'approved' ? 'positive' : 'negative'"
               text-color="white"
               size="sm"
-              :label="userProfile?.verification_status === 'verified' ? 'Verified' : 'Pending'"
+              :label="userProfile?.verification_status === 'approved' ? 'Verified' : 'Not Verified'"
             />
           </div>
         </div>
@@ -119,6 +124,13 @@
               <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>Dashboard</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('nurse-messaging')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="message" />
+            </q-item-section>
+            <q-item-section>Messaging</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple @click="navigateTo('patient-assessment')" class="nav-item active">
@@ -1324,6 +1336,11 @@ onMounted(() => {
   
   // Load patients from queue
   void loadQueuePatients()
+  
+  // Refresh user profile every 30 seconds to check for verification status updates
+  setInterval(() => {
+    void fetchUserProfile()
+  }, 30000)
 })
 
 onUnmounted(() => {
@@ -1621,8 +1638,12 @@ onUnmounted(() => {
 }
 
 .nav-item.active {
-  background: #e8f5e8;
-  color: #286660;
+  background: #286660;
+  color: white;
+}
+
+.nav-item.active .q-icon {
+  color: white;
 }
 
 .nav-item:hover:not(.active) {
@@ -1644,5 +1665,58 @@ onUnmounted(() => {
   border-radius: 8px;
   font-weight: 600;
   text-transform: uppercase;
+}
+
+/* Profile Avatar Styles - Circular Design */
+.profile-avatar {
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e7668;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+}
+
+.verified-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 </style>

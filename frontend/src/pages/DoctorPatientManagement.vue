@@ -72,11 +72,11 @@
             </q-avatar>
             <span class="logo-text">MediSync</span>
           </div>
-          <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn-right" />
+          <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn" />
         </div>
 
-        <!-- User Profile Section - Centered -->
-        <div class="sidebar-user-profile-centered">
+        <!-- User Profile Section -->
+        <div class="sidebar-user-profile">
           <div class="profile-picture-container">
             <q-avatar size="80px" class="profile-avatar">
               <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
@@ -123,7 +123,7 @@
         <q-list class="navigation-menu">
           <q-item clickable v-ripple @click="navigateTo('doctor-dashboard')" class="nav-item">
             <q-item-section avatar>
-              <q-icon name="grid_view" />
+              <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>Dashboard</q-item-section>
           </q-item>
@@ -151,7 +151,7 @@
 
           <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
             <q-item-section avatar>
-              <q-icon name="bar_chart" />
+              <q-icon name="analytics" />
             </q-item-section>
             <q-item-section>Analytics</q-item-section>
           </q-item>
@@ -164,17 +164,16 @@
           </q-item>
         </q-list>
 
-      </div>
-
-      <!-- Footer with Logout Button -->
-      <div class="sidebar-footer">
-        <q-btn
-          color="negative"
-          label="LOGOUT"
-          icon="logout"
-          class="logout-btn"
-          @click="logout"
-        />
+        <!-- Logout Section -->
+        <div class="logout-section">
+          <q-btn
+            color="negative"
+            icon="logout"
+            label="Logout"
+            class="logout-btn"
+            @click="logout"
+          />
+        </div>
       </div>
     </q-drawer>
 
@@ -761,46 +760,15 @@ onMounted(() => {
 }
 
 /* Centered User Profile Section */
-.sidebar-user-profile-centered {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  text-align: center;
-  background: #f8f9fa;
+.sidebar-user-profile {
+  padding: 24px 20px;
   border-bottom: 1px solid #e0e0e0;
-}
-
-.sidebar-user-profile-centered .profile-picture-container {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.sidebar-user-profile-centered .user-info {
   text-align: center;
 }
 
-.sidebar-user-profile-centered .user-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 8px 0;
-}
-
-.sidebar-user-profile-centered .user-role {
-  font-size: 14px;
-  color: #7f8c8d;
-  margin: 0 0 12px 0;
-}
-
-/* Footer with Logout Button */
-.sidebar-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+/* Logout Section */
+.logout-section {
   padding: 20px;
-  background: #f8f9fa;
   border-top: 1px solid #e0e0e0;
 }
 
@@ -1055,5 +1023,58 @@ onMounted(() => {
   .patient-actions {
     justify-content: center;
   }
+}
+
+/* Profile Avatar Styles - Circular Design */
+.profile-avatar {
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e7668;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+}
+
+.verified-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 </style>

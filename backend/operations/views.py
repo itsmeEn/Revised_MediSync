@@ -551,9 +551,11 @@ def get_available_users(request):
         user = request.user
         
         # Get all doctors and nurses except current user
+        # Include verified users for messaging
         available_users = User.objects.filter(
             role__in=['doctor', 'nurse'],
-            is_verified=True
+            is_active=True,
+            verification_status='approved'
         ).exclude(id=user.id)
         
         serializer = UserSerializer(available_users, many=True)

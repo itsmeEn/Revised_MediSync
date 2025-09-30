@@ -2,27 +2,28 @@
   <q-layout view="hHh Lpr fFf">
     <q-header elevated class="prototype-header">
       <q-toolbar class="header-toolbar">
-        <!-- Menu button to open sidebar -->
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-toggle-btn" />
-        
-        <!-- Left side - Search bar -->
+        <!-- Left side - Menu and Search -->
         <div class="header-left">
-        <div class="search-container">
-          <q-input 
-              outlined
-            dense 
-            v-model="text" 
-              placeholder="Search Patient, symptoms and Appointments"
-            class="search-input"
-              bg-color="white"
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" color="grey-6" />
+          <!-- Menu button to open sidebar -->
+          <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-toggle-btn" />
+          
+          <!-- Search bar -->
+          <div class="search-container">
+            <q-input 
+                outlined
+              dense 
+              v-model="text" 
+                placeholder="Search Patient, symptoms and Appointments"
+              class="search-input"
+                bg-color="white"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="search" color="grey-6" />
+                </template>
+                <template v-slot:append v-if="text">
+                  <q-icon name="clear" class="cursor-pointer" @click="text = ''" />
               </template>
-              <template v-slot:append v-if="text">
-                <q-icon name="clear" class="cursor-pointer" @click="text = ''" />
-            </template>
-          </q-input>
+            </q-input>
           </div>
         </div>
         
@@ -98,16 +99,21 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
+            <q-icon 
+              :name="userProfile.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              class="verified-badge" 
+            />
           </div>
           
           <div class="user-info">
             <h6 class="user-name">{{ userProfile?.first_name }} {{ userProfile?.last_name }}</h6>
             <p class="user-role">Nurse</p>
             <q-chip 
-              :color="userProfile?.verification_status === 'verified' ? 'green' : 'orange'"
+              :color="userProfile?.verification_status === 'approved' ? 'positive' : 'negative'"
               text-color="white"
               size="sm"
-              :label="userProfile?.verification_status === 'verified' ? 'Verified' : 'Pending'"
+              :label="userProfile?.verification_status === 'approved' ? 'Verified' : 'Not Verified'"
             />
           </div>
         </div>
@@ -119,6 +125,13 @@
               <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>Dashboard</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('nurse-messaging')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="message" />
+            </q-item-section>
+            <q-item-section>Messaging</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple @click="navigateTo('patient-assessment')" class="nav-item">
@@ -169,33 +182,13 @@
         <q-card class="greeting-card">
           <q-card-section class="greeting-content">
             <h2 class="greeting-text">
-              Good {{ getTimeOfDay() }}, {{ userProfile.role ? userProfile.role.charAt(0).toUpperCase() + userProfile.role.slice(1) : 'Nurse' }} {{ userProfile.full_name || 'User' }}
+              Medicine Inventory
             </h2>
-            <p class="greeting-subtitle">Manage your medicine inventory - {{ currentDate }}</p>
+            <p class="greeting-subtitle">Track and manage your medicine stock, monitor expiry dates, and ensure adequate supply for patient care - {{ currentDate }}</p>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Page Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <div class="header-left">
-            <h4 class="page-title">Medicine Inventory</h4>
-          </div>
-          <div class="header-right">
-            <q-btn
-              color="primary"
-              label="Add Medicine"
-              icon="add"
-              @click="handleAddMedicineClick"
-              :disable="!isUserVerified"
-            />
-            <q-tooltip v-if="!isUserVerified">
-              Account verification required to manage medicine inventory
-            </q-tooltip>
-          </div>
-        </div>
-      </div>
 
     <div class="page-content">
       <!-- Search and Filters -->
@@ -247,6 +240,19 @@
                 @click="applyFilters"
                 class="full-width"
               />
+            </div>
+            <div class="col-12 col-md-2">
+              <q-btn
+                color="primary"
+                label="Add Medicine"
+                icon="add"
+                @click="handleAddMedicineClick"
+                :disable="!isUserVerified"
+                class="full-width"
+              />
+              <q-tooltip v-if="!isUserVerified">
+                Account verification required to manage medicine inventory
+              </q-tooltip>
             </div>
           </div>
         </q-card-section>
@@ -452,109 +458,152 @@
 
     <!-- Add/Edit Medicine Dialog -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 500px">
-        <q-card-section>
-          <div class="text-h6">{{ editingMedicine ? 'Edit Medicine' : 'Add New Medicine' }}</div>
+      <q-card class="medicine-modal">
+        <q-card-section class="modal-header">
+          <div class="modal-title">
+            <q-icon name="medication" size="md" class="title-icon" />
+            {{ editingMedicine ? 'Edit Medicine' : 'Add New Medicine' }}
+          </div>
+          <q-btn flat round icon="close" @click="cancelEdit" class="close-btn" />
         </q-card-section>
 
-        <q-card-section>
-          <div class="row q-gutter-md">
-            <div class="col-12 col-md-6">
+        <q-card-section class="modal-content">
+          <div class="form-fields">
+            <div class="form-row">
               <q-input
                 v-model="medicineForm.name"
                 label="Medicine Name"
                 outlined
+                class="form-input"
                 :rules="[val => !!val || 'Name is required']"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-input
                 v-model="medicineForm.genericName"
                 label="Generic Name"
                 outlined
+                class="form-input"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-select
                 v-model="medicineForm.category"
                 :options="medicineCategories"
                 label="Category"
                 outlined
+                class="form-input"
                 emit-value
                 map-options
                 :rules="[val => !!val || 'Category is required']"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-input
                 v-model="medicineForm.dosage"
                 label="Dosage Form"
                 outlined
+                class="form-input"
                 placeholder="e.g., Tablet, Syrup, Injection"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-input
                 v-model.number="medicineForm.strength"
                 label="Strength"
                 outlined
+                class="form-input"
                 placeholder="e.g., 500mg, 10ml"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-input
                 v-model.number="medicineForm.quantity"
                 label="Quantity"
                 type="number"
                 outlined
+                class="form-input"
                 :rules="[val => val >= 0 || 'Quantity must be non-negative']"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-input
                 v-model="medicineForm.unit"
                 label="Unit"
                 outlined
+                class="form-input"
                 placeholder="e.g., tablets, bottles, vials"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-input
                 v-model="medicineForm.expiryDate"
                 label="Expiry Date"
                 type="date"
                 outlined
+                class="form-input"
                 :rules="[val => !!val || 'Expiry date is required']"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="form-row">
               <q-input
                 v-model.number="medicineForm.minStockLevel"
                 label="Minimum Stock Level"
                 type="number"
                 outlined
+                class="form-input"
                 :rules="[val => val >= 0 || 'Minimum stock must be non-negative']"
               />
             </div>
-            <div class="col-12">
+            <div class="form-row">
+              <q-input
+                v-model.number="medicineForm.unitPrice"
+                label="Unit Price"
+                type="number"
+                outlined
+                class="form-input"
+                placeholder="0.00"
+                step="0.01"
+                :rules="[val => val >= 0 || 'Unit price must be non-negative']"
+              />
+            </div>
+            <div class="form-row">
+              <q-input
+                v-model="medicineForm.batchNumber"
+                label="Batch Number"
+                outlined
+                class="form-input"
+                placeholder="e.g., BATCH-2024-001"
+              />
+            </div>
+            <div class="form-row">
               <q-input
                 v-model="medicineForm.description"
                 label="Description"
                 type="textarea"
                 outlined
+                class="form-input"
                 rows="3"
               />
             </div>
           </div>
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" @click="cancelEdit" />
+        <q-card-actions class="modal-actions">
+          <q-btn 
+            flat 
+            label="Cancel" 
+            color="grey-7" 
+            @click="cancelEdit"
+            class="cancel-btn"
+          />
           <q-btn
-            :label="editingMedicine ? 'Update' : 'Add'"
+            :label="editingMedicine ? 'Update Medicine' : 'Add Medicine'"
             color="primary"
             @click="saveMedicine"
             :loading="saving"
+            class="save-btn"
+            icon="save"
           />
         </q-card-actions>
       </q-card>
@@ -766,13 +815,6 @@ const weatherLoading = ref(false)
 const weatherError = ref(false)
 let timeInterval: NodeJS.Timeout | null = null
 
-// Get time of day for greeting
-const getTimeOfDay = () => {
-  const hour = new Date().getHours()
-  if (hour < 12) return 'Morning'
-  if (hour < 17) return 'Afternoon'
-  return 'Evening'
-}
 
 // Profile picture
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -874,7 +916,9 @@ const medicineForm = ref({
   unit: '',
   expiryDate: '',
   minStockLevel: 0,
-  description: ''
+  description: '',
+  unitPrice: 0,
+  batchNumber: ''
 })
 
 const dispenseForm = ref({
@@ -1073,11 +1117,26 @@ interface Medicine {
   minStockLevel: number
   description: string
   stockLevel: string
+  unitPrice?: number
+  batchNumber?: string
 }
 
 const editMedicine = (medicine: Medicine) => {
   editingMedicine.value = medicine
-  medicineForm.value = { ...medicine }
+  medicineForm.value = {
+    name: medicine.name,
+    genericName: medicine.genericName,
+    category: medicine.category,
+    dosage: medicine.dosage,
+    strength: medicine.strength,
+    quantity: medicine.quantity,
+    unit: medicine.unit,
+    expiryDate: medicine.expiryDate,
+    minStockLevel: medicine.minStockLevel,
+    description: medicine.description,
+    unitPrice: medicine.unitPrice || 0,
+    batchNumber: medicine.batchNumber || ''
+  }
   showAddDialog.value = true
 }
 
@@ -1115,7 +1174,9 @@ const cancelEdit = () => {
     unit: '',
     expiryDate: '',
     minStockLevel: 0,
-    description: ''
+    description: '',
+    unitPrice: 0,
+    batchNumber: ''
   }
   showAddDialog.value = false
 }
@@ -1185,22 +1246,71 @@ const checkStockLevels = () => {
   })
 }
 
-const saveMedicine = () => {
+const saveMedicine = async () => {
   saving.value = true
 
   try {
     if (editingMedicine.value) {
       // Update existing medicine
+      const response = await api.put(`/operations/medicine-inventory/${editingMedicine.value.id}/update/`, {
+        name: medicineForm.value.name,
+        quantity: medicineForm.value.quantity,
+        //unit_price: medicineForm.value.unitPrice || 0,
+        minimum_stock_level: medicineForm.value.minStockLevel,
+        expiry_date: medicineForm.value.expiryDate,
+        //batch_number: medicineForm.value.batchNumber || `BATCH-${Date.now()}`,
+        usage_pattern: medicineForm.value.description || ''
+      })
+      
+      // Update local state with backend response
       const index = medicines.value.findIndex(m => m.id === editingMedicine.value?.id)
-      if (index !== -1 && editingMedicine.value) {
-        medicines.value[index] = { ...editingMedicine.value, ...medicineForm.value }
+      if (index !== -1 && editingMedicine.value && medicines.value[index]) {
+        const currentMedicine = medicines.value[index]
+        medicines.value[index] = {
+          id: currentMedicine.id,
+          name: response.data.medicine_name,
+          genericName: currentMedicine.genericName,
+          category: currentMedicine.category,
+          dosage: currentMedicine.dosage,
+          strength: currentMedicine.strength,
+          quantity: response.data.current_stock,
+          unit: currentMedicine.unit,
+          expiryDate: response.data.expiry_date,
+          minStockLevel: response.data.minimum_stock_level,
+          description: response.data.usage_pattern,
+          stockLevel: response.data.stock_level,
+         // unitPrice: response.data.unit_price,
+          //batchNumber: response.data.batch_number
+        }
       }
     } else {
       // Add new medicine
+      const response = await api.post('/operations/medicine-inventory/add/', {
+        name: medicineForm.value.name,
+        quantity: medicineForm.value.quantity,
+        //unit_price: medicineForm.value.unitPrice || 0,
+        minimum_stock_level: medicineForm.value.minStockLevel,
+        expiry_date: medicineForm.value.expiryDate,
+        //batch_number: medicineForm.value.batchNumber || `BATCH-${Date.now()}`,
+        usage_pattern: medicineForm.value.description || ''
+      })
+      
+      // Add to local state
       const newMedicine: Medicine = {
-        id: Date.now(),
-        ...medicineForm.value,
-        stockLevel: 'in_stock'
+        id: response.data.id,
+        name: response.data.medicine_name,
+        genericName: medicineForm.value.genericName,
+        category: medicineForm.value.category,
+        dosage: medicineForm.value.dosage,
+        strength: medicineForm.value.strength,
+        quantity: response.data.current_stock,
+        unit: medicineForm.value.unit,
+        expiryDate: response.data.expiry_date,
+        minStockLevel: response.data.minimum_stock_level,
+        description: response.data.usage_pattern,
+        stockLevel: response.data.stock_level,
+        //unitPrice: response.data.unit_price,
+        //batchNumber: response.data.batch_number
       }
       medicines.value.push(newMedicine)
     }
@@ -1640,6 +1750,11 @@ onMounted(() => {
   
   // Load inventory data from backend
   void loadMedicineInventory()
+  
+  // Refresh user profile every 30 seconds to check for verification status updates
+  setInterval(() => {
+    void fetchUserProfile()
+  }, 30000)
 })
 
 onUnmounted(() => {
@@ -1704,9 +1819,10 @@ onUnmounted(() => {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #286660 0%, #1e7668 100%);
-  color: white;
+  background: white;
+  color: #333;
   padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .header-content {
@@ -1731,6 +1847,7 @@ onUnmounted(() => {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
+  color: #333;
 }
 
 .page-content {
@@ -1942,9 +2059,18 @@ onUnmounted(() => {
 
 .header-toolbar {
   padding: 0 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.header-left, .header-right {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-right {
   display: flex;
   align-items: center;
   gap: 24px;
@@ -2085,8 +2211,12 @@ onUnmounted(() => {
 }
 
 .nav-item.active {
-  background: #e8f5e8;
-  color: #286660;
+  background: #286660;
+  color: white;
+}
+
+.nav-item.active .q-icon {
+  color: white;
 }
 
 .nav-item:hover:not(.active) {
@@ -2108,5 +2238,145 @@ onUnmounted(() => {
   border-radius: 8px;
   font-weight: 600;
   text-transform: uppercase;
+}
+
+/* Profile Avatar Styles - Circular Design */
+.profile-avatar {
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e7668;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+}
+
+.verified-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+/* Medicine Modal Styles */
+.medicine-modal {
+  min-width: 750px;
+  max-width: 950px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #286660 0%, #1e7668 100%);
+  color: white;
+  padding: 20px 24px;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.title-icon {
+  color: white;
+}
+
+.close-btn {
+  color: white !important;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-actions {
+  padding: 20px 24px;
+  background: #f8f9fa;
+  border-radius: 0 0 16px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  padding: 8px 24px;
+  border-radius: 8px;
+}
+
+.save-btn {
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* Form Field Styles */
+.modal-content {
+  padding: 24px;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  width: 100%;
+}
+
+.form-input {
+  width: 100%;
+  min-width: 400px;
+}
+
+.form-input .q-field__control {
+  min-height: 48px;
+}
+
+.form-input .q-field__native {
+  font-size: 14px;
+  padding: 12px 16px;
 }
 </style>

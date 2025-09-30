@@ -121,6 +121,13 @@
             <q-item-section>Dashboard</q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple @click="navigateTo('nurse-messaging')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="message" />
+            </q-item-section>
+            <q-item-section>Messaging</q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple @click="navigateTo('patient-assessment')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="assignment" />
@@ -914,7 +921,7 @@ const backupPatientData = async () => {
     
     const link = document.createElement('a')
     link.href = url
-    link.download = `nurse-patient-management-backup-${new Date().toISOString().split('T')[0]}.json`
+    link.download = `nurse-settings-backup-${new Date().toISOString().split('T')[0]}.json`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -1017,7 +1024,7 @@ const getVerificationColor = (status: string | undefined) => {
 
 const getVerificationLabel = (status: string | undefined) => {
   switch (status) {
-    case 'verified':
+    case 'approved':
       return 'Verified'
     case 'pending':
       return 'Pending'
@@ -1454,8 +1461,12 @@ onUnmounted(() => {
 }
 
 .nav-item.active {
-  background: #e8f5e8;
-  color: #286660;
+  background: #286660;
+  color: white;
+}
+
+.nav-item.active .q-icon {
+  color: white;
 }
 
 .nav-item:hover:not(.active) {

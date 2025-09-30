@@ -187,9 +187,10 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:9000",  # Default Quasar dev server port
     "http://localhost:9001",  # Alternative Quasar dev server port
-    "http://localhost:8080",
+    "http://localhost:8080",  # Admin frontend
     "http://127.0.0.1:9000",
     "http://127.0.0.1:9001",
+    "http://127.0.0.1:8080",  # Admin frontend
 ]
 
 # Allow credentials (cookies, authorization headers)
@@ -227,6 +228,9 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+# Frontend URL for email verification links
+FRONTEND_URL = "http://localhost:8080"
 EMAIL_HOST_USER = "nitzydiones@gmail.com"
 EMAIL_HOST_PASSWORD = "vyqo dpsl twkg inzp"
 DEFAULT_FROM_EMAIL = "nitzydiones@gmail.com"

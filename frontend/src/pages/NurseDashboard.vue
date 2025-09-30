@@ -90,8 +90,8 @@
           <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn" />
         </div>
 
-        <!-- User Profile Section - Centered -->
-        <div class="sidebar-user-profile-centered">
+        <!-- User Profile Section -->
+        <div class="sidebar-user-profile">
           <div class="profile-picture-container">
             <q-avatar size="80px" class="profile-avatar">
               <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
@@ -114,16 +114,21 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
+            <q-icon 
+              :name="userProfile.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              class="verified-badge" 
+            />
           </div>
           
           <div class="user-info">
             <h6 class="user-name">{{ userProfile?.first_name }} {{ userProfile?.last_name }}</h6>
             <p class="user-role">Nurse</p>
             <q-chip 
-              :color="userProfile?.verification_status === 'verified' ? 'green' : 'orange'"
+              :color="userProfile?.verification_status === 'approved' ? 'positive' : 'negative'"
               text-color="white"
               size="sm"
-              :label="userProfile?.verification_status === 'verified' ? 'Verified' : 'Pending'"
+              :label="userProfile?.verification_status === 'approved' ? 'Verified' : 'Not Verified'"
             />
           </div>
         </div>
@@ -135,6 +140,13 @@
               <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>Dashboard</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple @click="navigateTo('nurse-messaging')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="message" />
+            </q-item-section>
+            <q-item-section>Messaging</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple @click="navigateTo('patient-assessment')" class="nav-item">
@@ -151,14 +163,7 @@
             <q-item-section>Medicine Inventory</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('patients')" class="nav-item">
-            <q-item-section avatar>
-              <q-icon name="people" />
-            </q-item-section>
-            <q-item-section>Patient Management</q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple @click="navigateTo('analytics')" class="nav-item">
+          <q-item clickable v-ripple @click="navigateTo('nurse-analytics')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="analytics" />
             </q-item-section>
@@ -981,11 +986,11 @@ const navigateTo = (route: string) => {
     case 'patient-assessment':
       void router.push('/nurse-patient-assessment')
       break
+    case 'nurse-messaging':
+      void router.push('/nurse-messaging')
+      break
     case 'nurse-medicine-inventory':
       void router.push('/nurse-medicine-inventory')
-      break
-    case 'patients':
-      void router.push('/nurse-patient-management')
       break
     case 'analytics':
       void router.push('/nurse-analytics')
@@ -1163,6 +1168,11 @@ onMounted(() => {
   
   // Refresh dashboard stats every 5 minutes
   setInterval(() => void loadDashboardStats(), 5 * 60 * 1000)
+  
+  // Refresh user profile every 30 seconds to check for verification status updates
+  setInterval(() => {
+    void fetchUserProfile()
+  }, 30000)
 })
 
 // Cleanup on component unmount
@@ -1403,7 +1413,16 @@ onUnmounted(() => {
 }
 
 .profile-avatar {
-  border: 3px solid #1e7668;
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
 
 .profile-placeholder {
@@ -1421,9 +1440,14 @@ onUnmounted(() => {
 
 .upload-btn {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: -5px;
+  right: -5px;
   background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
 }
 
 .user-info {
@@ -1449,17 +1473,22 @@ onUnmounted(() => {
 }
 
 .nav-item {
-  margin: 5px 10px;
+  margin: 4px 16px;
   border-radius: 8px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
-.nav-item:hover {
-  background: rgba(30, 118, 104, 0.1);
+.nav-item.active {
+  background: #286660;
+  color: white;
 }
 
-.nav-item .q-icon {
-  color: #1e7668;
+.nav-item.active .q-icon {
+  color: white;
+}
+
+.nav-item:hover:not(.active) {
+  background: #f5f5f5;
 }
 
 .sidebar-footer {
@@ -1588,13 +1617,10 @@ onUnmounted(() => {
   text-align: center;
 }
 
-.sidebar-user-profile-centered {
-  padding: 20px;
-  text-align: center;
+.sidebar-user-profile {
+  padding: 24px 20px;
   border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
 }
 
 .profile-picture-container {
@@ -1612,13 +1638,18 @@ onUnmounted(() => {
 
 .verified-badge {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  transform: translate(-25%, 25%);
+  top: -5px;
+  right: -5px;
   background: white;
   border-radius: 50%;
-  padding: 2px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
+
 
 .user-name {
   font-size: 16px;

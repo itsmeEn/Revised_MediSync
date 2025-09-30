@@ -34,10 +34,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/DoctorDashboard.vue')
   },
   {
-    path: '/doctor-patient-assignments',
-    component: () => import('pages/DoctorPatientAssignments.vue')
-  },
-  {
     path: '/doctor-appointments',
     name: 'DoctorAppointments',
     component: () => import('pages/DoctorAppointment.vue')
@@ -83,9 +79,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/NurseSettings.vue')
   },
   {
-    path: '/nurse-patient-management',
-    name: 'NursePatientManagement',
-    component: () => import('pages/NursePatientManagement.vue')
+    path: '/nurse-messaging',
+    component: () => import('pages/NurseMessaging.vue')
   },
   {
     path: '/patient-dashboard',

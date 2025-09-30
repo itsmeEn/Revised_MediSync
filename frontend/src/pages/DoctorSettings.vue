@@ -75,8 +75,8 @@
           <q-btn dense flat round icon="menu" @click="toggleRightDrawer" class="menu-btn" />
         </div>
 
-        <!-- User Profile Section - Centered -->
-        <div class="sidebar-user-profile-centered">
+        <!-- User Profile Section -->
+        <div class="sidebar-user-profile">
           <div class="profile-picture-container">
             <q-avatar size="80px" class="profile-avatar">
               <img v-if="profilePictureUrl" :src="profilePictureUrl" alt="Profile Picture" />
@@ -99,17 +99,23 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
+            <q-icon 
+              :name="userProfile?.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
+              :color="userProfile?.verification_status === 'approved' ? 'positive' : 'negative'" 
+              class="verified-badge" 
+            />
           </div>
           
           <div class="user-info">
-            <h6 class="user-name">{{ userProfile?.first_name }} {{ userProfile?.last_name }}</h6>
-            <p class="user-role">Doctor</p>
+            <h6 class="user-name">{{ userProfile?.full_name || 'Loading...' }}</h6>
+            <p class="user-role">{{ userProfile?.specialization || 'Loading specialization...' }}</p>
             <q-chip 
-              :color="userProfile?.verification_status === 'verified' ? 'green' : 'orange'"
+              :color="userProfile?.verification_status === 'approved' ? 'positive' : 'negative'"
               text-color="white"
               size="sm"
-              :label="userProfile?.verification_status === 'verified' ? 'Verified' : 'Pending'"
-            />
+            >
+              {{ userProfile?.verification_status === 'approved' ? 'Verified' : 'Not Verified' }}
+            </q-chip>
           </div>
         </div>
 
@@ -158,8 +164,8 @@
           </q-item>
         </q-list>
 
-        <!-- Logout Section - Footer -->
-        <div class="sidebar-footer">
+        <!-- Logout Section -->
+        <div class="logout-section">
           <q-btn
             color="negative"
             icon="logout"
@@ -1200,9 +1206,14 @@ onUnmounted(() => {
 
 .upload-btn {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  transform: translate(25%, 25%);
+  bottom: -5px;
+  right: -5px;
+  background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
 }
 
 .profile-placeholder {
@@ -1234,23 +1245,27 @@ onUnmounted(() => {
 }
 
 .nav-item {
-  margin-bottom: 5px;
+  margin: 4px 16px;
   border-radius: 8px;
-  transition: background-color 0.2s;
-}
-
-.nav-item:hover {
-  background-color: #f0f0f0;
+  transition: all 0.3s ease;
 }
 
 .nav-item.active {
-  background-color: #286660;
+  background: #286660;
   color: white;
 }
 
+.nav-item.active .q-icon {
+  color: white;
+}
+
+.nav-item:hover:not(.active) {
+  background: #f5f5f5;
+}
+
 .logout-section {
-  margin-top: auto;
-  padding-top: 20px;
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .logout-btn {
@@ -1356,13 +1371,10 @@ onUnmounted(() => {
   color: #666;
 }
 
-.sidebar-user-profile-centered {
-  padding: 20px;
-  text-align: center;
+.sidebar-user-profile {
+  padding: 24px 20px;
   border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
 }
 
 .profile-picture-container {
@@ -1373,17 +1385,28 @@ onUnmounted(() => {
 
 .upload-btn {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  transform: translate(25%, 25%);
+  bottom: -5px;
+  right: -5px;
+  background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
 }
 
 .verified-badge {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  top: -5px;
+  right: -5px;
   background: white;
   border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 
 .user-name {
@@ -1399,35 +1422,8 @@ onUnmounted(() => {
   margin: 0 0 12px 0;
 }
 
-.navigation-menu {
-  flex: 1;
-  padding: 8px 0;
-}
+/* Duplicate CSS removed - using standardized styles above */
 
-.nav-item {
-  margin: 4px 12px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.nav-item.active {
-  background: #e8f5e8;
-  color: #286660;
-}
-
-.nav-item:hover:not(.active) {
-  background: #f5f5f5;
-}
-
-.sidebar-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  border-top: 1px solid #e0e0e0;
-  background: #f8f9fa;
-}
 
 .logout-btn {
   width: 100%;
@@ -1523,8 +1519,17 @@ onUnmounted(() => {
 }
 
 .profile-avatar {
-  border: 3px solid #286660;
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
   box-shadow: 0 4px 12px rgba(40, 102, 96, 0.2);
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
 
 .profile-placeholder {

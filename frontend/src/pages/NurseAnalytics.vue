@@ -99,16 +99,21 @@
               style="display: none"
               @change="handleProfilePictureUpload"
             />
+            <q-icon 
+              :name="userProfile.verification_status === 'approved' ? 'check_circle' : 'cancel'" 
+              :color="userProfile.verification_status === 'approved' ? 'positive' : 'negative'" 
+              class="verified-badge" 
+            />
               </div>
           
           <div class="user-info">
             <h6 class="user-name">{{ userProfile?.first_name }} {{ userProfile?.last_name }}</h6>
             <p class="user-role">Nurse</p>
             <q-chip 
-              :color="userProfile?.verification_status === 'verified' ? 'green' : 'orange'"
+              :color="userProfile?.verification_status === 'approved' ? 'positive' : 'negative'"
               text-color="white"
               size="sm"
-              :label="userProfile?.verification_status === 'verified' ? 'Verified' : 'Pending'"
+              :label="userProfile?.verification_status === 'approved' ? 'Verified' : 'Not Verified'"
             />
         </div>
       </div>
@@ -129,6 +134,13 @@
             <q-item-section>Medicine Inventory</q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple @click="navigateTo('nurse-messaging')" class="nav-item">
+            <q-item-section avatar>
+              <q-icon name="message" />
+            </q-item-section>
+            <q-item-section>Messaging</q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple @click="navigateTo('patient-assessment')" class="nav-item">
             <q-item-section avatar>
               <q-icon name="assignment" />
@@ -136,12 +148,6 @@
             <q-item-section>Patient Assessment</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('patients')" class="nav-item">
-            <q-item-section avatar>
-              <q-icon name="people" />
-            </q-item-section>
-            <q-item-section>Patient Management</q-item-section>
-          </q-item>
 
           <q-item clickable v-ripple @click="navigateTo('nurse-analytics')" class="nav-item active">
             <q-item-section avatar>
@@ -284,10 +290,14 @@
                     </div>
                   </div>
                   <div v-else class="empty-data">
-                    <p>No medication analysis data available</p>
-          </div>
-        </div>
-      </div>
+                    <div class="empty-state">
+                      <q-icon name="medication" size="48px" color="grey-5" />
+                      <p>No medication analysis data available</p>
+                      <p class="empty-subtitle">Data will appear here once medication patterns are analyzed</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <!-- Demographics Panel -->
               <div class="analytics-panel demographics-panel">
@@ -312,10 +322,14 @@
                   </div>
                 </div>
                   <div v-else class="empty-data">
-                    <p>No demographics data available</p>
-              </div>
+                    <div class="empty-state">
+                      <q-icon name="people" size="48px" color="grey-5" />
+                      <p>No demographics data available</p>
+                      <p class="empty-subtitle">Patient demographic information will appear here</p>
                     </div>
                   </div>
+                </div>
+              </div>
 
               <!-- Health Trends Panel -->
               <div class="analytics-panel trends-panel">
@@ -332,7 +346,11 @@
                     </div>
                   </div>
                   <div v-else class="empty-data">
-                    <p>No health trends data available</p>
+                    <div class="empty-state">
+                      <q-icon name="trending_up" size="48px" color="grey-5" />
+                      <p>No health trends data available</p>
+                      <p class="empty-subtitle">Health trend analysis will appear here</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -351,7 +369,11 @@
                     </div>
                   </div>
                   <div v-else class="empty-data">
-                    <p>No volume prediction data available</p>
+                    <div class="empty-state">
+                      <q-icon name="analytics" size="48px" color="grey-5" />
+                      <p>No volume prediction data available</p>
+                      <p class="empty-subtitle">Patient volume forecasting will appear here</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -774,9 +796,51 @@ const fetchNurseAnalytics = async () => {
     console.log('Nurse analytics loaded:', analyticsData.value)
   } catch (error) {
     console.error('Failed to fetch nurse analytics:', error)
+    
+    // Load mock data for demonstration purposes
+    analyticsData.value = {
+      medication_analysis: {
+        medication_pareto_data: [
+          { medication: 'Paracetamol', frequency: 45, cumulative_percentage: 32.1 },
+          { medication: 'Ibuprofen', frequency: 32, cumulative_percentage: 54.9 },
+          { medication: 'Amoxicillin', frequency: 28, cumulative_percentage: 74.9 },
+          { medication: 'Aspirin', frequency: 22, cumulative_percentage: 90.6 },
+          { medication: 'Metformin', frequency: 18, cumulative_percentage: 100.0 }
+        ]
+      },
+      patient_demographics: {
+        age_distribution: {
+          '0-18': 15,
+          '19-35': 45,
+          '36-50': 30,
+          '51-65': 25,
+          '65+': 20
+        },
+        gender_proportions: {
+          'Male': 52,
+          'Female': 48
+        }
+      },
+      health_trends: {
+        top_illnesses_by_week: [
+          { medical_condition: 'Common Cold', count: 12, date_of_admission: '2024-01-15' },
+          { medical_condition: 'Hypertension', count: 8, date_of_admission: '2024-01-14' },
+          { medical_condition: 'Diabetes', count: 6, date_of_admission: '2024-01-13' },
+          { medical_condition: 'Flu', count: 5, date_of_admission: '2024-01-12' },
+          { medical_condition: 'Headache', count: 4, date_of_admission: '2024-01-11' }
+        ]
+      },
+      volume_prediction: {
+        evaluation_metrics: {
+          mae: 2.3,
+          rmse: 3.1
+        }
+      }
+    }
+    
     $q.notify({
-      type: 'negative',
-      message: 'Failed to load analytics data',
+      type: 'info',
+      message: 'Using demo analytics data',
       position: 'top',
       timeout: 3000
     })
@@ -812,11 +876,11 @@ const navigateTo = (route: string) => {
     case 'nurse-medicine-inventory':
       void router.push('/nurse-medicine-inventory')
       break
+    case 'nurse-messaging':
+      void router.push('/nurse-messaging')
+      break
     case 'patient-assessment':
       void router.push('/nurse-patient-assessment')
-      break
-    case 'patients':
-      void router.push('/nurse-patient-management')
       break
     case 'nurse-analytics':
       // Already on analytics page
@@ -1029,6 +1093,11 @@ onMounted(() => {
   timeInterval = setInterval(updateTime, 1000)
   
   void fetchWeatherData()
+  
+  // Refresh user profile every 30 seconds to check for verification status updates
+  setInterval(() => {
+    void fetchUserProfile()
+  }, 30000)
 })
 
 /**
@@ -1227,6 +1296,59 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
+/* Profile Avatar Styles - Circular Design */
+.profile-avatar {
+  border: 3px solid #1e7668 !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+}
+
+.profile-avatar img {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e7668;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: #1e7668 !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+}
+
+.verified-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
 /* Page Container with Background */
 .page-container-with-fixed-header {
   background: #f8f9fa;
@@ -1396,6 +1518,29 @@ onUnmounted(() => {
 
 .analytics-content {
   padding: 0 24px 24px 24px;
+}
+
+/* Empty State Styles */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.empty-state p {
+  margin: 12px 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.empty-subtitle {
+  font-size: 14px !important;
+  color: #999 !important;
+  font-weight: 400 !important;
 }
 
 .analytics-title {

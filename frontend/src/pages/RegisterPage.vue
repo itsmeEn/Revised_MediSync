@@ -66,6 +66,9 @@
                 <button type="button" class="toggle-password" @click="showPassword = !showPassword">
                   {{ showPassword ? 'Hide' : 'Show' }}
                 </button>
+                <div class="password-strength" :class="passwordStrengthClass">
+                  {{ passwordStrengthText }}
+                </div>
               </div>
               <div class="form-group">
                 <label for="password2">Confirm Password *</label>
@@ -157,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { api } from '../boot/axios'
@@ -184,6 +187,10 @@ const loading = ref(false)
 const showPassword = ref(false)
 const showPassword2 = ref(false)
 
+// Password strength
+const passwordStrengthClass = ref('')
+const passwordStrengthText = ref('')
+
 const formData = ref<RegistrationFormData>({
   full_name: '',
   email: '',
@@ -205,11 +212,65 @@ const roleTitle = computed(() => {
   }
 })
 
+// Password strength calculation
+const calculatePasswordStrength = (password: string) => {
+  if (!password) {
+    passwordStrengthText.value = ''
+    passwordStrengthClass.value = ''
+    return
+  }
+
+  let score = 0
+  const feedback = []
+
+  // Length check
+  if (password.length >= 8) score += 1
+  else feedback.push('at least 8 characters')
+
+  // Lowercase check
+  if (/[a-z]/.test(password)) score += 1
+  else feedback.push('lowercase letters')
+
+  // Uppercase check
+  if (/[A-Z]/.test(password)) score += 1
+  else feedback.push('uppercase letters')
+
+  // Number check
+  if (/\d/.test(password)) score += 1
+  else feedback.push('numbers')
+
+  // Special character check
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1
+  else feedback.push('special characters')
+
+  // Determine strength
+  if (score <= 2) {
+    passwordStrengthText.value = 'Weak password'
+    passwordStrengthClass.value = 'weak'
+  } else if (score <= 3) {
+    passwordStrengthText.value = 'Medium password'
+    passwordStrengthClass.value = 'medium'
+  } else {
+    passwordStrengthText.value = 'Strong password'
+    passwordStrengthClass.value = 'strong'
+  }
+
+  // Add feedback for weak passwords
+  if (score <= 2 && feedback.length > 0) {
+    passwordStrengthText.value += ` - needs ${feedback.slice(0, 2).join(', ')}`
+  }
+}
+
 onMounted(() => {
   role.value = route.params.role as string
   if (!['doctor', 'nurse', 'patient'].includes(role.value)) {
     void router.push('/role-selection')
   }
+})
+
+// Watch password changes to update strength indicator
+watch(() => formData.value.password, (newPassword) => {
+  calculatePasswordStrength(newPassword)
 })
 
 const onRegister = async () => {
@@ -446,6 +507,25 @@ const onRegister = async () => {
   color: #1e7668;
   cursor: pointer;
   font-size: 14px;
+}
+
+.password-strength {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.password-strength.weak {
+  color: #e74c3c;
+}
+
+.password-strength.medium {
+  color: #f39c12;
+}
+
+.password-strength.strong {
+  color: #27ae60;
 }
 
 .role-specific-fields {
