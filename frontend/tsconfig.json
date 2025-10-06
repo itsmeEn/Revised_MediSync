@@ -1,3 +1,9 @@
 {
-  "extends": "./.quasar/tsconfig.json"
+  "extends": "./.quasar/tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "quasar", "vite/client"]
+  },
+  "vueCompilerOptions": {
+    "globalTypesPath": "./src/volar.d.ts"
+  }
 }

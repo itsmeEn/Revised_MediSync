@@ -556,7 +556,7 @@
               label="Follow-up Date"
               outlined
               type="date"
-              :rules="[val => !!val || 'Date is required']"
+              :rules="[ (val: string | null) => !!val || 'Date is required']"
             />
 
             <q-input
@@ -564,7 +564,7 @@
               label="Follow-up Time"
               outlined
               type="time"
-              :rules="[val => !!val || 'Time is required']"
+              :rules="[ (val: string | null) => !!val || 'Time is required']"
             />
 
             <q-input

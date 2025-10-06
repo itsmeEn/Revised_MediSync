@@ -274,7 +274,9 @@ const onRegister = async () => {
 
     // An HTTP POST request is sent to the registration endpoint.
     // Axios automatically configures the correct 'Content-Type' header for FormData.
-    const response = await api.post('/users/register/', registrationData);
+    const response = await api.post('/users/register/', registrationData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
 
     // Upon successful registration, the access and refresh tokens are stored in local storage.
     localStorage.setItem('access_token', response.data.tokens.access);

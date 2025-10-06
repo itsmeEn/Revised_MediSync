@@ -1,5 +1,5 @@
 import { defineBoot } from '#q-app/wrappers';
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance, type AxiosError, type AxiosRequestConfig, type RawAxiosRequestHeaders } from 'axios';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -15,10 +15,7 @@ declare module 'vue' {
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  }
+  baseURL: 'http://localhost:8000/api'
 });
 
 // Request interceptor to add auth token
@@ -33,8 +30,10 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(new Error(error.message || 'Request failed'));
+  (error: unknown) => {
+    // Ensure we reject with an Error instance to satisfy ESLint rule
+    const reason = error instanceof Error ? error : new Error(String(error));
+    return Promise.reject(reason);
   }
 );
 
@@ -43,8 +42,8 @@ api.interceptors.response.use(
   (response) => {
     return response;
   },
-  async (error) => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       console.log('🔄 401 Unauthorized detected, attempting token refresh...');
@@ -58,11 +57,13 @@ api.interceptors.response.use(
             refresh: refreshToken
           });
 
-          const { access } = response.data;
+          const { access } = response.data as { access: string };
           localStorage.setItem('access_token', access);
           console.log('✅ Token refreshed successfully');
 
-          originalRequest.headers.Authorization = `Bearer ${access}`;
+          const headers = (originalRequest.headers || {}) as RawAxiosRequestHeaders;
+          headers['Authorization'] = `Bearer ${access}`;
+          originalRequest.headers = headers;
           return api(originalRequest);
         } else {
           console.warn('⚠️ No refresh token found');
@@ -77,7 +78,9 @@ api.interceptors.response.use(
       }
     }
 
-    return Promise.reject(new Error(error.message || 'Response failed'));
+    // Ensure we reject with an Error instance to satisfy ESLint rule
+    const reason = error instanceof Error ? error : new Error(String(error));
+    return Promise.reject(reason);
   }
 );
 

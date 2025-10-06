@@ -333,7 +333,7 @@
                 label="Quantity"
                 type="number"
                 outlined
-                :rules="[ (val: number | null) => (val ?? 0) >= 0 || 'Quantity must be non-negative' ]"
+                :rules="[ (val: number | null) => (val ?? 0) > 0 || 'Quantity must be positive' ]"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -462,7 +462,7 @@
                 label="Quantity to Add"
                 type="number"
                 outlined
-                :rules="[val => val > 0 || 'Quantity must be positive']"
+                :rules="[ (val: number | null) => (val ?? 0) > 0 || 'Quantity must be positive']"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -471,7 +471,7 @@
                 label="New Expiry Date"
                 type="date"
                 outlined
-                :rules="[val => !!val || 'Expiry date is required']"
+                :rules="[ (val: string | null) => !!val || 'Expiry date is required']"
               />
             </div>
             <div class="col-12">

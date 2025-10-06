@@ -231,14 +231,14 @@
               :options="recipientOptions"
               label="Recipient"
               outlined
-              :rules="[val => !!val || 'Recipient is required']"
+              :rules="[ (val: string | null) => !!val || 'Recipient is required' ]"
             />
 
             <q-input
               v-model="newMessage.subject"
               label="Subject"
               outlined
-              :rules="[val => !!val || 'Subject is required']"
+              :rules="[ (val: string | null) => !!val || 'Subject is required' ]"
             />
 
             <q-input
@@ -247,7 +247,7 @@
               outlined
               type="textarea"
               rows="4"
-              :rules="[val => !!val || 'Message is required']"
+              :rules="[ (val: string | null) => !!val || 'Message is required' ]"
             />
 
             <div class="row q-gutter-sm justify-end">

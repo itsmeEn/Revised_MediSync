@@ -114,7 +114,7 @@
                   type="text"
                   placeholder="120/80"
                   outlined
-                  :rules="[val => !!val || 'Blood pressure is required']"
+                  :rules="[ (val: string | null) => !!val || 'Blood pressure is required' ]"
                 />
               </div>
               <div class="col-12 col-md-3">
@@ -123,7 +123,7 @@
                   label="Heart Rate (bpm)"
                   type="number"
                   outlined
-                  :rules="[val => !!val || 'Heart rate is required']"
+                  :rules="[ (val: string | null) => !!val || 'Heart rate is required' ]"
                 />
               </div>
               <div class="col-12 col-md-3">
@@ -133,7 +133,7 @@
                   type="number"
                   step="0.1"
                   outlined
-                  :rules="[val => !!val || 'Temperature is required']"
+                  :rules="[ (val: string | null) => !!val || 'Temperature is required' ]"
                 />
               </div>
               <div class="col-12 col-md-3">
@@ -142,7 +142,7 @@
                   label="Respiratory Rate (breaths/min)"
                   type="number"
                   outlined
-                  :rules="[val => !!val || 'Respiratory rate is required']"
+                  :rules="[ (val: string | null) => !!val || 'Respiratory rate is required' ]"
                 />
               </div>
               <div class="col-12 col-md-3">
@@ -151,7 +151,7 @@
                   label="Oxygen Saturation (%)"
                   type="number"
                   outlined
-                  :rules="[val => !!val || 'Oxygen saturation is required']"
+                  :rules="[ (val: string | null) => !!val || 'Oxygen saturation is required' ]"
                 />
               </div>
               <div class="col-12 col-md-3">

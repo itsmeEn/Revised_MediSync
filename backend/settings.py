@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,10 @@ SECRET_KEY = "django-insecure-jkac^7ayyqz9=+ksgij@fva4f&cv($)9+w=#d^u)mkozs&#hq&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -171,6 +175,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:9000",
     "http://127.0.0.1:9001",
+    "http://localhost:9003",  # Current dev server port
+    "http://127.0.0.1:9003",  # Current dev server port
+    "http://localhost:9002",  # Current dev server port
+    "http://127.0.0.1:9002",  # Current dev server port
 ]
 
 # Allow credentials (cookies, authorization headers)
@@ -208,6 +216,6 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "nitzydiones@gmail.com"
-EMAIL_HOST_PASSWORD = "vyqo dpsl twkg inzp"
-DEFAULT_FROM_EMAIL = "nitzydiones@gmail.com"  
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
