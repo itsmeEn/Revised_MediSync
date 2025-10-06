@@ -436,7 +436,7 @@
               v-model="newAppointment.patient_name"
               label="Patient Name"
               outlined
-              :rules="[val => !!val || 'Patient name is required']"
+              :rules="[ (val: string | null) => !!val || 'Patient name is required' ]"
             />
 
             <q-input
@@ -444,7 +444,7 @@
               label="Date"
               outlined
               type="date"
-              :rules="[val => !!val || 'Date is required']"
+              :rules="[ (val: string | null) => !!val || 'Date is required' ]"
             />
 
             <q-input
@@ -452,7 +452,7 @@
               label="Time"
               outlined
               type="time"
-              :rules="[val => !!val || 'Time is required']"
+              :rules="[ (val: string | null) => !!val || 'Time is required' ]"
             />
 
             <q-select
@@ -460,7 +460,7 @@
               :options="appointmentTypes"
               label="Appointment Type"
               outlined
-              :rules="[val => !!val || 'Appointment type is required']"
+              :rules="[ (val: string | null) => !!val || 'Appointment type is required' ]"
             />
 
             <q-input

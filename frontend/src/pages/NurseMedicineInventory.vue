@@ -290,7 +290,7 @@
                 v-model="medicineForm.name"
                 label="Medicine Name"
                 outlined
-                :rules="[val => !!val || 'Name is required']"
+                :rules="[ (val: string | null) => !!val || 'Name is required' ]"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -308,7 +308,7 @@
                 outlined
                 emit-value
                 map-options
-                :rules="[val => !!val || 'Category is required']"
+                :rules="[ (val: string | null) => !!val || 'Category is required' ]"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -333,7 +333,7 @@
                 label="Quantity"
                 type="number"
                 outlined
-                :rules="[val => val >= 0 || 'Quantity must be non-negative']"
+                :rules="[ (val: number | null) => (val ?? 0) >= 0 || 'Quantity must be non-negative' ]"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -350,7 +350,7 @@
                 label="Expiry Date"
                 type="date"
                 outlined
-                :rules="[val => !!val || 'Expiry date is required']"
+                :rules="[ (val: string | null) => !!val || 'Expiry date is required' ]"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -359,7 +359,7 @@
                 label="Minimum Stock Level"
                 type="number"
                 outlined
-                :rules="[val => val >= 0 || 'Minimum stock must be non-negative']"
+                :rules="[ (val: number | null) => (val ?? 0) >= 0 || 'Minimum stock must be non-negative' ]"
               />
             </div>
             <div class="col-12">
@@ -400,7 +400,7 @@
                 v-model="dispenseForm.patientName"
                 label="Patient Name"
                 outlined
-                :rules="[val => !!val || 'Patient name is required']"
+                :rules="[ (val: string | null) => !!val || 'Patient name is required' ]"
               />
             </div>
             <div class="col-12 col-md-6">
@@ -410,8 +410,8 @@
                 type="number"
                 outlined
                 :rules="[
-                  val => !!val || 'Quantity is required',
-                  val => val <= (selectedMedicine?.quantity || 0) || 'Insufficient stock'
+                  (val: number | null) => !!val || 'Quantity is required',
+                  (val: number) => val <= (selectedMedicine?.quantity || 0) || 'Insufficient stock'
                 ]"
               />
             </div>

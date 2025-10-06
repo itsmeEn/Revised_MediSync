@@ -1,0 +1,2215 @@
+﻿diff --git a/admin_site/__pycache__/__init__.cpython-313.pyc b/admin_site/__pycache__/__init__.cpython-313.pyc
+index a0faa3b..907845e 100644
+Binary files a/admin_site/__pycache__/__init__.cpython-313.pyc and b/admin_site/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/admin.cpython-313.pyc b/admin_site/__pycache__/admin.cpython-313.pyc
+index b201368..17f1cf8 100644
+Binary files a/admin_site/__pycache__/admin.cpython-313.pyc and b/admin_site/__pycache__/admin.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/apps.cpython-313.pyc b/admin_site/__pycache__/apps.cpython-313.pyc
+index 3dccbe1..f65c4c3 100644
+Binary files a/admin_site/__pycache__/apps.cpython-313.pyc and b/admin_site/__pycache__/apps.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/authentication.cpython-313.pyc b/admin_site/__pycache__/authentication.cpython-313.pyc
+index 8c79192..f0b20be 100644
+Binary files a/admin_site/__pycache__/authentication.cpython-313.pyc and b/admin_site/__pycache__/authentication.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/managers.cpython-313.pyc b/admin_site/__pycache__/managers.cpython-313.pyc
+index 4ccc351..a87919a 100644
+Binary files a/admin_site/__pycache__/managers.cpython-313.pyc and b/admin_site/__pycache__/managers.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/models.cpython-313.pyc b/admin_site/__pycache__/models.cpython-313.pyc
+index eb57598..2bc9b09 100644
+Binary files a/admin_site/__pycache__/models.cpython-313.pyc and b/admin_site/__pycache__/models.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/serializers.cpython-313.pyc b/admin_site/__pycache__/serializers.cpython-313.pyc
+index 3cc12e1..761cf15 100644
+Binary files a/admin_site/__pycache__/serializers.cpython-313.pyc and b/admin_site/__pycache__/serializers.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/urls.cpython-313.pyc b/admin_site/__pycache__/urls.cpython-313.pyc
+index 1290495..629a865 100644
+Binary files a/admin_site/__pycache__/urls.cpython-313.pyc and b/admin_site/__pycache__/urls.cpython-313.pyc differ
+diff --git a/admin_site/__pycache__/views.cpython-313.pyc b/admin_site/__pycache__/views.cpython-313.pyc
+index 7911ca0..9b4067d 100644
+Binary files a/admin_site/__pycache__/views.cpython-313.pyc and b/admin_site/__pycache__/views.cpython-313.pyc differ
+diff --git a/admin_site/migrations/__pycache__/0001_initial.cpython-313.pyc b/admin_site/migrations/__pycache__/0001_initial.cpython-313.pyc
+index 81e7fa5..708dad1 100644
+Binary files a/admin_site/migrations/__pycache__/0001_initial.cpython-313.pyc and b/admin_site/migrations/__pycache__/0001_initial.cpython-313.pyc differ
+diff --git a/admin_site/migrations/__pycache__/0002_alter_adminuser_managers_alter_adminuser_username.cpython-313.pyc b/admin_site/migrations/__pycache__/0002_alter_adminuser_managers_alter_adminuser_username.cpython-313.pyc
+index 2e8ac96..a6140b0 100644
+Binary files a/admin_site/migrations/__pycache__/0002_alter_adminuser_managers_alter_adminuser_username.cpython-313.pyc and b/admin_site/migrations/__pycache__/0002_alter_adminuser_managers_alter_adminuser_username.cpython-313.pyc differ
+diff --git a/admin_site/migrations/__pycache__/__init__.cpython-313.pyc b/admin_site/migrations/__pycache__/__init__.cpython-313.pyc
+index ed324eb..e57cebf 100644
+Binary files a/admin_site/migrations/__pycache__/__init__.cpython-313.pyc and b/admin_site/migrations/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/backend/__pycache__/__init__.cpython-313.pyc b/backend/__pycache__/__init__.cpython-313.pyc
+index 62704ab..8bdd0ce 100644
+Binary files a/backend/__pycache__/__init__.cpython-313.pyc and b/backend/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/backend/__pycache__/settings.cpython-313.pyc b/backend/__pycache__/settings.cpython-313.pyc
+index 111db4f..e04f5e3 100644
+Binary files a/backend/__pycache__/settings.cpython-313.pyc and b/backend/__pycache__/settings.cpython-313.pyc differ
+diff --git a/backend/__pycache__/urls.cpython-313.pyc b/backend/__pycache__/urls.cpython-313.pyc
+index 49b7324..b5ec4c3 100644
+Binary files a/backend/__pycache__/urls.cpython-313.pyc and b/backend/__pycache__/urls.cpython-313.pyc differ
+diff --git a/backend/__pycache__/wsgi.cpython-313.pyc b/backend/__pycache__/wsgi.cpython-313.pyc
+index 94ceee0..b62a489 100644
+Binary files a/backend/__pycache__/wsgi.cpython-313.pyc and b/backend/__pycache__/wsgi.cpython-313.pyc differ
+diff --git a/backend/operations/__pycache__/__init__.cpython-313.pyc b/backend/operations/__pycache__/__init__.cpython-313.pyc
+index 7e5b6c7..b7209f3 100644
+Binary files a/backend/operations/__pycache__/__init__.cpython-313.pyc and b/backend/operations/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/backend/operations/__pycache__/admin.cpython-313.pyc b/backend/operations/__pycache__/admin.cpython-313.pyc
+index 246dd75..ed88ae1 100644
+Binary files a/backend/operations/__pycache__/admin.cpython-313.pyc and b/backend/operations/__pycache__/admin.cpython-313.pyc differ
+diff --git a/backend/operations/__pycache__/apps.cpython-313.pyc b/backend/operations/__pycache__/apps.cpython-313.pyc
+index ca40c22..89c138f 100644
+Binary files a/backend/operations/__pycache__/apps.cpython-313.pyc and b/backend/operations/__pycache__/apps.cpython-313.pyc differ
+diff --git a/backend/operations/__pycache__/models.cpython-313.pyc b/backend/operations/__pycache__/models.cpython-313.pyc
+index 6eb1d2e..b08c528 100644
+Binary files a/backend/operations/__pycache__/models.cpython-313.pyc and b/backend/operations/__pycache__/models.cpython-313.pyc differ
+diff --git a/backend/operations/migrations/__pycache__/0001_initial.cpython-313.pyc b/backend/operations/migrations/__pycache__/0001_initial.cpython-313.pyc
+index 13a1675..7061f23 100644
+Binary files a/backend/operations/migrations/__pycache__/0001_initial.cpython-313.pyc and b/backend/operations/migrations/__pycache__/0001_initial.cpython-313.pyc differ
+diff --git a/backend/operations/migrations/__pycache__/0002_alter_priorityqueue_options_and_more.cpython-313.pyc b/backend/operations/migrations/__pycache__/0002_alter_priorityqueue_options_and_more.cpython-313.pyc
+index 301121b..ac5cd29 100644
+Binary files a/backend/operations/migrations/__pycache__/0002_alter_priorityqueue_options_and_more.cpython-313.pyc and b/backend/operations/migrations/__pycache__/0002_alter_priorityqueue_options_and_more.cpython-313.pyc differ
+diff --git a/backend/operations/migrations/__pycache__/__init__.cpython-313.pyc b/backend/operations/migrations/__pycache__/__init__.cpython-313.pyc
+index c480b22..4ed7559 100644
+Binary files a/backend/operations/migrations/__pycache__/__init__.cpython-313.pyc and b/backend/operations/migrations/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/backend/settings.py b/backend/settings.py
+index 56874b9..4f0a66e 100644
+--- a/backend/settings.py
++++ b/backend/settings.py
+@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
+ 
+ from pathlib import Path
+ from datetime import timedelta
++import os
+ 
+ # Build paths inside the project like this: BASE_DIR / 'subdir'.
+ BASE_DIR = Path(__file__).resolve().parent.parent
+@@ -26,7 +27,10 @@ SECRET_KEY = "django-insecure-jkac^7ayyqz9=+ksgij@fva4f&cv($)9+w=#d^u)mkozs&#hq&
+ # SECURITY WARNING: don't run with debug turned on in production!
+ DEBUG = True
+ 
+-ALLOWED_HOSTS = []
++ALLOWED_HOSTS = [
++    'localhost',
++    '127.0.0.1',
++]
+ 
+ 
+ # Application definition
+@@ -171,6 +175,10 @@ CORS_ALLOWED_ORIGINS = [
+     "http://localhost:8080",
+     "http://127.0.0.1:9000",
+     "http://127.0.0.1:9001",
++    "http://localhost:9003",  # Current dev server port
++    "http://127.0.0.1:9003",  # Current dev server port
++    "http://localhost:9002",  # Current dev server port
++    "http://127.0.0.1:9002",  # Current dev server port
+ ]
+ 
+ # Allow credentials (cookies, authorization headers)
+@@ -208,6 +216,6 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+ EMAIL_HOST = "smtp.gmail.com"
+ EMAIL_PORT = 587
+ EMAIL_USE_TLS = True
+-EMAIL_HOST_USER = "nitzydiones@gmail.com"
+-EMAIL_HOST_PASSWORD = "vyqo dpsl twkg inzp"
+-DEFAULT_FROM_EMAIL = "nitzydiones@gmail.com"  
+\ No newline at end of file
++EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
++EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
++DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+\ No newline at end of file
+diff --git a/backend/users/__pycache__/__init__.cpython-313.pyc b/backend/users/__pycache__/__init__.cpython-313.pyc
+index ad99a1a..4f100b6 100644
+Binary files a/backend/users/__pycache__/__init__.cpython-313.pyc and b/backend/users/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/backend/users/__pycache__/admin.cpython-313.pyc b/backend/users/__pycache__/admin.cpython-313.pyc
+index 95c93cb..1c5f7bc 100644
+Binary files a/backend/users/__pycache__/admin.cpython-313.pyc and b/backend/users/__pycache__/admin.cpython-313.pyc differ
+diff --git a/backend/users/__pycache__/apps.cpython-313.pyc b/backend/users/__pycache__/apps.cpython-313.pyc
+index d670d9d..dc8ed2f 100644
+Binary files a/backend/users/__pycache__/apps.cpython-313.pyc and b/backend/users/__pycache__/apps.cpython-313.pyc differ
+diff --git a/backend/users/__pycache__/managers.cpython-313.pyc b/backend/users/__pycache__/managers.cpython-313.pyc
+index 2b448c0..e357dfb 100644
+Binary files a/backend/users/__pycache__/managers.cpython-313.pyc and b/backend/users/__pycache__/managers.cpython-313.pyc differ
+diff --git a/backend/users/__pycache__/models.cpython-313.pyc b/backend/users/__pycache__/models.cpython-313.pyc
+index d8a14b9..6639e9a 100644
+Binary files a/backend/users/__pycache__/models.cpython-313.pyc and b/backend/users/__pycache__/models.cpython-313.pyc differ
+diff --git a/backend/users/__pycache__/serializers.cpython-313.pyc b/backend/users/__pycache__/serializers.cpython-313.pyc
+index 233a2b7..4039606 100644
+Binary files a/backend/users/__pycache__/serializers.cpython-313.pyc and b/backend/users/__pycache__/serializers.cpython-313.pyc differ
+diff --git a/backend/users/__pycache__/urls.cpython-313.pyc b/backend/users/__pycache__/urls.cpython-313.pyc
+index 4d9ea27..b166e86 100644
+Binary files a/backend/users/__pycache__/urls.cpython-313.pyc and b/backend/users/__pycache__/urls.cpython-313.pyc differ
+diff --git a/backend/users/__pycache__/views.cpython-313.pyc b/backend/users/__pycache__/views.cpython-313.pyc
+index 059f63f..c537ce9 100644
+Binary files a/backend/users/__pycache__/views.cpython-313.pyc and b/backend/users/__pycache__/views.cpython-313.pyc differ
+diff --git a/backend/users/migrations/__pycache__/0001_initial.cpython-313.pyc b/backend/users/migrations/__pycache__/0001_initial.cpython-313.pyc
+index 5cbbfbe..9badf2f 100644
+Binary files a/backend/users/migrations/__pycache__/0001_initial.cpython-313.pyc and b/backend/users/migrations/__pycache__/0001_initial.cpython-313.pyc differ
+diff --git a/backend/users/migrations/__pycache__/0002_alter_user_managers_and_more.cpython-313.pyc b/backend/users/migrations/__pycache__/0002_alter_user_managers_and_more.cpython-313.pyc
+index cbc428e..adbd16d 100644
+Binary files a/backend/users/migrations/__pycache__/0002_alter_user_managers_and_more.cpython-313.pyc and b/backend/users/migrations/__pycache__/0002_alter_user_managers_and_more.cpython-313.pyc differ
+diff --git a/backend/users/migrations/__pycache__/0003_patientprofile.cpython-313.pyc b/backend/users/migrations/__pycache__/0003_patientprofile.cpython-313.pyc
+index 0e5d928..5fe23c6 100644
+Binary files a/backend/users/migrations/__pycache__/0003_patientprofile.cpython-313.pyc and b/backend/users/migrations/__pycache__/0003_patientprofile.cpython-313.pyc differ
+diff --git a/backend/users/migrations/__pycache__/0004_user_profile_picture_user_verification_document.cpython-313.pyc b/backend/users/migrations/__pycache__/0004_user_profile_picture_user_verification_document.cpython-313.pyc
+index 23f095d..c502c2c 100644
+Binary files a/backend/users/migrations/__pycache__/0004_user_profile_picture_user_verification_document.cpython-313.pyc and b/backend/users/migrations/__pycache__/0004_user_profile_picture_user_verification_document.cpython-313.pyc differ
+diff --git a/backend/users/migrations/__pycache__/__init__.cpython-313.pyc b/backend/users/migrations/__pycache__/__init__.cpython-313.pyc
+index 90199d2..233b9d2 100644
+Binary files a/backend/users/migrations/__pycache__/__init__.cpython-313.pyc and b/backend/users/migrations/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/frontend/src/boot/axios.ts b/frontend/src/boot/axios.ts
+index 427f20c..43d83c3 100644
+--- a/frontend/src/boot/axios.ts
++++ b/frontend/src/boot/axios.ts
+@@ -1,5 +1,5 @@
+ import { defineBoot } from '#q-app/wrappers';
+-import axios, { type AxiosInstance } from 'axios';
++import axios, { type AxiosInstance, type AxiosError, type AxiosRequestConfig, type RawAxiosRequestHeaders } from 'axios';
+ 
+ declare module 'vue' {
+   interface ComponentCustomProperties {
+@@ -15,10 +15,7 @@ declare module 'vue' {
+ // "export default () => {}" function below (which runs individually
+ // for each client)
+ const api = axios.create({
+-  baseURL: 'http://localhost:8000/api',
+-  headers: {
+-    'Content-Type': 'application/json',
+-  }
++  baseURL: 'http://localhost:8000/api'
+ });
+ 
+ // Request interceptor to add auth token
+@@ -33,8 +30,10 @@ api.interceptors.request.use(
+     }
+     return config;
+   },
+-  (error) => {
+-    return Promise.reject(new Error(error.message || 'Request failed'));
++  (error: unknown) => {
++    // Ensure we reject with an Error instance to satisfy ESLint rule
++    const reason = error instanceof Error ? error : new Error(String(error));
++    return Promise.reject(reason);
+   }
+ );
+ 
+@@ -43,8 +42,8 @@ api.interceptors.response.use(
+   (response) => {
+     return response;
+   },
+-  async (error) => {
+-    const originalRequest = error.config;
++  async (error: AxiosError) => {
++    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+ 
+     if (error.response?.status === 401 && !originalRequest._retry) {
+       console.log('≡ƒöä 401 Unauthorized detected, attempting token refresh...');
+@@ -58,11 +57,13 @@ api.interceptors.response.use(
+             refresh: refreshToken
+           });
+ 
+-          const { access } = response.data;
++          const { access } = response.data as { access: string };
+           localStorage.setItem('access_token', access);
+           console.log('Γ£à Token refreshed successfully');
+ 
+-          originalRequest.headers.Authorization = `Bearer ${access}`;
++          const headers = (originalRequest.headers || {}) as RawAxiosRequestHeaders;
++          headers['Authorization'] = `Bearer ${access}`;
++          originalRequest.headers = headers;
+           return api(originalRequest);
+         } else {
+           console.warn('ΓÜá∩╕Å No refresh token found');
+@@ -77,7 +78,9 @@ api.interceptors.response.use(
+       }
+     }
+ 
+-    return Promise.reject(new Error(error.message || 'Response failed'));
++    // Ensure we reject with an Error instance to satisfy ESLint rule
++    const reason = error instanceof Error ? error : new Error(String(error));
++    return Promise.reject(reason);
+   }
+ );
+ 
+diff --git a/frontend/src/pages/DoctorAppointment.vue b/frontend/src/pages/DoctorAppointment.vue
+index 5fd2ce0..ed91edc 100644
+--- a/frontend/src/pages/DoctorAppointment.vue
++++ b/frontend/src/pages/DoctorAppointment.vue
+@@ -436,7 +436,7 @@
+               v-model="newAppointment.patient_name"
+               label="Patient Name"
+               outlined
+-              :rules="[val => !!val || 'Patient name is required']"
++              :rules="[ (val: string | null) => !!val || 'Patient name is required' ]"
+             />
+ 
+             <q-input
+@@ -444,7 +444,7 @@
+               label="Date"
+               outlined
+               type="date"
+-              :rules="[val => !!val || 'Date is required']"
++              :rules="[ (val: string | null) => !!val || 'Date is required' ]"
+             />
+ 
+             <q-input
+@@ -452,7 +452,7 @@
+               label="Time"
+               outlined
+               type="time"
+-              :rules="[val => !!val || 'Time is required']"
++              :rules="[ (val: string | null) => !!val || 'Time is required' ]"
+             />
+ 
+             <q-select
+@@ -460,7 +460,7 @@
+               :options="appointmentTypes"
+               label="Appointment Type"
+               outlined
+-              :rules="[val => !!val || 'Appointment type is required']"
++              :rules="[ (val: string | null) => !!val || 'Appointment type is required' ]"
+             />
+ 
+             <q-input
+@@ -556,7 +556,7 @@
+               label="Follow-up Date"
+               outlined
+               type="date"
+-              :rules="[val => !!val || 'Date is required']"
++              :rules="[ (val: string | null) => !!val || 'Date is required']"
+             />
+ 
+             <q-input
+@@ -564,7 +564,7 @@
+               label="Follow-up Time"
+               outlined
+               type="time"
+-              :rules="[val => !!val || 'Time is required']"
++              :rules="[ (val: string | null) => !!val || 'Time is required']"
+             />
+ 
+             <q-input
+diff --git a/frontend/src/pages/DoctorMessaging.vue b/frontend/src/pages/DoctorMessaging.vue
+index 351c9c6..bf526b5 100644
+--- a/frontend/src/pages/DoctorMessaging.vue
++++ b/frontend/src/pages/DoctorMessaging.vue
+@@ -231,14 +231,14 @@
+               :options="recipientOptions"
+               label="Recipient"
+               outlined
+-              :rules="[val => !!val || 'Recipient is required']"
++              :rules="[ (val: string | null) => !!val || 'Recipient is required' ]"
+             />
+ 
+             <q-input
+               v-model="newMessage.subject"
+               label="Subject"
+               outlined
+-              :rules="[val => !!val || 'Subject is required']"
++              :rules="[ (val: string | null) => !!val || 'Subject is required' ]"
+             />
+ 
+             <q-input
+@@ -247,7 +247,7 @@
+               outlined
+               type="textarea"
+               rows="4"
+-              :rules="[val => !!val || 'Message is required']"
++              :rules="[ (val: string | null) => !!val || 'Message is required' ]"
+             />
+ 
+             <div class="row q-gutter-sm justify-end">
+diff --git a/frontend/src/pages/NurseMedicineInventory.vue b/frontend/src/pages/NurseMedicineInventory.vue
+index 0dab3d1..d2885f9 100644
+--- a/frontend/src/pages/NurseMedicineInventory.vue
++++ b/frontend/src/pages/NurseMedicineInventory.vue
+@@ -290,7 +290,7 @@
+                 v-model="medicineForm.name"
+                 label="Medicine Name"
+                 outlined
+-                :rules="[val => !!val || 'Name is required']"
++                :rules="[ (val: string | null) => !!val || 'Name is required' ]"
+               />
+             </div>
+             <div class="col-12 col-md-6">
+@@ -308,7 +308,7 @@
+                 outlined
+                 emit-value
+                 map-options
+-                :rules="[val => !!val || 'Category is required']"
++                :rules="[ (val: string | null) => !!val || 'Category is required' ]"
+               />
+             </div>
+             <div class="col-12 col-md-6">
+@@ -333,7 +333,7 @@
+                 label="Quantity"
+                 type="number"
+                 outlined
+-                :rules="[val => val >= 0 || 'Quantity must be non-negative']"
++                :rules="[ (val: number | null) => (val ?? 0) > 0 || 'Quantity must be positive' ]"
+               />
+             </div>
+             <div class="col-12 col-md-6">
+@@ -350,7 +350,7 @@
+                 label="Expiry Date"
+                 type="date"
+                 outlined
+-                :rules="[val => !!val || 'Expiry date is required']"
++                :rules="[ (val: string | null) => !!val || 'Expiry date is required' ]"
+               />
+             </div>
+             <div class="col-12 col-md-6">
+@@ -359,7 +359,7 @@
+                 label="Minimum Stock Level"
+                 type="number"
+                 outlined
+-                :rules="[val => val >= 0 || 'Minimum stock must be non-negative']"
++                :rules="[ (val: number | null) => (val ?? 0) >= 0 || 'Minimum stock must be non-negative' ]"
+               />
+             </div>
+             <div class="col-12">
+@@ -400,7 +400,7 @@
+                 v-model="dispenseForm.patientName"
+                 label="Patient Name"
+                 outlined
+-                :rules="[val => !!val || 'Patient name is required']"
++                :rules="[ (val: string | null) => !!val || 'Patient name is required' ]"
+               />
+             </div>
+             <div class="col-12 col-md-6">
+@@ -410,8 +410,8 @@
+                 type="number"
+                 outlined
+                 :rules="[
+-                  val => !!val || 'Quantity is required',
+-                  val => val <= (selectedMedicine?.quantity || 0) || 'Insufficient stock'
++                  (val: number | null) => !!val || 'Quantity is required',
++                  (val: number) => val <= (selectedMedicine?.quantity || 0) || 'Insufficient stock'
+                 ]"
+               />
+             </div>
+@@ -462,7 +462,7 @@
+                 label="Quantity to Add"
+                 type="number"
+                 outlined
+-                :rules="[val => val > 0 || 'Quantity must be positive']"
++                :rules="[ (val: number | null) => (val ?? 0) > 0 || 'Quantity must be positive']"
+               />
+             </div>
+             <div class="col-12 col-md-6">
+@@ -471,7 +471,7 @@
+                 label="New Expiry Date"
+                 type="date"
+                 outlined
+-                :rules="[val => !!val || 'Expiry date is required']"
++                :rules="[ (val: string | null) => !!val || 'Expiry date is required']"
+               />
+             </div>
+             <div class="col-12">
+diff --git a/frontend/src/pages/NursePatientAssessment.vue b/frontend/src/pages/NursePatientAssessment.vue
+index 8037808..e810cb0 100644
+--- a/frontend/src/pages/NursePatientAssessment.vue
++++ b/frontend/src/pages/NursePatientAssessment.vue
+@@ -114,7 +114,7 @@
+                   type="text"
+                   placeholder="120/80"
+                   outlined
+-                  :rules="[val => !!val || 'Blood pressure is required']"
++                  :rules="[ (val: string | null) => !!val || 'Blood pressure is required' ]"
+                 />
+               </div>
+               <div class="col-12 col-md-3">
+@@ -123,7 +123,7 @@
+                   label="Heart Rate (bpm)"
+                   type="number"
+                   outlined
+-                  :rules="[val => !!val || 'Heart rate is required']"
++                  :rules="[ (val: string | null) => !!val || 'Heart rate is required' ]"
+                 />
+               </div>
+               <div class="col-12 col-md-3">
+@@ -133,7 +133,7 @@
+                   type="number"
+                   step="0.1"
+                   outlined
+-                  :rules="[val => !!val || 'Temperature is required']"
++                  :rules="[ (val: string | null) => !!val || 'Temperature is required' ]"
+                 />
+               </div>
+               <div class="col-12 col-md-3">
+@@ -142,7 +142,7 @@
+                   label="Respiratory Rate (breaths/min)"
+                   type="number"
+                   outlined
+-                  :rules="[val => !!val || 'Respiratory rate is required']"
++                  :rules="[ (val: string | null) => !!val || 'Respiratory rate is required' ]"
+                 />
+               </div>
+               <div class="col-12 col-md-3">
+@@ -151,7 +151,7 @@
+                   label="Oxygen Saturation (%)"
+                   type="number"
+                   outlined
+-                  :rules="[val => !!val || 'Oxygen saturation is required']"
++                  :rules="[ (val: string | null) => !!val || 'Oxygen saturation is required' ]"
+                 />
+               </div>
+               <div class="col-12 col-md-3">
+diff --git a/frontend/src/pages/NurseSettings.vue b/frontend/src/pages/NurseSettings.vue
+index a0f4cc7..bdc5fd4 100644
+--- a/frontend/src/pages/NurseSettings.vue
++++ b/frontend/src/pages/NurseSettings.vue
+@@ -55,7 +55,7 @@
+                         v-model="profileForm.firstName"
+                         label="First Name"
+                         outlined
+-                        :rules="[val => !!val || 'First name is required']"
++                        :rules="[ (val: string | null) => !!val || 'First name is required' ]"
+                       />
+                     </div>
+                     <div class="col-12 col-md-6">
+@@ -63,7 +63,7 @@
+                         v-model="profileForm.lastName"
+                         label="Last Name"
+                         outlined
+-                        :rules="[val => !!val || 'Last name is required']"
++                        :rules="[ (val: string | null) => !!val || 'Last name is required' ]"
+                       />
+                     </div>
+                     <div class="col-12 col-md-6">
+@@ -128,7 +128,7 @@
+                     label="Current Password"
+                     type="password"
+                     outlined
+-                    :rules="[val => !!val || 'Current password is required']"
++                    :rules="[ (val: string | null) => !!val || 'Current password is required' ]"
+                   />
+                 </div>
+                 <div class="col-12 col-md-6">
+@@ -138,8 +138,8 @@
+                     type="password"
+                     outlined
+                     :rules="[
+-                      val => !!val || 'New password is required',
+-                      val => val.length >= 8 || 'Password must be at least 8 characters'
++                      (val: string | null) => !!val || 'New password is required',
++                      (val: string) => val.length >= 8 || 'Password must be at least 8 characters'
+                     ]"
+                   />
+                 </div>
+@@ -150,8 +150,8 @@
+                     type="password"
+                     outlined
+                     :rules="[
+-                      val => !!val || 'Please confirm your password',
+-                      val => val === securityForm.newPassword || 'Passwords do not match'
++                      (val: string | null) => !!val || 'Please confirm your password',
++                      (val: string) => val === securityForm.newPassword || 'Passwords do not match'
+                     ]"
+                   />
+                 </div>
+diff --git a/frontend/src/pages/PatientAppointmentSchedule.vue b/frontend/src/pages/PatientAppointmentSchedule.vue
+new file mode 100644
+index 0000000..b867adc
+--- /dev/null
++++ b/frontend/src/pages/PatientAppointmentSchedule.vue
+@@ -0,0 +1,276 @@
++<template>
++  <q-layout view="hHh lpR fFf">
++    <!-- Header -->
++    <q-header elevated class="bg-teal-7 text-white">
++      <q-toolbar>
++        <q-btn flat round icon="arrow_back" @click="$router.go(-1)" />
++        <q-avatar class="q-mr-sm">
++          <q-icon name="favorite" color="white" />
++        </q-avatar>
++        <q-toolbar-title class="text-weight-medium">
++          Patient Portal
++          <div class="text-caption">Healthcare Dashboard</div>
++        </q-toolbar-title>
++        
++        <q-btn flat round icon="notifications" class="q-mr-sm">
++          <q-badge color="red" floating>1</q-badge>
++        </q-btn>
++        
++        <q-btn-dropdown flat round>
++          <template v-slot:label>
++            <q-avatar size="32px">
++              <q-icon name="person" />
++            </q-avatar>
++            <div class="q-ml-sm text-caption">{{ userName }}</div>
++          </template>
++          <q-list>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="settings" />
++              </q-item-section>
++              <q-item-section>Settings</q-item-section>
++            </q-item>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="help" />
++              </q-item-section>
++              <q-item-section>FAQ</q-item-section>
++            </q-item>
++            <q-separator />
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="logout" color="red" />
++              </q-item-section>
++              <q-item-section class="text-red">Logout</q-item-section>
++            </q-item>
++          </q-list>
++        </q-btn-dropdown>
++      </q-toolbar>
++    </q-header>
++
++    <!-- Main Content -->
++    <q-page-container>
++      <q-page class="bg-grey-1 q-pa-md">
++        <div class="row items-center q-mb-lg">
++          <q-btn flat round icon="arrow_back" @click="$router.go(-1)" class="q-mr-sm" />
++          <div class="text-h5 text-grey-8">Schedule Appointment</div>
++        </div>
++        
++        <div class="row justify-center">
++          <div class="col-12 col-md-8 col-lg-6">
++            <q-card class="appointment-card">
++              <q-card-section class="q-pa-lg">
++                <q-form @submit="scheduleAppointment" class="q-gutter-lg">
++                  <!-- Appointment Type -->
++                  <div>
++                    <div class="text-subtitle1 text-teal-7 q-mb-sm">Appointment Type</div>
++                    <q-select
++                      v-model="appointmentForm.type"
++                      :options="appointmentTypes"
++                      outlined
++                      placeholder="Select Appointment Type"
++                      class="full-width"
++                      :rules="[ (val: string | null) => !!val || 'Please select appointment type']"
++                    />
++                  </div>
++
++                  <!-- Department -->
++                  <div>
++                    <div class="text-subtitle1 text-teal-7 q-mb-sm">Department</div>
++                    <q-select
++                      v-model="appointmentForm.department"
++                      :options="departments"
++                      outlined
++                      placeholder="Select Department"
++                      class="full-width"
++                      :rules="[ (val: string | null) => !!val || 'Please select department']"
++                    />
++                  </div>
++
++                  <!-- Date -->
++                  <div>
++                    <div class="text-subtitle1 text-teal-7 q-mb-sm">Date</div>
++                    <q-input
++                      v-model="appointmentForm.date"
++                      outlined
++                      placeholder="mm/dd/yyyy"
++                      class="full-width"
++                      :rules="[ (val: string | null) => !!val || 'Please select date']"
++                    >
++                      <template v-slot:append>
++                        <q-icon name="event" class="cursor-pointer">
++                          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
++                            <q-date v-model="appointmentForm.date" mask="MM/DD/YYYY">
++                              <div class="row items-center justify-end">
++                                <q-btn v-close-popup label="Close" color="primary" flat />
++                              </div>
++                            </q-date>
++                          </q-popup-proxy>
++                        </q-icon>
++                      </template>
++                    </q-input>
++                  </div>
++
++                  <!-- Appointment Time -->
++                  <div>
++                    <div class="text-subtitle1 text-teal-7 q-mb-sm">Appointment Time</div>
++                    <q-select
++                      v-model="appointmentForm.time"
++                      :options="timeSlots"
++                      outlined
++                      placeholder="Select Time"
++                      class="full-width"
++                      :rules="[ (val: string | null) => !!val || 'Please select time']"
++                    />
++                  </div>
++
++                  <!-- Reason for Appointment -->
++                  <div>
++                    <div class="text-subtitle1 text-teal-7 q-mb-sm">Reason for Appointment</div>
++                    <q-input
++                      v-model="appointmentForm.reason"
++                      type="textarea"
++                      outlined
++                      rows="4"
++                      placeholder="Please describe the reason for your appointment, any symptoms, or concerns you would like to discuss..."
++                      class="full-width"
++                      :rules="[ (val: string | null) => !!val || 'Please provide reason for appointment']"
++                    />
++                  </div>
++
++                  <q-btn 
++                    type="submit" 
++                    color="teal-7" 
++                    label="Schedule Appointment" 
++                    class="full-width q-mt-xl"
++                    size="lg"
++                    :loading="isSubmitting"
++                  />
++                </q-form>
++              </q-card-section>
++            </q-card>
++          </div>
++        </div>
++      </q-page>
++    </q-page-container>
++
++    <!-- Bottom Navigation -->
++    <q-footer class="bg-teal-7">
++      <q-tabs 
++        v-model="activeTab" 
++        class="text-white"
++        active-color="white"
++        indicator-color="white"
++        align="justify"
++      >
++        <q-tab name="queue" icon="queue" label="Queue" @click="navigateTo('/patient-queue')" />
++        <q-tab name="appointments" icon="event" label="Appointments" @click="navigateTo('/patient-appointments')" />
++        <q-tab name="home" icon="home" label="Home" @click="navigateTo('/patient-dashboard')" />
++        <q-tab name="alerts" icon="notifications" label="Alerts" @click="navigateTo('/patient-notifications')" />
++        <q-tab name="requests" icon="description" label="Requests" @click="navigateTo('/patient-medical-request')" />
++      </q-tabs>
++    </q-footer>
++  </q-layout>
++</template>
++
++<script setup lang="ts">
++import { ref } from 'vue'
++import { useRouter } from 'vue-router'
++import { useQuasar } from 'quasar'
++import { computed } from 'vue'
++
++const router = useRouter()
++const $q = useQuasar()
++const activeTab = ref('appointments')
++const isSubmitting = ref(false)
++
++const appointmentForm = ref({
++  type: '',
++  department: '',
++  date: '',
++  time: '',
++  reason: ''
++})
++
++const appointmentTypes = [
++  'General Consultation',
++  'Follow-up Visit',
++  'Lab Test',
++  'Specialist Consultation',
++  'Emergency Visit',
++  'Routine Check-up',
++  'Vaccination',
++  'Physical Therapy'
++]
++
++const departments = [
++  'General Medicine',
++  'Cardiology',
++  'Dermatology',
++  'Orthopedics',
++  'Pediatrics',
++  'Gynecology',
++  'Neurology',
++  'Emergency',
++  'Laboratory',
++  'Radiology'
++]
++
++const timeSlots = [
++  '8:00 AM',
++  '8:30 AM',
++  '9:00 AM',
++  '9:30 AM',
++  '10:00 AM',
++  '10:30 AM',
++  '11:00 AM',
++  '11:30 AM',
++  '1:00 PM',
++  '1:30 PM',
++  '2:00 PM',
++  '2:30 PM',
++  '3:00 PM',
++  '3:30 PM',
++  '4:00 PM',
++  '4:30 PM'
++]
++
++const navigateTo = (path: string) => {
++  void router.push(path)
++}
++
++const scheduleAppointment = () => {
++  try {
++    $q.notify({
++      type: 'positive',
++      message: 'Appointment scheduled successfully!',
++      position: 'top'
++    })
++
++    // Navigate back to appointments
++    void router.push('/patient-appointments')
++  } catch {
++    $q.notify({
++      type: 'negative',
++      message: 'Failed to schedule appointment. Please try again.',
++      position: 'top'
++    })
++  }
++}
++
++const userName = computed(() => {
++  try {
++    const u = JSON.parse(localStorage.getItem('user') || '{}')
++    return u.full_name || u.email || 'User'
++  } catch {
++    return 'User'
++  }
++})
++</script>
++
++<style scoped>
++.appointment-card {
++  border-radius: 12px;
++  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
++}
++</style>
+\ No newline at end of file
+diff --git a/frontend/src/pages/PatientAppointments.vue b/frontend/src/pages/PatientAppointments.vue
+new file mode 100644
+index 0000000..9ecd265
+--- /dev/null
++++ b/frontend/src/pages/PatientAppointments.vue
+@@ -0,0 +1,264 @@
++<template>
++  <q-layout view="hHh lpR fFf">
++    <!-- Header -->
++    <q-header elevated class="bg-teal-7 text-white">
++      <q-toolbar>
++        <q-btn flat round icon="arrow_back" @click="$router.go(-1)" />
++        <q-avatar class="q-mr-sm">
++          <q-icon name="favorite" color="white" />
++        </q-avatar>
++        <q-toolbar-title class="text-weight-medium">
++          Patient Portal
++          <div class="text-caption">Healthcare Dashboard</div>
++        </q-toolbar-title>
++        
++        <q-btn flat round icon="notifications" class="q-mr-sm">
++          <q-badge color="red" floating>1</q-badge>
++        </q-btn>
++        
++        <q-btn-dropdown flat round>
++          <template v-slot:label>
++            <q-avatar size="32px">
++              <q-icon name="person" />
++            </q-avatar>
++            <div class="q-ml-sm text-caption">{{ userName }}</div>
++          </template>
++          <q-list>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="settings" />
++              </q-item-section>
++              <q-item-section>Settings</q-item-section>
++            </q-item>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="help" />
++              </q-item-section>
++              <q-item-section>FAQ</q-item-section>
++            </q-item>
++            <q-separator />
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="logout" color="red" />
++              </q-item-section>
++              <q-item-section class="text-red">Logout</q-item-section>
++            </q-item>
++          </q-list>
++        </q-btn-dropdown>
++      </q-toolbar>
++    </q-header>
++
++    <!-- Main Content -->
++    <q-page-container>
++      <q-page class="bg-grey-1 q-pa-md">
++        <div class="text-h5 text-grey-8 q-mb-lg">Manage Your Appointments</div>
++        
++        <div class="row q-gutter-lg">
++          <!-- New Appointment Card -->
++          <div class="col-12 col-md-4">
++            <q-card class="new-appointment-card bg-teal-6 text-white">
++              <q-card-section class="q-pa-lg">
++                <div class="row items-center q-mb-md">
++                  <q-icon name="add_circle" size="32px" class="q-mr-sm" />
++                  <div class="text-h6">New Appointment</div>
++                </div>
++                <div class="text-body2 q-mb-lg">
++                  Schedule your next consultation, lab test, or procedure quickly.
++                </div>
++                <q-btn 
++                  color="white" 
++                  text-color="teal-6" 
++                  label="Book Now" 
++                  class="full-width"
++                  @click="navigateTo('/patient-appointment-schedule')"
++                />
++              </q-card-section>
++            </q-card>
++          </div>
++
++          <!-- Appointments List -->
++          <div class="col-12 col-md-8">
++            <q-card>
++              <q-card-section>
++                <!-- Filter Tabs -->
++                <q-tabs 
++                  v-model="activeFilter" 
++                  class="text-teal-7 q-mb-lg"
++                  active-color="teal-7"
++                  indicator-color="teal-7"
++                  align="left"
++                >
++                  <q-tab name="upcoming" label="Upcoming" />
++                  <q-tab name="completed" label="Completed" />
++                  <q-tab name="cancelled" label="Cancelled" />
++                </q-tabs>
++
++                <!-- Appointments Count -->
++                <div class="text-h6 text-grey-8 q-mb-md">
++                  {{ activeFilter === 'upcoming' ? 'Upcoming' : activeFilter === 'completed' ? 'Completed' : 'Cancelled' }} 
++                  Appointments ({{ filteredAppointments.length }})
++                </div>
++
++                <!-- Appointments List -->
++                <div class="q-gutter-sm">
++                  <q-card 
++                    v-for="appointment in filteredAppointments" 
++                    :key="appointment.id"
++                    flat 
++                    bordered 
++                    class="appointment-item"
++                  >
++                    <q-card-section class="q-pa-md">
++                      <div class="row items-center">
++                        <div class="col-1">
++                          <div class="appointment-indicator" :class="getIndicatorClass(appointment.type)"></div>
++                        </div>
++                        <div class="col-8">
++                          <div class="text-weight-medium text-grey-8">{{ appointment.type }}</div>
++                          <div class="text-body2 text-grey-6">{{ appointment.doctor }} | {{ appointment.datetime }}</div>
++                        </div>
++                        <div class="col-3 text-right">
++                          <q-btn flat round icon="chevron_right" @click="viewAppointment(appointment)" />
++                        </div>
++                      </div>
++                    </q-card-section>
++                  </q-card>
++
++                  <!-- Empty State -->
++                  <div v-if="filteredAppointments.length === 0" class="text-center q-pa-xl">
++                    <q-icon name="event_busy" size="64px" class="text-grey-4 q-mb-md" />
++                    <div class="text-h6 text-grey-5">No {{ activeFilter }} appointments</div>
++                    <div class="text-body2 text-grey-4">
++                      {{ activeFilter === 'upcoming' ? 'Schedule your first appointment to get started.' : 
++                         activeFilter === 'completed' ? 'Your completed appointments will appear here.' : 
++                         'Your cancelled appointments will appear here.' }}
++                    </div>
++                  </div>
++                </div>
++              </q-card-section>
++            </q-card>
++          </div>
++        </div>
++      </q-page>
++    </q-page-container>
++
++    <!-- Bottom Navigation -->
++    <q-footer class="bg-teal-7">
++      <q-tabs 
++        v-model="activeTab" 
++        class="text-white"
++        active-color="white"
++        indicator-color="white"
++        align="justify"
++      >
++        <q-tab name="queue" icon="queue" label="Queue" @click="navigateTo('/patient-queue')" />
++        <q-tab name="appointments" icon="event" label="Appointments" @click="navigateTo('/patient-appointments')" />
++        <q-tab name="home" icon="home" label="Home" @click="navigateTo('/patient-dashboard')" />
++        <q-tab name="alerts" icon="notifications" label="Alerts" @click="navigateTo('/patient-notifications')" />
++        <q-tab name="requests" icon="description" label="Requests" @click="navigateTo('/patient-medical-request')" />
++      </q-tabs>
++    </q-footer>
++  </q-layout>
++</template>
++
++<script setup lang="ts">
++import { ref, computed } from 'vue'
++import { useRouter } from 'vue-router'
++
++const router = useRouter()
++const activeTab = ref('appointments')
++const activeFilter = ref('upcoming')
++
++interface Appointment {
++  id: number
++  type: string
++  doctor: string
++  datetime: string
++  status: 'upcoming' | 'completed' | 'cancelled'
++}
++
++const appointments = ref<Appointment[]>([
++  {
++    id: 1,
++    type: 'Follow Up',
++    doctor: 'Dr. Amelia Chen',
++    datetime: 'Wednesday, October 8, 2025 at 10:00 PM',
++    status: 'upcoming'
++  },
++  {
++    id: 2,
++    type: 'Lab Test',
++    doctor: 'Dr. Robert Wilson',
++    datetime: 'Thursday, October 23, 2025 at 7:00 PM',
++    status: 'upcoming'
++  },
++  {
++    id: 3,
++    type: 'General Consultation',
++    doctor: 'Dr. Lisa Wang',
++    datetime: 'Thursday, October 23, 2025 at 8:00 PM',
++    status: 'upcoming'
++  },
++  {
++    id: 4,
++    type: 'General Consultation',
++    doctor: 'Dr. Amelia Chen',
++    datetime: 'Thursday, October 9, 2025 at 10:00 AM',
++    status: 'upcoming'
++  }
++])
++
++const filteredAppointments = computed(() => {
++  return appointments.value.filter(appointment => appointment.status === activeFilter.value)
++})
++
++const navigateTo = (path: string) => {
++  void router.push(path)
++}
++
++const getIndicatorClass = (type: string) => {
++  const typeMap: Record<string, string> = {
++    'Follow Up': 'bg-blue-5',
++    'Lab Test': 'bg-purple-5',
++    'General Consultation': 'bg-green-5',
++    'Specialist Consultation': 'bg-orange-5'
++  }
++  return typeMap[type] || 'bg-grey-5'
++}
++
++const viewAppointment = (appointment: Appointment) => {
++  // Handle appointment view/edit
++  console.log('Viewing appointment:', appointment)
++}
++
++const userName = computed(() => {
++  try {
++    const u = JSON.parse(localStorage.getItem('user') || '{}')
++    return u.full_name || u.email || 'User'
++  } catch {
++    return 'User'
++  }
++})
++</script>
++
++<style scoped>
++.new-appointment-card {
++  border-radius: 12px;
++  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
++}
++
++.appointment-item {
++  border-radius: 8px;
++  transition: all 0.2s ease;
++}
++
++.appointment-item:hover {
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
++}
++
++.appointment-indicator {
++  width: 4px;
++  height: 40px;
++  border-radius: 2px;
++}
++</style>
+\ No newline at end of file
+diff --git a/frontend/src/pages/PatientDashboard.vue b/frontend/src/pages/PatientDashboard.vue
+index 396d8d4..1b13edd 100644
+--- a/frontend/src/pages/PatientDashboard.vue
++++ b/frontend/src/pages/PatientDashboard.vue
+@@ -1,37 +1,184 @@
+ <template>
+   <q-layout view="hHh lpR fFf">
+-
+-    <q-header elevated class="bg-primary text-white" height-hint="98">
++    <!-- Header -->
++    <q-header elevated class="bg-teal-7 text-white">
+       <q-toolbar>
+-        <q-toolbar-title>
+-          <q-avatar>
+-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+-          </q-avatar>
+-          Title
++        <q-avatar class="q-mr-sm">
++          <q-icon name="favorite" color="white" />
++        </q-avatar>
++        <q-toolbar-title class="text-weight-medium">
++          Patient Portal
++          <div class="text-caption">Healthcare Dashboard</div>
+         </q-toolbar-title>
++        
++        <q-btn flat round icon="notifications" class="q-mr-sm">
++          <q-badge color="red" floating>1</q-badge>
++        </q-btn>
++        
++        <q-btn-dropdown flat round>
++          <template v-slot:label>
++            <q-avatar size="32px">
++              <q-icon name="person" />
++            </q-avatar>
++            <div class="q-ml-sm text-caption">{{ userName }}</div>
++          </template>
++          <q-list>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="settings" />
++              </q-item-section>
++              <q-item-section>Settings</q-item-section>
++            </q-item>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="help" />
++              </q-item-section>
++              <q-item-section>FAQ</q-item-section>
++            </q-item>
++            <q-separator />
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="logout" color="red" />
++              </q-item-section>
++              <q-item-section class="text-red">Logout</q-item-section>
++            </q-item>
++          </q-list>
++        </q-btn-dropdown>
+       </q-toolbar>
+-
+-      <q-tabs align="left">
+-        <q-route-tab to="/page1" label="Page One" />
+-        <q-route-tab to="/page2" label="Page Two" />
+-        <q-route-tab to="/page3" label="Page Three" />
+-      </q-tabs>
+     </q-header>
+ 
++    <!-- Main Content -->
+     <q-page-container>
+-      <router-view />
++      <q-page class="bg-grey-1 q-pa-md">
++        <!-- Navigation Cards -->
++        <div class="row q-gutter-md q-mb-lg">
++          <div class="col-12 col-sm-6 col-md-3">
++            <q-card 
++              class="dashboard-card cursor-pointer" 
++              @click="navigateTo('/patient-queue')"
++            >
++              <q-card-section class="text-center q-pa-lg">
++                <q-icon name="queue" size="48px" class="text-teal-6 q-mb-md" />
++                <div class="text-h6 text-grey-8">Queue Status</div>
++              </q-card-section>
++            </q-card>
++          </div>
++          
++          <div class="col-12 col-sm-6 col-md-3">
++            <q-card 
++              class="dashboard-card cursor-pointer" 
++              @click="navigateTo('/patient-appointments')"
++            >
++              <q-card-section class="text-center q-pa-lg">
++                <q-icon name="event" size="48px" class="text-teal-6 q-mb-md" />
++                <div class="text-h6 text-grey-8">Appointments</div>
++              </q-card-section>
++            </q-card>
++          </div>
++          
++          <div class="col-12 col-sm-6 col-md-3">
++            <q-card 
++              class="dashboard-card cursor-pointer" 
++              @click="navigateTo('/patient-notifications')"
++            >
++              <q-card-section class="text-center q-pa-lg">
++                <q-icon name="notifications" size="48px" class="text-teal-6 q-mb-md" />
++                <div class="text-h6 text-grey-8">Notifications</div>
++              </q-card-section>
++            </q-card>
++          </div>
++          
++          <div class="col-12 col-sm-6 col-md-3">
++            <q-card 
++              class="dashboard-card cursor-pointer" 
++              @click="navigateTo('/patient-medical-request')"
++            >
++              <q-card-section class="text-center q-pa-lg">
++                <q-icon name="description" size="48px" class="text-teal-6 q-mb-md" />
++                <div class="text-h6 text-grey-8">Medical Request</div>
++              </q-card-section>
++            </q-card>
++          </div>
++        </div>
++
++        <!-- Live Queue Status -->
++        <q-card class="q-mb-lg">
++          <q-card-section>
++            <div class="text-h6 text-grey-8 q-mb-md">Live Queue Status</div>
++            <div class="row q-gutter-md">
++              <div class="col-12 col-md-6">
++                <q-card class="bg-teal-6 text-white">
++                  <q-card-section>
++                    <div class="text-caption text-teal-2">NOW SERVING</div>
++                    <div class="text-h3 text-weight-bold">001</div>
++                    <div class="text-body2">Eylissa Rose's Patient</div>
++                  </q-card-section>
++                </q-card>
++              </div>
++              <div class="col-12 col-md-6">
++                <q-card class="bg-teal-6 text-white">
++                  <q-card-section>
++                    <div class="text-caption text-teal-2">MY QUEUE STATUS</div>
++                    <div class="text-h3 text-weight-bold">005</div>
++                    <div class="text-body2">{{ userName }}</div>
++                  </q-card-section>
++                </q-card>
++              </div>
++            </div>
++          </q-card-section>
++        </q-card>
++      </q-page>
+     </q-page-container>
+ 
+-    <q-footer class="bg-grey-8 text-white">
+-      <q-toolbar>
+-        <q-toolbar-title>
+-          <q-avatar>
+-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+-          </q-avatar>
+-          <div>Title</div>
+-        </q-toolbar-title>
+-      </q-toolbar>
++    <!-- Bottom Navigation -->
++    <q-footer class="bg-teal-7">
++      <q-tabs 
++        v-model="activeTab" 
++        class="text-white"
++        active-color="white"
++        indicator-color="white"
++        align="justify"
++      >
++        <q-tab name="queue" icon="queue" label="Queue" @click="navigateTo('/patient-queue')" />
++        <q-tab name="appointments" icon="event" label="Appointments" @click="navigateTo('/patient-appointments')" />
++        <q-tab name="home" icon="home" label="Home" @click="navigateTo('/patient-dashboard')" />
++        <q-tab name="alerts" icon="notifications" label="Alerts" @click="navigateTo('/patient-notifications')" />
++        <q-tab name="requests" icon="description" label="Requests" @click="navigateTo('/patient-medical-request')" />
++      </q-tabs>
+     </q-footer>
+-
+   </q-layout>
+-</template>
+\ No newline at end of file
++</template>
++
++<script setup lang="ts">
++import { ref, computed } from 'vue'
++import { useRouter } from 'vue-router'
++
++const router = useRouter()
++const activeTab = ref('home')
++
++const userName = computed(() => {
++  try {
++    const u = JSON.parse(localStorage.getItem('user') || '{}')
++    return u.full_name || u.email || 'User'
++  } catch {
++    return 'User'
++  }
++})
++
++const navigateTo = (path: string) => {
++  void router.push(path)
++}
++</script>
++
++<style scoped>
++.dashboard-card {
++  transition: all 0.3s ease;
++  border-radius: 12px;
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
++}
++
++.dashboard-card:hover {
++  transform: translateY(-4px);
++  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
++}
++</style>
+\ No newline at end of file
+diff --git a/frontend/src/pages/PatientMedicalRequest.vue b/frontend/src/pages/PatientMedicalRequest.vue
+new file mode 100644
+index 0000000..c6051bf
+--- /dev/null
++++ b/frontend/src/pages/PatientMedicalRequest.vue
+@@ -0,0 +1,230 @@
++<template>
++  <q-layout view="hHh lpR fFf">
++    <!-- Header -->
++    <q-header elevated class="bg-teal-7 text-white">
++      <q-toolbar>
++        <q-btn flat round icon="arrow_back" @click="$router.go(-1)" />
++        <q-avatar class="q-mr-sm">
++          <q-icon name="favorite" color="white" />
++        </q-avatar>
++        <q-toolbar-title class="text-weight-medium">
++          Patient Portal
++          <div class="text-caption">Healthcare Dashboard</div>
++        </q-toolbar-title>
++        
++        <q-btn flat round icon="notifications" class="q-mr-sm">
++          <q-badge color="red" floating>1</q-badge>
++        </q-btn>
++        
++        <q-btn-dropdown flat round>
++          <template v-slot:label>
++            <q-avatar size="32px">
++              <q-icon name="person" />
++            </q-avatar>
++            <div class="q-ml-sm text-caption">{{ userName }}</div>
++          </template>
++          <q-list>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="settings" />
++              </q-item-section>
++              <q-item-section>Settings</q-item-section>
++            </q-item>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="help" />
++              </q-item-section>
++              <q-item-section>FAQ</q-item-section>
++            </q-item>
++            <q-separator />
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="logout" color="red" />
++              </q-item-section>
++              <q-item-section class="text-red">Logout</q-item-section>
++            </q-item>
++          </q-list>
++        </q-btn-dropdown>
++      </q-toolbar>
++    </q-header>
++
++    <!-- Main Content -->
++    <q-page-container>
++      <q-page class="bg-grey-1 q-pa-md">
++        <div class="text-h5 text-grey-8 q-mb-lg">Medical Records & General Requests</div>
++        
++        <div class="row q-gutter-lg">
++          <!-- Request Form -->
++          <div class="col-12 col-md-7">
++            <q-card>
++              <q-card-section>
++                <div class="row items-center q-mb-md">
++                  <q-icon name="description" size="24px" class="text-orange-6 q-mr-sm" />
++                  <div class="text-h6 text-grey-8">Request Your Medical Records</div>
++                </div>
++                <div class="text-body2 text-grey-6 q-mb-lg">
++                  Use this form to securely request your medical records. The records will be sent directly to your 
++                  designated doctor or nurse for review and release.
++                </div>
++
++                <q-form @submit="submitRequest" class="q-gutter-md">
++                  <!-- Type of Request -->
++                  <div>
++                    <div class="text-subtitle2 text-teal-7 q-mb-sm">Type of Request</div>
++                    <q-select
++                      v-model="requestForm.type"
++                      :options="requestTypes"
++                      outlined
++                      placeholder="Full Medical Records (Last 5 Years)"
++                      class="full-width"
++                    />
++                  </div>
++
++                  <!-- Recipient -->
++                  <div>
++                    <div class="text-subtitle2 text-teal-7 q-mb-sm">Recipient (Doctor/Nurse)</div>
++                    <q-input
++                      v-model="requestForm.recipient"
++                      outlined
++                      placeholder="Dr. Amelia Chen"
++                      class="full-width"
++                    />
++                  </div>
++
++                  <!-- Additional Details -->
++                  <div>
++                    <div class="text-subtitle2 text-teal-7 q-mb-sm">Additional Details (Optional)</div>
++                    <q-input
++                      v-model="requestForm.details"
++                      type="textarea"
++                      outlined
++                      rows="4"
++                      placeholder="I need these records for my upcoming specialist consultation."
++                      class="full-width"
++                    />
++                  </div>
++
++                  <q-btn 
++                    type="submit" 
++                    color="teal-7" 
++                    label="Submit Request" 
++                    class="full-width q-mt-lg"
++                    size="lg"
++                  />
++                </q-form>
++              </q-card-section>
++            </q-card>
++          </div>
++
++          <!-- Request History -->
++          <div class="col-12 col-md-4">
++            <q-card>
++              <q-card-section>
++                <div class="row items-center q-mb-md">
++                  <q-icon name="history" size="24px" class="text-grey-6 q-mr-sm" />
++                  <div class="text-h6 text-grey-8">Request History</div>
++                </div>
++
++                <div class="q-gutter-sm">
++                  <!-- Request Item 1 -->
++                  <q-card flat bordered class="q-pa-sm">
++                    <div class="text-weight-medium text-grey-8">Records Request (Full)</div>
++                    <div class="row items-center q-mt-xs">
++                      <q-chip 
++                        color="red" 
++                        text-color="white" 
++                        size="sm" 
++                        label="Denied - Insufficient authorization"
++                      />
++                    </div>
++                    <div class="text-caption text-grey-6 q-mt-xs">Date: 2024-08-01</div>
++                  </q-card>
++
++                  <!-- Request Item 2 -->
++                  <q-card flat bordered class="q-pa-sm">
++                    <div class="text-weight-medium text-grey-8">Lab Results (Specific)</div>
++                    <div class="row items-center q-mt-xs">
++                      <q-chip 
++                        color="green" 
++                        text-color="white" 
++                        size="sm" 
++                        label="Completed"
++                      />
++                    </div>
++                    <div class="text-caption text-grey-6 q-mt-xs">Date: 2024-06-16</div>
++                  </q-card>
++                </div>
++              </q-card-section>
++            </q-card>
++          </div>
++        </div>
++      </q-page>
++    </q-page-container>
++
++    <!-- Bottom Navigation -->
++    <q-footer class="bg-teal-7">
++      <q-tabs 
++        v-model="activeTab" 
++        class="text-white"
++        active-color="white"
++        indicator-color="white"
++        align="justify"
++      >
++        <q-tab name="queue" icon="queue" label="Queue" @click="navigateTo('/patient-queue')" />
++        <q-tab name="appointments" icon="event" label="Appointments" @click="navigateTo('/patient-appointments')" />
++        <q-tab name="home" icon="home" label="Home" @click="navigateTo('/patient-dashboard')" />
++        <q-tab name="alerts" icon="notifications" label="Alerts" @click="navigateTo('/patient-notifications')" />
++        <q-tab name="requests" icon="description" label="Requests" @click="navigateTo('/patient-medical-request')" />
++      </q-tabs>
++    </q-footer>
++  </q-layout>
++</template>
++
++<script setup lang="ts">
++import { ref } from 'vue'
++import { useRouter } from 'vue-router'
++import { computed } from 'vue'
++
++const router = useRouter()
++const activeTab = ref('requests')
++
++const requestForm = ref({
++  type: '',
++  recipient: '',
++  details: ''
++})
++
++const requestTypes = [
++  'Full Medical Records (Last 5 Years)',
++  'Lab Results (Specific)',
++  'Imaging Reports',
++  'Prescription History',
++  'Vaccination Records',
++  'Specialist Reports'
++]
++
++const navigateTo = (path: string) => {
++  void router.push(path)
++}
++
++const submitRequest = () => {
++  // Handle form submission
++  console.log('Submitting request:', requestForm.value)
++  // Add API call here
++}
++
++const userName = computed(() => {
++  try {
++    const u = JSON.parse(localStorage.getItem('user') || '{}')
++    return u.full_name || u.email || 'User'
++  } catch {
++    return 'User'
++  }
++})
++</script>
++
++<style scoped>
++.q-card {
++  border-radius: 12px;
++}
++</style>
+\ No newline at end of file
+diff --git a/frontend/src/pages/PatientNotifications.vue b/frontend/src/pages/PatientNotifications.vue
+new file mode 100644
+index 0000000..e5d4117
+--- /dev/null
++++ b/frontend/src/pages/PatientNotifications.vue
+@@ -0,0 +1,321 @@
++<template>
++  <q-layout view="hHh lpR fFf">
++    <!-- Header -->
++    <q-header elevated class="bg-teal-7 text-white">
++      <q-toolbar>
++        <q-btn flat round icon="arrow_back" @click="$router.go(-1)" />
++        <q-avatar class="q-mr-sm">
++          <q-icon name="favorite" color="white" />
++        </q-avatar>
++        <q-toolbar-title class="text-weight-medium">
++          Patient Portal
++          <div class="text-caption">Healthcare Dashboard</div>
++        </q-toolbar-title>
++        
++        <q-btn flat round icon="notifications" class="q-mr-sm">
++          <q-badge color="red" floating>3</q-badge>
++        </q-btn>
++        
++        <q-btn-dropdown flat round>
++          <template v-slot:label>
++            <q-avatar size="32px">
++              <q-icon name="person" />
++            </q-avatar>
++            <div class="q-ml-sm text-caption">{{ userName }}</div>
++          </template>
++          <q-list>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="settings" />
++              </q-item-section>
++              <q-item-section>Settings</q-item-section>
++            </q-item>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="help" />
++              </q-item-section>
++              <q-item-section>FAQ</q-item-section>
++            </q-item>
++            <q-separator />
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="logout" color="red" />
++              </q-item-section>
++              <q-item-section class="text-red">Logout</q-item-section>
++            </q-item>
++          </q-list>
++        </q-btn-dropdown>
++      </q-toolbar>
++    </q-header>
++
++    <!-- Main Content -->
++    <q-page-container>
++      <q-page class="bg-grey-1 q-pa-md">
++        <div class="row items-center justify-between q-mb-lg">
++          <div class="text-h5 text-grey-8">Notifications</div>
++          <q-btn 
++            flat 
++            color="teal-6" 
++            label="Mark All Read" 
++            @click="markAllRead"
++          />
++        </div>
++
++        <!-- Filter Tabs -->
++        <q-tabs
++          v-model="activeFilter"
++          class="text-grey-6 q-mb-lg"
++          active-color="teal-6"
++          indicator-color="teal-6"
++          align="left"
++        >
++          <q-tab name="all" label="All" />
++          <q-tab name="unread" label="Unread" />
++          <q-tab name="appointments" label="Appointments" />
++          <q-tab name="queue" label="Queue" />
++          <q-tab name="medical" label="Medical" />
++        </q-tabs>
++
++        <!-- Notifications List -->
++        <div class="q-gutter-sm">
++          <!-- Unread Notification -->
++          <q-card class="notification-card unread" v-for="notification in filteredNotifications" :key="notification.id">
++            <q-card-section class="q-pa-md">
++              <div class="row items-start">
++                <div class="col-1">
++                  <q-avatar :color="notification.iconColor" text-color="white" size="40px">
++                    <q-icon :name="notification.icon" />
++                  </q-avatar>
++                </div>
++                <div class="col-10 q-ml-md">
++                  <div class="row items-center q-mb-xs">
++                    <div class="text-weight-medium text-grey-8">{{ notification.title }}</div>
++                    <q-space />
++                    <div class="text-caption text-grey-5">{{ notification.time }}</div>
++                  </div>
++                  <div class="text-body2 text-grey-6 q-mb-sm">{{ notification.message }}</div>
++                  <div class="row items-center">
++                    <q-chip 
++                      :color="notification.categoryColor" 
++                      text-color="white" 
++                      size="sm" 
++                      :label="notification.category"
++                    />
++                    <q-space />
++                    <q-btn 
++                      v-if="!notification.read"
++                      flat 
++                      size="sm" 
++                      color="teal-6" 
++                      label="Mark as Read"
++                      @click="markAsRead(notification.id)"
++                    />
++                  </div>
++                </div>
++                <div class="col-1 text-right">
++                  <q-btn flat round size="sm" icon="more_vert">
++                    <q-menu>
++                      <q-list>
++                        <q-item clickable v-close-popup @click="markAsRead(notification.id)">
++                          <q-item-section>Mark as Read</q-item-section>
++                        </q-item>
++                        <q-item clickable v-close-popup @click="deleteNotification(notification.id)">
++                          <q-item-section class="text-red">Delete</q-item-section>
++                        </q-item>
++                      </q-list>
++                    </q-menu>
++                  </q-btn>
++                </div>
++              </div>
++            </q-card-section>
++          </q-card>
++
++          <!-- Empty State -->
++          <div v-if="filteredNotifications.length === 0" class="text-center q-pa-xl">
++            <q-icon name="notifications_none" size="80px" class="text-grey-4" />
++            <div class="text-h6 text-grey-5 q-mt-md">No notifications</div>
++            <div class="text-body2 text-grey-4">You're all caught up!</div>
++          </div>
++        </div>
++      </q-page>
++    </q-page-container>
++
++    <!-- Bottom Navigation -->
++    <q-footer class="bg-teal-7">
++      <q-tabs 
++        v-model="activeTab" 
++        class="text-white"
++        active-color="white"
++        indicator-color="white"
++        align="justify"
++      >
++        <q-tab name="queue" icon="queue" label="Queue" @click="navigateTo('/patient-queue')" />
++        <q-tab name="appointments" icon="event" label="Appointments" @click="navigateTo('/patient-appointments')" />
++        <q-tab name="home" icon="home" label="Home" @click="navigateTo('/patient-dashboard')" />
++        <q-tab name="alerts" icon="notifications" label="Alerts" @click="navigateTo('/patient-notifications')" />
++        <q-tab name="requests" icon="description" label="Requests" @click="navigateTo('/patient-medical-request')" />
++      </q-tabs>
++    </q-footer>
++  </q-layout>
++</template>
++
++<script setup lang="ts">
++import { ref, computed } from 'vue'
++import { useRouter } from 'vue-router'
++import { useQuasar } from 'quasar'
++
++const router = useRouter()
++const $q = useQuasar()
++const activeTab = ref('alerts')
++const activeFilter = ref('all')
++
++interface Notification {
++  id: number
++  title: string
++  message: string
++  time: string
++  category: string
++  categoryColor: string
++  icon: string
++  iconColor: string
++  read: boolean
++  type: string
++}
++
++const notifications = ref<Notification[]>([
++  {
++    id: 1,
++    title: 'Appointment Reminder',
++    message: 'Your appointment with Dr. Smith is scheduled for tomorrow at 2:00 PM.',
++    time: '2 hours ago',
++    category: 'Appointment',
++    categoryColor: 'blue-6',
++    icon: 'event',
++    iconColor: 'blue-6',
++    read: false,
++    type: 'appointments'
++  },
++  {
++    id: 2,
++    title: 'Queue Update',
++    message: 'You are now #3 in the queue. Estimated wait time: 15 minutes.',
++    time: '30 minutes ago',
++    category: 'Queue',
++    categoryColor: 'orange-6',
++    icon: 'queue',
++    iconColor: 'orange-6',
++    read: false,
++    type: 'queue'
++  },
++  {
++    id: 3,
++    title: 'Medical Records Ready',
++    message: 'Your requested medical records are now available for download.',
++    time: '1 day ago',
++    category: 'Medical',
++    categoryColor: 'green-6',
++    icon: 'description',
++    iconColor: 'green-6',
++    read: false,
++    type: 'medical'
++  },
++  {
++    id: 4,
++    title: 'Appointment Confirmed',
++    message: 'Your appointment for January 15th has been confirmed.',
++    time: '2 days ago',
++    category: 'Appointment',
++    categoryColor: 'blue-6',
++    icon: 'check_circle',
++    iconColor: 'green-6',
++    read: true,
++    type: 'appointments'
++  },
++  {
++    id: 5,
++    title: 'System Maintenance',
++    message: 'The system will be under maintenance on Sunday from 2-4 AM.',
++    time: '3 days ago',
++    category: 'System',
++    categoryColor: 'grey-6',
++    icon: 'build',
++    iconColor: 'grey-6',
++    read: true,
++    type: 'system'
++  }
++])
++
++const filteredNotifications = computed(() => {
++  let filtered = notifications.value
++
++  if (activeFilter.value === 'unread') {
++    filtered = filtered.filter(n => !n.read)
++  } else if (activeFilter.value !== 'all') {
++    filtered = filtered.filter(n => n.type === activeFilter.value)
++  }
++
++  return filtered
++})
++
++const navigateTo = (path: string) => {
++  void router.push(path)
++}
++
++const markAsRead = (id: number) => {
++  const notification = notifications.value.find(n => n.id === id)
++  if (notification) {
++    notification.read = true
++    $q.notify({
++      type: 'positive',
++      message: 'Notification marked as read',
++      position: 'top'
++    })
++  }
++}
++
++const markAllRead = () => {
++  notifications.value.forEach(n => n.read = true)
++  $q.notify({
++    type: 'positive',
++    message: 'All notifications marked as read',
++    position: 'top'
++  })
++}
++
++const deleteNotification = (id: number) => {
++  const index = notifications.value.findIndex(n => n.id === id)
++  if (index > -1) {
++    notifications.value.splice(index, 1)
++    $q.notify({
++      type: 'positive',
++      message: 'Notification deleted',
++      position: 'top'
++    })
++  }
++}
++const userName = computed(() => {
++  try {
++    const u = JSON.parse(localStorage.getItem('user') || '{}')
++    return u.full_name || u.email || 'User'
++  } catch {
++    return 'User'
++  }
++})
++</script>
++
++<style scoped>
++.notification-card {
++  border-radius: 8px;
++  transition: all 0.2s ease;
++  border-left: 4px solid transparent;
++}
++
++.notification-card:hover {
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
++}
++
++.notification-card.unread {
++  border-left-color: #26A69A;
++  background-color: #F9FFFE;
++}
++</style>
+\ No newline at end of file
+diff --git a/frontend/src/pages/PatientQueue.vue b/frontend/src/pages/PatientQueue.vue
+new file mode 100644
+index 0000000..f764aab
+--- /dev/null
++++ b/frontend/src/pages/PatientQueue.vue
+@@ -0,0 +1,280 @@
++<template>
++  <q-layout view="hHh lpR fFf">
++    <!-- Header -->
++    <q-header elevated class="bg-teal-7 text-white">
++      <q-toolbar>
++        <q-btn flat round icon="arrow_back" @click="$router.go(-1)" />
++        <q-avatar class="q-mr-sm">
++          <q-icon name="favorite" color="white" />
++        </q-avatar>
++        <q-toolbar-title class="text-weight-medium">
++          Patient Portal
++          <div class="text-caption">Healthcare Dashboard</div>
++        </q-toolbar-title>
++        
++        <q-btn flat round icon="notifications" class="q-mr-sm">
++          <q-badge color="red" floating>1</q-badge>
++        </q-btn>
++        
++        <q-btn-dropdown flat round>
++          <template v-slot:label>
++            <q-avatar size="32px">
++              <q-icon name="person" />
++            </q-avatar>
++            <div class="q-ml-sm text-caption">{{ userName }}</div>
++          </template>
++          <q-list>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="settings" />
++              </q-item-section>
++              <q-item-section>Settings</q-item-section>
++            </q-item>
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="help" />
++              </q-item-section>
++              <q-item-section>FAQ</q-item-section>
++            </q-item>
++            <q-separator />
++            <q-item clickable v-close-popup>
++              <q-item-section avatar>
++                <q-icon name="logout" color="red" />
++              </q-item-section>
++              <q-item-section class="text-red">Logout</q-item-section>
++            </q-item>
++          </q-list>
++        </q-btn-dropdown>
++      </q-toolbar>
++    </q-header>
++
++    <!-- Main Content -->
++    <q-page-container>
++      <q-page class="bg-grey-1 q-pa-md">
++        <div class="row items-center justify-between q-mb-lg">
++          <div class="text-h5 text-grey-8">Live Queue & Wait Time</div>
++          <q-chip color="teal-6" text-color="white" icon="person">{{ userName }}</q-chip>
++        </div>
++        
++        <!-- Current Status Cards -->
++        <div class="row q-gutter-md q-mb-lg">
++          <div class="col-12 col-md-6">
++            <q-card class="status-card">
++              <q-card-section class="q-pa-lg">
++                <div class="row items-center">
++                  <div class="col-8">
++                    <div class="text-caption text-grey-6">NOW SERVING</div>
++                    <div class="text-h2 text-weight-bold text-grey-8">001</div>
++                    <div class="text-body2 text-grey-6">{{ userName }}</div>
++                  </div>
++                  <div class="col-4 text-right">
++                    <q-circular-progress
++                      :value="75"
++                      size="60px"
++                      :thickness="0.1"
++                      color="teal-6"
++                      track-color="grey-3"
++                      class="q-ma-md"
++                    />
++                  </div>
++                </div>
++              </q-card-section>
++            </q-card>
++          </div>
++          
++          <div class="col-12 col-md-6">
++            <q-card class="status-card">
++              <q-card-section class="q-pa-lg">
++                <div class="row items-center">
++                  <div class="col-8">
++                    <div class="text-caption text-grey-6">YOUR QUEUE STATUS</div>
++                    <div class="text-h2 text-weight-bold text-teal-6">001</div>
++                    <div class="text-body2 text-grey-6">Estimated Wait: ~15 mins</div>
++                  </div>
++                  <div class="col-4 text-right">
++                    <q-icon name="schedule" size="60px" class="text-teal-6" />
++                  </div>
++                </div>
++              </q-card-section>
++            </q-card>
++          </div>
++        </div>
++
++        <div class="row q-gutter-lg">
++          <!-- Current Queue -->
++          <div class="col-12 col-md-7">
++            <q-card>
++              <q-card-section>
++                <div class="row items-center q-mb-md">
++                  <q-icon name="list" size="24px" class="text-teal-6 q-mr-sm" />
++                  <div class="text-h6 text-grey-8">Current Queue</div>
++                  <q-space />
++                  <q-chip color="teal-6" text-color="white" label="Position: 1" />
++                </div>
++
++                <!-- Queue List -->
++                <div class="q-gutter-sm">
++                  <!-- Current Patient -->
++                  <q-card flat bordered class="queue-item current-patient">
++                    <q-card-section class="q-pa-md">
++                      <div class="row items-center">
++                        <div class="col-1">
++                          <q-icon name="person" size="24px" class="text-teal-6" />
++                        </div>
++                        <div class="col-6">
++                          <div class="text-weight-medium">{{ userName }} (001)</div>
++                          <div class="text-caption text-grey-6">You</div>
++                        </div>
++                        <div class="col-3">
++                          <q-chip size="sm" color="orange" text-color="white" label="Next" />
++                        </div>
++                        <div class="col-2 text-right">
++                          <div class="text-caption text-grey-6">~15 mins</div>
++                          <div class="text-caption text-grey-5">general</div>
++                        </div>
++                      </div>
++                    </q-card-section>
++                  </q-card>
++
++                  <!-- Other Patient -->
++                  <q-card flat bordered class="queue-item">
++                    <q-card-section class="q-pa-md">
++                      <div class="row items-center">
++                        <div class="col-1">
++                          <q-icon name="person" size="24px" class="text-grey-5" />
++                        </div>
++                        <div class="col-6">
++                          <div class="text-weight-medium">{{ userName }} (001)</div>
++                          <div class="text-caption text-grey-6">You</div>
++                        </div>
++                        <div class="col-3">
++                          <q-chip size="sm" color="grey-5" text-color="white" label="You" />
++                        </div>
++                        <div class="col-2 text-right">
++                          <div class="text-caption text-grey-6">~15 mins</div>
++                          <div class="text-caption text-grey-5">dermatology</div>
++                        </div>
++                      </div>
++                    </q-card-section>
++                  </q-card>
++                </div>
++              </q-card-section>
++            </q-card>
++          </div>
++
++          <!-- Queue Alerts & Info -->
++          <div class="col-12 col-md-5">
++            <q-card>
++              <q-card-section>
++                <div class="row items-center q-mb-md">
++                  <q-icon name="info" size="24px" class="text-grey-6 q-mr-sm" />
++                  <div class="text-h6 text-grey-8">Queue Alerts & Info</div>
++                </div>
++
++                <div class="text-body2 text-grey-6 q-mb-lg">
++                  Request a text message alert when you are the **next patient** in line.
++                </div>
++
++                <!-- Current Wait Time Alert -->
++                <q-card flat class="bg-orange-1 q-mb-md">
++                  <q-card-section class="q-pa-md">
++                    <div class="text-weight-medium text-orange-8">
++                      Current estimated total wait time: ~15 minutes.
++                    </div>
++                  </q-card-section>
++                </q-card>
++
++                <!-- SMS Alert Button -->
++                <q-btn 
++                  color="indigo-6" 
++                  icon="sms" 
++                  label="Activate SMS Alert" 
++                  class="full-width"
++                  @click="activateSMSAlert"
++                  :disable="smsAlertActive"
++                />
++
++                <div v-if="smsAlertActive" class="text-center q-mt-md">
++                  <q-chip color="green" text-color="white" icon="check_circle">
++                    SMS Alert Active
++                  </q-chip>
++                </div>
++              </q-card-section>
++            </q-card>
++          </div>
++        </div>
++      </q-page>
++    </q-page-container>
++
++    <!-- Bottom Navigation -->
++    <q-footer class="bg-teal-7">
++      <q-tabs 
++        v-model="activeTab" 
++        class="text-white"
++        active-color="white"
++        indicator-color="white"
++        align="justify"
++      >
++        <q-tab name="queue" icon="queue" label="Queue" @click="navigateTo('/patient-queue')" />
++        <q-tab name="appointments" icon="event" label="Appointments" @click="navigateTo('/patient-appointments')" />
++        <q-tab name="home" icon="home" label="Home" @click="navigateTo('/patient-dashboard')" />
++        <q-tab name="alerts" icon="notifications" label="Alerts" @click="navigateTo('/patient-notifications')" />
++        <q-tab name="requests" icon="description" label="Requests" @click="navigateTo('/patient-medical-request')" />
++      </q-tabs>
++    </q-footer>
++  </q-layout>
++</template>
++
++<script setup lang="ts">
++import { ref, computed } from 'vue'
++import { useRouter } from 'vue-router'
++import { useQuasar } from 'quasar'
++
++const router = useRouter()
++const $q = useQuasar()
++const activeTab = ref('queue')
++const smsAlertActive = ref(false)
++
++const userName = computed(() => {
++  try {
++    const u = JSON.parse(localStorage.getItem('user') || '{}')
++    return u.full_name || u.email || 'User'
++  } catch {
++    return 'User'
++  }
++})
++
++const navigateTo = (path: string) => {
++  void router.push(path)
++}
++
++const activateSMSAlert = () => {
++  $q.notify({
++    type: 'positive',
++    message: 'SMS alert activated! You will receive a text when you are next in line.',
++    position: 'top'
++  })
++  smsAlertActive.value = true
++}
++</script>
++
++<style scoped>
++.status-card {
++  border-radius: 12px;
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
++}
++
++.queue-item {
++  border-radius: 8px;
++  transition: all 0.2s ease;
++}
++
++.queue-item:hover {
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
++}
++
++.current-patient {
++  border-left: 4px solid #26A69A;
++  background-color: #E0F2F1;
++}
++</style>
+\ No newline at end of file
+diff --git a/frontend/src/pages/RegisterPage.vue b/frontend/src/pages/RegisterPage.vue
+index dbe1985..54c044e 100644
+--- a/frontend/src/pages/RegisterPage.vue
++++ b/frontend/src/pages/RegisterPage.vue
+@@ -274,7 +274,9 @@ const onRegister = async () => {
+ 
+     // An HTTP POST request is sent to the registration endpoint.
+     // Axios automatically configures the correct 'Content-Type' header for FormData.
+-    const response = await api.post('/users/register/', registrationData);
++    const response = await api.post('/users/register/', registrationData, {
++      headers: { 'Content-Type': 'multipart/form-data' }
++    });
+ 
+     // Upon successful registration, the access and refresh tokens are stored in local storage.
+     localStorage.setItem('access_token', response.data.tokens.access);
+diff --git a/frontend/src/router/routes.ts b/frontend/src/router/routes.ts
+index 3283d8b..acacfd6 100644
+--- a/frontend/src/router/routes.ts
++++ b/frontend/src/router/routes.ts
+@@ -48,11 +48,6 @@ const routes: RouteRecordRaw[] = [
+     name: 'DoctorSettings',
+     component: () => import('pages/DoctorSettings.vue')
+   },
+-  {
+-    path: '/doctor-analytics',
+-    name: 'DoctorAnalytics',
+-    component: () => import('pages/DoctorAnalytics.vue')
+-  },
+   {
+     path: '/nurse-dashboard',
+     component: () => import('pages/NurseDashboard.vue')
+@@ -77,6 +72,26 @@ const routes: RouteRecordRaw[] = [
+     path: '/patient-dashboard',
+     component: () => import('pages/PatientDashboard.vue')
+   },
++  {
++    path: '/patient-appointments',
++    component: () => import('pages/PatientAppointments.vue')
++  },
++  {
++    path: '/patient-appointment-schedule',
++    component: () => import('pages/PatientAppointmentSchedule.vue')
++  },
++  {
++    path: '/patient-medical-request',
++    component: () => import('pages/PatientMedicalRequest.vue')
++  },
++  {
++    path: '/patient-queue',
++    component: () => import('pages/PatientQueue.vue')
++  },
++  {
++    path: '/patient-notifications',
++    component: () => import('pages/PatientNotifications.vue')
++  },
+   {
+     path: '/home',
+     component: () => import('layouts/MainLayout.vue'),
+diff --git a/frontend/src/volar.d.ts b/frontend/src/volar.d.ts
+new file mode 100644
+index 0000000..db00b0c
+--- /dev/null
++++ b/frontend/src/volar.d.ts
+@@ -0,0 +1,7 @@
++// Global types for Vue/Quasar to satisfy Volar
++import 'vue-router';
++import 'quasar';
++
++declare module 'vue' {
++  // Extend global component props/types here if needed
++}
+\ No newline at end of file
+diff --git a/frontend/tsconfig.json b/frontend/tsconfig.json
+index a17e05f..df288c3 100644
+--- a/frontend/tsconfig.json
++++ b/frontend/tsconfig.json
+@@ -1,3 +1,9 @@
+ {
+-  "extends": "./.quasar/tsconfig.json"
++  "extends": "./.quasar/tsconfig.json",
++  "compilerOptions": {
++    "types": ["node", "quasar", "vite/client"]
++  },
++  "vueCompilerOptions": {
++    "globalTypesPath": "./src/volar.d.ts"
++  }
+ }
